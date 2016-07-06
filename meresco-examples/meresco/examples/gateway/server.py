@@ -85,8 +85,8 @@ def main(reactor, port, statePath, **ignored):
                     (HandleRequestLog(),
                         (BasicHttpHandler(),
                             (PathFilter('/oai', excluding=['/oai/info']),
-                                (OaiPmh(repositoryName='Gateay',
-                                        adminEmail='info@example.org',
+                                (OaiPmh(repositoryName='Gateway',
+                                        adminEmail='ab@narcis.nl',
                                         supportXWait=True
                                     ),
                                     (oaiJazz,),
