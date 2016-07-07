@@ -120,6 +120,7 @@ class ExampleIntegrationState(IntegrationState):
         print "Creating database in", self.integrationTempdir
         try:
             for f in listdir(self.testdataDir):
+                print "Uploading file:", f
                 postRequest(self.gatewayPort, '/update', data=open(join(self.testdataDir, f)).read(), parse=False)
             sleepWheel(2)
             print "Finished creating database in %s seconds" % (time() - start)
