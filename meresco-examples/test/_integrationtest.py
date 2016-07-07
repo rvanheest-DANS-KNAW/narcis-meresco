@@ -37,7 +37,7 @@ from _integration import ExampleIntegrationState
 if __name__ == '__main__':
     runner = TestRunner()
     ExampleIntegrationState(
-        "default",
+        "seecr",
         tests=[
             '_integration.gatewaytest.GatewayTest',
             '_integration.apitest.ApiTest',
