@@ -27,6 +27,7 @@
 from seecr.test import IntegrationTestCase
 from seecr.test.utils import getRequest
 from meresco.xml import xpath
+from lxml import etree
 
 class GatewayTest(IntegrationTestCase):
 
@@ -38,3 +39,10 @@ class GatewayTest(IntegrationTestCase):
 
         deletes = xpath(body, '//oai:record[oai:header/@status = "deleted"]')
         self.assertEqual(1, len(deletes))
+
+    def testOaiIdentify(self):
+        header, body = getRequest(self.gatewayPort, '/oai', arguments=dict(verb='Identify'))
+        print "Identify body:", etree.tostring(body)
+        self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: text/xml; charset=utf-8', header)
+        adminEmail = xpath(body, '//oai:Identify/oai:adminEmail/text()')
+        self.assertEqual("ab@narcis.nl", adminEmail[0])
