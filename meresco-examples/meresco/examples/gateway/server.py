@@ -112,7 +112,7 @@ def main(reactor, port, statePath, **ignored):
                                             (oaiJazz,),
                                         ),
                                         (FilterMessages(allowed=['add']),
-                                            (XmlXPath(['srw:recordData/*'], namespaces=namespaces, fromKwarg="lxmlNode"),
+                                            (XmlXPath(['srw:recordData/*'], fromKwarg="lxmlNode"),
                                                 (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
                                                     (storeComponent,),
                                                 ),
