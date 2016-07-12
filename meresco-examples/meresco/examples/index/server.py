@@ -39,7 +39,7 @@ from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
 
 from meresco.components.http import BasicHttpHandler, ObservableHttpServer, PathFilter
 from meresco.components import PeriodicDownload, FilterMessages, XmlXPath, XmlParseLxml, PeriodicCall, Schedule
-from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog
+from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog, LogComponent
 
 from meresco.lucene.lucenecommit import LuceneCommit
 from meresco.lucene.queryexpressiontolucenequerydict import QueryExpressionToLuceneQueryDict
@@ -61,9 +61,9 @@ from .dcfields import DcFields
 
 LUCENE_VM = getJVM()
 
-myPath = dirname(abspath(__file__))
-dynamicPath = join(myPath, 'dynamic')
-binDir = join(dirname(dirname(myPath)), "bin")
+# myPath = dirname(abspath(__file__))
+# dynamicPath = join(myPath, 'dynamic')
+# binDir = join(dirname(dirname(myPath)), "bin")
 
 def untokenizedFieldname(fieldname):
     return UNTOKENIZED_PREFIX + fieldname
@@ -101,7 +101,7 @@ def readerMain(reactor, statePath, port, defaultLuceneSettings, serverPort):
 
     return \
     (Observable(),
-        (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
+        # (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
         (ObservableHttpServer(reactor=reactor, port=port),
             (LogCollector(),
                 (ApacheLogWriter(apacheLogStream),),
@@ -119,18 +119,18 @@ def readerMain(reactor, statePath, port, defaultLuceneSettings, serverPort):
                                         (luceneIndex,),
                                         (http11Request,),
                                     )
-                                ),
+                                )
                             )
                         )
-                    ),
+                    )
                 )
             )
-        ),
+        )
     )
 
 
 def writerMain(writerReactor, readerReactor, readerPort, statePath, serverPort, gatewayPort):
-    apacheLogStream = stdout
+    #apacheLogStream = stdout
 
     http11Request = be(
         (HttpRequest1_1(),
@@ -166,8 +166,9 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, serverPort, 
             (AllToDo(),
                 (periodicDownload,),
                 (LuceneCommit(host='localhost', port=serverPort,),
-                    # (LogComponent(),),
-                    (http11Request,),
+                    # (LogComponent("http"),
+                        (http11Request,),
+                    # ),
                 )
             )
         )
@@ -184,16 +185,18 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, serverPort, 
     writerServer = \
     (Observable(),
         (scheduledCommitPeriodicCall,),
-        (DebugPrompt(reactor=writerReactor, port=readerPort-1, globals=locals()),),
+        # (DebugPrompt(reactor=writerReactor, port=readerPort-1, globals=locals()),),
         (periodicDownload,
             (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)),
                 (oaiDownload,
                     (UpdateAdapterFromOaiDownloadProcessor(),
                         (FilterMessages(allowed=['add']),
+                            # (LogComponent("ADD"),),
                             (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data'),
                                 (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
                                     (XmlXPath(['/oai:record/oai:metadata/oai_dc:dc'], fromKwarg='lxmlNode'),
                                         (DcToFieldsList(),
+                                            (LogComponent("DcToFieldsList"),),
                                             (FieldsListToLuceneDocument(
                                                     fieldRegistry=luceneWriter.settings.fieldRegistry,
                                                     untokenizedFieldnames=untokenizedFieldnames,

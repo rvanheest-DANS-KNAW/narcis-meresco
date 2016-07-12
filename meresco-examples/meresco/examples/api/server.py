@@ -59,9 +59,9 @@ from storage.storageadapter import StorageAdapter
 from meresco.examples.index.server import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
 
 
-myDir = dirname(abspath(__file__))
-infoPath = join(myDir, 'info')
-dynamicPath = join(myDir, 'dynamic')
+# myDir = dirname(abspath(__file__))
+# infoPath = join(myDir, 'info')
+# dynamicPath = join(myDir, 'dynamic')
 
 def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
     return \
@@ -169,7 +169,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                         (luceneRemote,),
                     )
                 )
-            ),
+            )
         )
 
     return \
@@ -195,7 +195,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                         (oaiJazz,),
                                         (StorageAdapter(),
                                             (storage,)
-                                        ),
+                                        )
                                     )
                                 )
                             ),
@@ -206,7 +206,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                             port=80,
                                             defaultRecordSchema=DEFAULT_CORE,
                                             defaultRecordPacking='xml'),
-                                        (SruLimitStartRecord(limitBeyond=1000),
+                                        (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(
                                                     includeQueryTimes=True,
                                                     extraXParameters=[],
@@ -239,17 +239,17 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                         (StorageAdapter(),
                                             (storage,)
                                         )
-                                    ),
+                                    )
                                 )
                             ),
                             (PathFilter('/log'),
                                 (LogFileServer(name="Example Queries", log=directoryLog, basepath='/log'),)
-                            ),
-                        ),
+                            )
+                        )
                     )
                 )
             )
-        ),
+        )
     )
 
 def startServer(port, stateDir, **kwargs):

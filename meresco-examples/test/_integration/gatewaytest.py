@@ -42,7 +42,7 @@ class GatewayTest(IntegrationTestCase):
 
     def testOaiIdentify(self):
         header, body = getRequest(self.gatewayPort, '/oai', arguments=dict(verb='Identify'))
-        print "Identify body:", etree.tostring(body)
+        #print "Identify body:", etree.tostring(body)
         self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: text/xml; charset=utf-8', header)
         adminEmail = xpath(body, '//oai:Identify/oai:adminEmail/text()')
         self.assertEqual("ab@narcis.nl", adminEmail[0])

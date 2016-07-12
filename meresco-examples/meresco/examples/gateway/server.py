@@ -50,8 +50,8 @@ from weightless.io import Reactor
 from storage import StorageComponent
 from storage.storageadapter import StorageAdapter
 
-myPath = dirname(abspath(__file__))
-dynamicPath = join(myPath, 'dynamic')
+# myPath = dirname(abspath(__file__))
+# dynamicPath = join(myPath, 'dynamic')
 
 def main(reactor, port, statePath, **ignored):
     apacheLogStream = stdout
