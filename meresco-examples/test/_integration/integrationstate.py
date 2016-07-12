@@ -35,6 +35,8 @@ from seecr.test.integrationtestcase import IntegrationState
 from seecr.test.portnumbergenerator import PortNumberGenerator
 from seecr.test.utils import postRequest, sleepWheel
 
+from glob import glob
+
 mydir = dirname(abspath(__file__))
 projectDir = dirname(dirname(mydir))
 
@@ -102,10 +104,11 @@ class ExampleIntegrationState(IntegrationState):
             waitForStart=False)
 
     def startLuceneServer(self):
+        executable = self.binPath('start-lucene-server')
         self._startServer(
-            'lucene',
-            self.binPath('start-lucene-server'),
-            'http://localhost:%s/info/version' % self.lucenePort,
+            serviceName='lucene',
+            executable=executable,
+            serviceReadyUrl='http://localhost:%s/info/version' % self.lucenePort,
             port=self.lucenePort,
             stateDir=join(self.integrationTempdir, 'lucene'),
             waitForStart=True,
@@ -119,7 +122,8 @@ class ExampleIntegrationState(IntegrationState):
         start = time()
         print "Creating database in", self.integrationTempdir
         try:
-            for f in listdir(self.testdataDir):
+            for f in sorted(glob(self.testdataDir + '/*.updateRequest')):
+            # for f in listdir(self.testdataDir):
                 print "Uploading file:", f
                 postRequest(self.gatewayPort, '/update', data=open(join(self.testdataDir, f)).read(), parse=False)
             sleepWheel(2)
