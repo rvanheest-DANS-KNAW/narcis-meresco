@@ -36,9 +36,12 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
+        response2 = self.doSruQuery(**{"query": 'dc:identifier = "*"'})
+        print "DC:Identifier:", etree.tostring(response2)
+
     def testQueryWithDrilldown(self):
         response = self.doSruQuery(**{"query": 'dc:title = "Example Program"', "x-term-drilldown": "dc:date,dc:subject"})
-#         print "DD body:", etree.tostring(response)
+        # print "DD body:", etree.tostring(response)
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
