@@ -50,8 +50,11 @@ from weightless.io import Reactor
 from storage import StorageComponent
 from storage.storageadapter import StorageAdapter
 
-# myPath = dirname(abspath(__file__))
-# dynamicPath = join(myPath, 'dynamic')
+
+from storage.storagecomponent import HashDistributeStrategy, DefaultStrategy
+from meresco.dans.storagesplit import Md5HashDistributeStrategy
+
+DEFAULT_PARTNAME = 'oai_dc'
 
 def main(reactor, port, statePath, **ignored):
     apacheLogStream = stdout
@@ -60,11 +63,16 @@ def main(reactor, port, statePath, **ignored):
     oaiJazz = be((OaiJazz(join(statePath, 'oai')),
         (oaiSuspendRegister,)
     ))
-    storeComponent = StorageComponent(join(statePath, 'store'))
+
+    # WST:
+    # strategie = HashDistributeStrategy() # filename (=partname) is also hashed...
+    strategie = Md5HashDistributeStrategy()
+
+    storeComponent = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME])
 
     scheduledCommitPeriodicCall = be(
         (PeriodicCall(reactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1)),
-            (AllToDo(),
+            (AllToDo(), # Converts all_unknown to: self.do.unknown messages.
                 (storeComponent,),
                 (oaiJazz,)
             )
@@ -81,7 +89,7 @@ def main(reactor, port, statePath, **ignored):
         (ObservableHttpServer(reactor=reactor, port=port),
             (LogCollector(),
                 (ApacheLogWriter(apacheLogStream),),
-                (Deproxy(),
+                (Deproxy(), # Switches IP adress from proxy to client IP. (x-forwarded-for header)
                     (HandleRequestLog(),
                         (BasicHttpHandler(),
                             (PathFilter('/oai', excluding=['/oai/info']),
@@ -106,7 +114,7 @@ def main(reactor, port, statePath, **ignored):
                                         sendRecordData=False,
                                         logErrors=True,
                                     ),
-                                    (RewritePartname('oai_dc'),
+                                    (RewritePartname(DEFAULT_PARTNAME),
                                         (FilterMessages(allowed=['delete']),
                                             (storeComponent,),
                                             (oaiJazz,),
@@ -116,10 +124,10 @@ def main(reactor, port, statePath, **ignored):
                                                 (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
                                                     (storeComponent,),
                                                 ),
-                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=['oai_dc']),
+                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[DEFAULT_PARTNAME]),
                                                     (oaiJazz,),
                                                 ),
-                                            ),
+                                            )
                                         )
                                     )
                                 )
@@ -128,7 +136,7 @@ def main(reactor, port, statePath, **ignored):
                     )
                 )
             )
-        ),
+        )
     )
 
 def startServer(port, stateDir, **kwargs):
