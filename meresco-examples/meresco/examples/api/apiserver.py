@@ -43,7 +43,7 @@ from meresco.components.http import ObservableHttpServer, BasicHttpHandler, Path
 from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog, LogCollectorScope, QueryLogWriter, DirectoryLog, LogFileServer, LogComponent
 from meresco.components.sru import SruHandler, SruParser, SruLimitStartRecord
 
-from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiPmh, OaiAddDeleteRecordWithPrefixesAndSetSpecs
+from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiPmh, OaiAddDeleteRecordWithPrefixesAndSetSpecs, OaiBranding, OaiProvenance
 
 
 from meresco.lucene import SORTED_PREFIX, UNTOKENIZED_PREFIX
@@ -54,9 +54,12 @@ from seecr.utils import DebugPrompt
 
 from meresco.components.drilldownqueries import DrilldownQueries
 from storage import StorageComponent
+from meresco.dans.storagesplit import Md5HashDistributeStrategy
+
 from storage.storageadapter import StorageAdapter
 
 from meresco.examples.index.indexserver import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
+from meresco.examples.gateway.gatewayserver import DEFAULT_PARTNAME
 
 
 def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
@@ -76,8 +79,8 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                     (XmlXPath(['/oai:record/oai:metadata/oai_dc:dc'], fromKwarg='lxmlNode'),
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
                                             (storageComponent,)
-                                        ),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=['oai_dc']),
+                                        ), #metadataPrefixes=None, setSpecs=None, name=None
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=['oai_dc'], setSpecs=['publications'], name='NARCISPORTAL'),
                                             (oaiJazz,),
                                         )
                                     )
@@ -93,7 +96,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
 def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
     apacheLogStream = sys.stdout
 
-    periodicDownload = PeriodicDownload(
+    periodicGateWayDownload = PeriodicDownload(
         reactor,
         host='localhost',
         port=gatewayPort,
@@ -107,13 +110,15 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
         name='gateway',
         autoCommit=False)
 
-    def sortFieldRename(name):
-        if not name.startswith('__'):
-            name = SORTED_PREFIX + name
-        return name
+    # def sortFieldRename(name):
+    #     if not name.startswith('__'):
+    #         name = SORTED_PREFIX + name
+    #     return name
 
     fieldnameRewrites = {
+        UNTOKENIZED_PREFIX+'genre': UNTOKENIZED_PREFIX+'dc:genre',
     }
+
     def fieldnameRewrite(name):
         return fieldnameRewrites.get(name, name)
 
@@ -131,10 +136,13 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
 
     luceneRemote = LuceneRemote(host='localhost', port=indexPort, path='/lucene')
 
-    storage = StorageComponent(join(statePath, 'store'))
-    oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat('oai_dc', None, None)
+    strategie = Md5HashDistributeStrategy()
+    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME])
 
+    oaiJazz = OaiJazz(join(statePath, 'oai'))
+    oaiJazz.updateMetadataFormat('oai_dc', None, None) # def updateMetadataFormat(self, prefix, schema, namespace):
+
+    # Wat doet dit?
     cqlClauseConverters = [
         RenameFieldForExact(
             untokenizedFields=untokenizedFieldnames,
@@ -146,14 +154,16 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
         ).filterAndModifier(),
     ]
 
-    scheduledCommitPeriodicCall = be(
-        (PeriodicCall(reactor, message='commit', name='Scheduled commit', initialSchedule=Schedule(period=1), schedule=Schedule(period=1)),
-            (AllToDo(),
-                (storage,),
-                (periodicDownload,),
-            )
-        )
-    )
+    # # Post commit naar storage en ??
+    # scheduledCommitPeriodicCall = be(
+    #     (PeriodicCall(reactor, message='commit', name='Scheduled commit', initialSchedule=Schedule(period=1), schedule=Schedule(period=1)),
+    #         (AllToDo(),
+    #             (LogComponent("PeriodicCall"),), # commit(*(), **{})
+    #             (storage,),
+    #             (periodicGateWayDownload,),
+    #         )
+    #     )
+    # )
 
     directoryLog = DirectoryLog(join(statePath, 'log'), extension='-query.log')
 
@@ -170,9 +180,9 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
 
     return \
     (Observable(),
-        (scheduledCommitPeriodicCall,),
-        (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
-        createDownloadHelix(reactor, periodicDownload, oaiDownload, storage, oaiJazz),
+        # (scheduledCommitPeriodicCall,),
+        # (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
+        createDownloadHelix(reactor, periodicGateWayDownload, oaiDownload, storage, oaiJazz),
         (ObservableHttpServer(reactor, port, compressResponse=True),
             (LogCollector(),
                 (ApacheLogWriter(apacheLogStream),),
@@ -187,11 +197,13 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                         (BasicHttpHandler(),
                             (PathFilter(["/oai"]),
                                 (LogCollectorScope("http-scope"),
-                                    (OaiPmh(repositoryName="Example OAI", adminEmail="info@example.org"),
+                                    (OaiPmh(repositoryName="NARCIS OAI-pmh", adminEmail="narcis@dans.knaw.nl"),
                                         (oaiJazz,),
                                         (StorageAdapter(),
                                             (storage,)
-                                        )
+                                        ),
+                                        (OaiBranding(url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", link="http://oai.narcis.nl", title="Narcis - The gateway to scholarly information in The Netherlands"),),
+                                        # (OaiProvenance(nsMap={}, baseURL='http://dds.nl', harvestDate='2016-02-02', metadataNamespace='urn:didl', identifier='unique', datestamp='2016-01-01'),),
                                     )
                                 )
                             ),
@@ -204,7 +216,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(
-                                                    includeQueryTimes=True,
+                                                    includeQueryTimes=False,
                                                     extraXParameters=[],
                                                     enableCollectLog=True),
                                                 (SruTermDrilldown(),),
@@ -221,7 +233,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                 (Rss(   title = 'Meresco',
                                         description = 'RSS feed for Meresco',
                                         link = 'http://meresco.org',
-                                        maximumRecords = 15),
+                                        maximumRecords = 20),
                                     executeQueryHelix,
                                     (RssItem(
                                             nsMap={

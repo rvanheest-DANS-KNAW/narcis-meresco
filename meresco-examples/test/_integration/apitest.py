@@ -45,8 +45,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
 
     def testQueryWithDrilldown(self):
-        response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dc:date,dc:subject,genre"})
-        print "x-term-drilldown:", etree.tostring(response)
+        # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dc:date,dc:subject,genre"})
         response = self.doSruQuery(**{"query": 'dc:title = "Example Program"', "x-term-drilldown": "dc:date,dc:subject"})
         # print "DD body:", etree.tostring(response)
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
@@ -60,13 +59,37 @@ class ApiTest(IntegrationTestCase):
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         self.assertEqual([('Search', '1'), ('Programming', '1')], drilldown)
 
+    def testSruLimitStartRecord(self):
+        response = self.doSruQuery(**{'maximumRecords': '1', 'startRecord': '4002', 'query':'*'})
+        # TODO: add namespace: xmlns="http://www.loc.gov/zing/srw/diagnostic/ to xpathFirst
+        # self.assertEqual("Argument 'startRecord' too high, maximum: 4000", xpathFirst(response, '//srwdia:diagnostic/srwdia:details/text()'))
+        # print "SruLimitStartRecord:", etree.tostring(response)
+
     def testOai(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
+        # print "OAI body:", etree.tostring(body)
         records = xpath(body, '//oai:record/oai:metadata')
         self.assertEqual(2, len(records))
 
+    def testOaiPovenance(self):
+        header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
+        # print "OAI body:", etree.tostring(body)
+        # TODO: add namespace: oaiprov:xmlns="http://www.openarchives.org/OAI/2.0/provenance"
+        # self.assertEqual('oai_dc', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
+
+    def testOaiIdentify(self):
+        header, body = getRequest(self.apiPort, '/oai', dict(verb="Identify"))
+        self.assertEqual('NARCIS OAI-pmh', xpathFirst(body, '//oai:Identify/oai:repositoryName/text()'))
+
+    def testOaiListSets(self):
+        header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))
+        # print "ListSets", etree.tostring(body)
+        self.assertEqual(set(['publications']), set(xpath(body, '//oai:setSpec/text()')))
+        
+
     def testRSS(self):
         header, body = getRequest(self.apiPort, '/rss', dict(query="dc:title=program"))
+        # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(2, len(items))
         self.assertEqual(set(["Example Program 1", "Example Program 2"]), set(xpath(body, "//item/title/text()")))
