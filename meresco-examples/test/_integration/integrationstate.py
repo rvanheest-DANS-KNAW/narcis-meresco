@@ -85,7 +85,7 @@ class ExampleIntegrationState(IntegrationState):
             serviceReadyUrl='http://localhost:%s/info/version' % self.indexPort,
             cwd=dirname(abspath(executable)),
             port=self.indexPort,
-            serverPort=self.lucenePort,
+            luceneserverPort=self.lucenePort,
             gatewayPort=self.gatewayPort,
             stateDir=join(self.integrationTempdir, 'index'),
             waitForStart=False)
@@ -105,6 +105,7 @@ class ExampleIntegrationState(IntegrationState):
 
     def startLuceneServer(self):
         executable = self.binPath('start-lucene-server')
+        print 'start-lucene-server', executable
         self._startServer(
             serviceName='lucene',
             executable=executable,

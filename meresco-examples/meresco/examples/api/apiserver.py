@@ -56,23 +56,19 @@ from meresco.components.drilldownqueries import DrilldownQueries
 from storage import StorageComponent
 from storage.storageadapter import StorageAdapter
 
-from meresco.examples.index.server import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
+from meresco.examples.index.indexserver import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
 
-
-# myDir = dirname(abspath(__file__))
-# infoPath = join(myDir, 'info')
-# dynamicPath = join(myDir, 'dynamic')
 
 def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
     return \
-    (periodicDownload,
-        (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)),
-            (oaiDownload,
-                (UpdateAdapterFromOaiDownloadProcessor(),
-                    (RewritePartname(DEFAULT_CORE),
-                        (FilterMessages(['delete']),
-                            (storageComponent,),
-                            (oaiJazz,),
+    (periodicDownload, # Scheduled connection to a remote (response / request)...
+        (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)), # Convert from plain text to lxml-object.
+            (oaiDownload, # Implementation/Protocol of a PeriodicDownload...
+                (UpdateAdapterFromOaiDownloadProcessor(), # Maakt van een SRU update/delete bericht (lxmlNode) een relevante message: 'delete' of 'add' message.
+                    (RewritePartname(DEFAULT_CORE), # Hernoemt partname van 'record' naar DEFAULT_CORE.
+                        (FilterMessages(['delete']), # Filtert delete messages
+                            (storageComponent,), # Delete from storage
+                            (oaiJazz,), # Delete from OAI-pmh repo
                         ),
                         (FilterMessages(['add']),
                             (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data'),
