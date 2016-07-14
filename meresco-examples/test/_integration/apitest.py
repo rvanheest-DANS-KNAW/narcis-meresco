@@ -61,9 +61,7 @@ class ApiTest(IntegrationTestCase):
 
     def testSruLimitStartRecord(self):
         response = self.doSruQuery(**{'maximumRecords': '1', 'startRecord': '4002', 'query':'*'})
-        # TODO: add namespace: xmlns="http://www.loc.gov/zing/srw/diagnostic/ to xpathFirst
-        # self.assertEqual("Argument 'startRecord' too high, maximum: 4000", xpathFirst(response, '//srwdia:diagnostic/srwdia:details/text()'))
-        # print "SruLimitStartRecord:", etree.tostring(response)
+        self.assertEqual("Argument 'startRecord' too high, maximum: 4000", xpathFirst(response, '//diag:diagnostic/diag:details/text()'))
 
     def testOai(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
@@ -74,7 +72,6 @@ class ApiTest(IntegrationTestCase):
     def testOaiPovenance(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
         # print "OAI body:", etree.tostring(body)
-        # TODO: add namespace: oaiprov:xmlns="http://www.openarchives.org/OAI/2.0/provenance"
         # self.assertEqual('oai_dc', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
     def testOaiIdentify(self):
