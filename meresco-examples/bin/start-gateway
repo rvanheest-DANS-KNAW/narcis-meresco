@@ -43,5 +43,5 @@ if __name__ == '__main__':
     parser.addOption('', '--stateDir', help="Directory to write state.", mandatory=True)
     options, arguments =  parser.parse()
 
-    from meresco.examples.gateway.server import startServer
+    from meresco.examples.gateway.gatewayserver import startServer
     startServer(**vars(options))

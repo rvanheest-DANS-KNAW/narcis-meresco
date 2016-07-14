@@ -45,5 +45,5 @@ if __name__ == '__main__':
     parser.addOption('', '--gatewayPort', type='int', help="Portnumber of gateway server.", mandatory=True)
     options, arguments =  parser.parse()
 
-    from meresco.examples.api.server import startServer
+    from meresco.examples.api.apiserver import startServer
     startServer(**vars(options))

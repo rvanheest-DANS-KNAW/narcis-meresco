@@ -41,9 +41,9 @@ if __name__ == '__main__':
     parser = ParseArguments()
     parser.addOption('-p', '--port', type='int', help="Default port number", mandatory=True)
     parser.addOption('', '--stateDir', help="Directory to write state.", mandatory=True)
-    parser.addOption('', '--serverPort', type='int', help="Portnumber of lucene server.", mandatory=True)
+    parser.addOption('', '--luceneserverPort', type='int', help="Portnumber of lucene server.", mandatory=True)
     parser.addOption('', '--gatewayPort', type='int', help="Portnumber of gateway server.", mandatory=True)
     options, arguments =  parser.parse()
 
-    from meresco.examples.index.server import startServer
+    from meresco.examples.index.indexserver import startServer
     startServer(**vars(options))
