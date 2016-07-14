@@ -36,10 +36,17 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
-        response2 = self.doSruQuery(**{"query": 'dc:identifier = "*"'})
-        print "DC:Identifier:", etree.tostring(response2)
+    def testQueryWithUntokenized(self):
+        response = self.doSruQuery(**{"query": 'untokenized.dc:identifier exact "http://meresco.com?record=1"'})        
+        # print "DC:Identifier:", etree.tostring(response)
+        self.assertEqual('meresco:record:1', xpathFirst(response, '//srw:recordIdentifier/text()'))
+
+        response = self.doSruQuery(**{"query": 'untokenized.dc:date exact "2016"'})
+        self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
 
     def testQueryWithDrilldown(self):
+        response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dc:date,dc:subject,genre"})
+        print "x-term-drilldown:", etree.tostring(response)
         response = self.doSruQuery(**{"query": 'dc:title = "Example Program"', "x-term-drilldown": "dc:date,dc:subject"})
         # print "DD body:", etree.tostring(response)
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))

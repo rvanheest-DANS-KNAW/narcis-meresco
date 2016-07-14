@@ -34,4 +34,9 @@ class DcToFieldsList(Observable):
         for child in lxmlNode.getroot().getchildren():
             fieldname = tagToCurie(child.tag)
             fieldslist.append((fieldname, child.text))
+            # if fieldname == 'dc:identifier' and child.text=='http://meresco.com?record=1':
+            # 	fieldslist.append(('genre', 'boek'))
+            # elif fieldname == 'dc:identifier':
+            # 	fieldslist.append(('genre', 'boek'))
+
         yield self.all.add(fieldslist=fieldslist, **kwargs)

@@ -25,6 +25,7 @@
 ## end license ##
 
 from os import getuid
+import sys
 assert getuid() != 0, "Do not run tests as 'root'"
 
 
@@ -36,6 +37,10 @@ from _integration import ExampleIntegrationState
 
 if __name__ == '__main__':
     runner = TestRunner()
+    # Setting fastmode to True, will SKIP the upload part, and reuse existing database/store for the integration tests.
+    runner.fastMode = False
+    print "FASTMODE:", runner.fastMode
+
     ExampleIntegrationState(
         "seecr",
         tests=[
