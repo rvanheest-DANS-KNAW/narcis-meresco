@@ -32,7 +32,7 @@ from lxml import etree
 class GatewayTest(IntegrationTestCase):
 
     def testOai(self):
-        header, body = getRequest(self.gatewayPort, '/oai', arguments=dict(verb='ListRecords', metadataPrefix='oai_dc'))
+        header, body = getRequest(self.gatewayPort, '/oaix', arguments=dict(verb='ListRecords', metadataPrefix='oai_dc'))
         self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: text/xml; charset=utf-8', header)
         records = xpath(body, '//oai:record')
         self.assertEqual(3, len(records))
@@ -41,7 +41,7 @@ class GatewayTest(IntegrationTestCase):
         self.assertEqual(1, len(deletes))
 
     def testOaiIdentify(self):
-        header, body = getRequest(self.gatewayPort, '/oai', arguments=dict(verb='Identify'))
+        header, body = getRequest(self.gatewayPort, '/oaix', arguments=dict(verb='Identify'))
         #print "Identify body:", etree.tostring(body)
         self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: text/xml; charset=utf-8', header)
         adminEmail = xpath(body, '//oai:Identify/oai:adminEmail/text()')

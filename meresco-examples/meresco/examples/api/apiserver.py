@@ -103,7 +103,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
         name='gateway')
 
     oaiDownload = OaiDownloadProcessor(
-        path='/oai',
+        path='/oaix',
         metadataPrefix='oai_dc',
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
         xWait=True,

@@ -92,7 +92,7 @@ def main(reactor, port, statePath, **ignored):
                 (Deproxy(), # Switches IP adress from proxy to client IP. (x-forwarded-for header)
                     (HandleRequestLog(),
                         (BasicHttpHandler(),
-                            (PathFilter('/oai', excluding=['/oai/info']),
+                            (PathFilter('/oaix', excluding=['/oaix/info']),
                                 (OaiPmh(repositoryName='Gateway',
                                         adminEmail='ab@narcis.nl',
                                         supportXWait=True
@@ -104,7 +104,7 @@ def main(reactor, port, statePath, **ignored):
                                     ),
                                 )
                             ),
-                            (PathFilter('/oai/info'),
+                            (PathFilter('/oaix/info'),
                                 (OaiInfo(reactor=reactor, oaiPath='/oai'),
                                     (oaiJazz,),
                                 )

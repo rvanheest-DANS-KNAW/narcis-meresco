@@ -162,7 +162,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
         autoStart=True)
 
     oaiDownload = OaiDownloadProcessor(
-        path='/oai',
+        path='/oaix',
         metadataPrefix='oai_dc',
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
         xWait=True,
