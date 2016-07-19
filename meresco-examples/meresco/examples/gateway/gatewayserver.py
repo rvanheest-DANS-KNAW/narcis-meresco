@@ -24,8 +24,8 @@
 ## end license ##
 
 from meresco.components import XmlPrintLxml, RewritePartname, XmlXPath, FilterMessages, PeriodicCall, Schedule
-from meresco.components.http import BasicHttpHandler, ObservableHttpServer, PathFilter, Deproxy
-from meresco.components.log import ApacheLogWriter, HandleRequestLog, LogCollector
+from meresco.components.http import BasicHttpHandler, ObservableHttpServer, PathFilter, Deproxy, IpFilter
+from meresco.components.log import ApacheLogWriter, HandleRequestLog, LogCollector, LogComponent
 from meresco.components.sru import SruRecordUpdate
 
 from meresco.core import Observable
@@ -70,21 +70,22 @@ def main(reactor, port, statePath, **ignored):
 
     storeComponent = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME])
 
-    scheduledCommitPeriodicCall = be(
-        (PeriodicCall(reactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1)),
-            (AllToDo(), # Converts all_unknown to: self.do.unknown messages.
-                (storeComponent,),
-                (oaiJazz,)
-            )
-        )
-    )
-    processingStates = [
-        scheduledCommitPeriodicCall.getState(),
-    ]
+    # scheduledCommitPeriodicCall = be(
+    #     (PeriodicCall(reactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1)),
+    #         (AllToDo(), # Converts all_unknown to: self.do.unknown messages.
+    #             (LogComponent("PeriodicCall"),), # [PeriodicCall] commit(*(), **{})
+    #             (storeComponent,),
+    #             (oaiJazz,)
+    #         )
+    #     )
+    # )
+    # processingStates = [
+    #     scheduledCommitPeriodicCall.getState(),
+    # ]
 
     return \
     (Observable(),
-        (scheduledCommitPeriodicCall,),
+        # (scheduledCommitPeriodicCall,),
         (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
         (ObservableHttpServer(reactor=reactor, port=port),
             (LogCollector(),
@@ -92,29 +93,31 @@ def main(reactor, port, statePath, **ignored):
                 (Deproxy(), # Switches IP adress from proxy to client IP. (x-forwarded-for header)
                     (HandleRequestLog(),
                         (BasicHttpHandler(),
-                            (PathFilter('/oaix', excluding=['/oaix/info']),
-                                (OaiPmh(repositoryName='Gateway',
-                                        adminEmail='ab@narcis.nl',
-                                        supportXWait=True
-                                    ),
-                                    (oaiJazz,),
-                                    (oaiSuspendRegister,),
-                                    (StorageAdapter(),
-                                        (storeComponent,),
-                                    ),
-                                )
-                            ),
-                            (PathFilter('/oaix/info'),
-                                (OaiInfo(reactor=reactor, oaiPath='/oai'),
-                                    (oaiJazz,),
-                                )
+                            (IpFilter(allowedIps=['127.0.0.1']),
+                                (PathFilter('/oaix', excluding=['/oaix/info']),
+                                    (OaiPmh(repositoryName='Gateway',
+                                            adminEmail='ab@narcis.nl',
+                                            supportXWait=True
+                                        ),
+                                        (oaiJazz,),
+                                        (oaiSuspendRegister,), # Wat doet dit?
+                                        (StorageAdapter(),
+                                            (storeComponent,),
+                                        ),
+                                    )
+                                ),
+                                (PathFilter('/oaix/info'),
+                                    (OaiInfo(reactor=reactor, oaiPath='/oai'),
+                                        (oaiJazz,),
+                                    )
+                                ),
                             ),
                             (PathFilter('/update'),
                                 (SruRecordUpdate(
                                         sendRecordData=False,
                                         logErrors=True,
                                     ),
-                                    (RewritePartname(DEFAULT_PARTNAME),
+                                    (RewritePartname(DEFAULT_PARTNAME), # 
                                         (FilterMessages(allowed=['delete']),
                                             (storeComponent,),
                                             (oaiJazz,),
@@ -127,7 +130,21 @@ def main(reactor, port, statePath, **ignored):
                                                 (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[DEFAULT_PARTNAME]),
                                                     (oaiJazz,),
                                                 ),
-                                            )
+                                            ),
+                                            # (Mods(),
+                                            #     (RewritePartname("mods"),
+                                            #         (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
+                                            #             (storeComponent,),
+                                            #         ),
+                                            #     )
+                                            # )
+                                            (RewritePartname("mods"),
+                                                (XmlXPath(['srw:recordData/*'], fromKwarg="lxmlNode"),
+                                                    (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
+                                                        (storeComponent,),
+                                                    ),
+                                                )
+                                            ) # ! rewrite mods
                                         )
                                     )
                                 )

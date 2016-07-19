@@ -25,7 +25,7 @@
 ## end license ##
 
 from seecr.test import IntegrationTestCase
-from seecr.test.utils import getRequest
+from seecr.test.utils import getRequest, sleepWheel, htmlXPath
 from meresco.xml import xpathFirst, xpath
 from lxml import etree
 
@@ -82,7 +82,6 @@ class ApiTest(IntegrationTestCase):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))
         # print "ListSets", etree.tostring(body)
         self.assertEqual(set(['publications']), set(xpath(body, '//oai:setSpec/text()')))
-        
 
     def testRSS(self):
         header, body = getRequest(self.apiPort, '/rss', dict(query="dc:title=program"))
@@ -91,6 +90,10 @@ class ApiTest(IntegrationTestCase):
         self.assertEquals(2, len(items))
         self.assertEqual(set(["Example Program 1", "Example Program 2"]), set(xpath(body, "//item/title/text()")))
         self.assertEqual(set(["This is an example program about Search with Meresco", "This is an example program about Programming with Meresco"]), set(xpath(body, "//item/description/text()")))
+
+    def testLog(self):
+        header, body = getRequest(self.apiPort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
+        self.assertEqual('"Example Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
 
     def doSruQuery(self, **arguments):
         queryArguments = {'version': '1.2', 'operation': 'searchRetrieve'}
