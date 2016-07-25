@@ -53,6 +53,9 @@ from storage.storageadapter import StorageAdapter
 
 from storage.storagecomponent import HashDistributeStrategy, DefaultStrategy
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
+from meresco.dans.metapartconverter import AddProvenanceToMetaPart
+from meresco.dans.addmetadataformat import AddMetadataFormat
+from meresco.dans.modsconverter import ModsConverter
 
 DEFAULT_PARTNAME = 'oai_dc'
 
@@ -117,34 +120,37 @@ def main(reactor, port, statePath, **ignored):
                                         sendRecordData=False,
                                         logErrors=True,
                                     ),
-                                    (RewritePartname(DEFAULT_PARTNAME), # 
+                                    (RewritePartname(DEFAULT_PARTNAME),
                                         (FilterMessages(allowed=['delete']),
                                             (storeComponent,),
                                             (oaiJazz,),
                                         ),
                                         (FilterMessages(allowed=['add']),
-                                            (XmlXPath(['srw:recordData/*'], fromKwarg="lxmlNode"),
-                                                (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                                    (storeComponent,),
-                                                ),
-                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[DEFAULT_PARTNAME]),
-                                                    (oaiJazz,),
-                                                ),
-                                            ),
-                                            # (Mods(),
-                                            #     (RewritePartname("mods"),
-                                            #         (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                            #             (storeComponent,),
-                                            #         ),
-                                            #     )
-                                            # )
-                                            (RewritePartname("mods"),
-                                                (XmlXPath(['srw:recordData/*'], fromKwarg="lxmlNode"),
+
+                                             # Does not work? See comments in component...
+                                            # (AddMetadataFormat(fromKwarg="lxmlNode", name='md_format'),
+                                            #     (LogComponent("AddMetadataFormat"),),
+                                            # ),
+
+                                            (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
+                                                (AddProvenanceToMetaPart(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to metaPart.
                                                     (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                                        (storeComponent,),
+                                                        (storeComponent,), # Store original record.
+                                                    ),
+                                                    (ModsConverter(fromKwarg='lxmlNode'), # convert Original to mods format.
+                                                        
+                                                        (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
+                                                            (RewritePartname('mods'), # Rename (converted) part.
+                                                                (storeComponent,), # Store converted/renamed part.
+                                                            ),
+                                                        )
+                                                    ),
+
+                                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[DEFAULT_PARTNAME]),
+                                                        (oaiJazz,),
                                                     ),
                                                 )
-                                            ) # ! rewrite mods
+                                            )
                                         )
                                     )
                                 )
