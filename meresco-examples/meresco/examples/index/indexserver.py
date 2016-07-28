@@ -82,7 +82,8 @@ drilldownFields = [
 untokenizedFieldnames = [f.name for f in drilldownFields] + [untokenizedFieldname('dc:identifier')]
 
 
-DEFAULT_CORE = 'oai_dc'
+# DEFAULT_CORE = 'oai_dc'
+DEFAULT_CORE = 'narcis'
 
 def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, luceneserverPort):
 

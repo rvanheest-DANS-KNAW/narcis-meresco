@@ -68,7 +68,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
         (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)), # Convert from plain text to lxml-object.
             (oaiDownload, # Implementation/Protocol of a PeriodicDownload...
                 (UpdateAdapterFromOaiDownloadProcessor(), # Maakt van een SRU update/delete bericht (lxmlNode) een relevante message: 'delete' of 'add' message.
-                    (RewritePartname(DEFAULT_CORE), # Hernoemt partname van 'record' naar DEFAULT_CORE.
+                    (RewritePartname(DEFAULT_PARTNAME), # Hernoemt partname van 'record' naar DEFAULT_PARTNAME.
                         (FilterMessages(['delete']), # Filtert delete messages
                             (storageComponent,), # Delete from storage
                             (oaiJazz,), # Delete from OAI-pmh repo
@@ -104,7 +104,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
 
     oaiDownload = OaiDownloadProcessor(
         path='/oaix',
-        metadataPrefix='oai_dc',
+        metadataPrefix=DEFAULT_PARTNAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
         xWait=True,
         name='gateway',
@@ -140,7 +140,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
     storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat('oai_dc', None, None) # def updateMetadataFormat(self, prefix, schema, namespace):
+    oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None) # def updateMetadataFormat(self, prefix, schema, namespace):
 
     # Wat doet dit?
     cqlClauseConverters = [
@@ -212,7 +212,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (SruParser(
                                             host='example.org',
                                             port=80,
-                                            defaultRecordSchema=DEFAULT_CORE,
+                                            defaultRecordSchema=DEFAULT_PARTNAME,
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(

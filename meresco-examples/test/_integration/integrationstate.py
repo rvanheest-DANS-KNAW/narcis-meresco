@@ -113,7 +113,7 @@ class ExampleIntegrationState(IntegrationState):
             port=self.lucenePort,
             stateDir=join(self.integrationTempdir, 'lucene'),
             waitForStart=True,
-            core=["oai_dc"],
+            core=["narcis"], # core=["oai_dc"],
             env=dict(JAVA_BIN=JAVA_BIN, LANG="en_US.UTF-8"))
 
     def _createDatabase(self):

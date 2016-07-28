@@ -58,6 +58,7 @@ from meresco.dans.addmetadataformat import AddMetadataFormat
 from meresco.dans.modsconverter import ModsConverter
 
 DEFAULT_PARTNAME = 'oai_dc'
+NORMALISED_DOC_NAME = 'normdoc'
 
 def main(reactor, port, statePath, **ignored):
     apacheLogStream = stdout
@@ -140,7 +141,7 @@ def main(reactor, port, statePath, **ignored):
                                                     (ModsConverter(fromKwarg='lxmlNode'), # convert Original to mods format.
                                                         
                                                         (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                                            (RewritePartname('mods'), # Rename (converted) part.
+                                                            (RewritePartname(NORMALISED_DOC_NAME), # Rename (converted) part.
                                                                 (storeComponent,), # Store converted/renamed part.
                                                             ),
                                                         )
