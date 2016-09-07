@@ -135,13 +135,12 @@ def main(reactor, port, statePath, **ignored):
 
                                             (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
                                                 (AddProvenanceToMetaPart(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to metaPart.
-                                                    (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                                        (storeComponent,), # Store original record.
+                                                    (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False), # Store original record.
+                                                        (storeComponent,),
                                                     ),
-                                                    (ModsConverter(fromKwarg='lxmlNode'), # convert Original to mods format.
-                                                        
+                                                    (ModsConverter(fromKwarg='lxmlNode'), # Convert original to: mods & original
                                                         (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                                            (RewritePartname(NORMALISED_DOC_NAME), # Rename (converted) part.
+                                                            (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
                                                                 (storeComponent,), # Store converted/renamed part.
                                                             ),
                                                         )
