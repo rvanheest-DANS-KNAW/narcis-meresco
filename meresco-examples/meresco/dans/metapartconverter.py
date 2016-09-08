@@ -10,7 +10,6 @@ from lxml import etree
 from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
 from meresco.components import lxmltostring, Converter
-from xml.sax.saxutils import unescape
 from meresco.dans.metadataformats import MetadataFormat
 
 import time
@@ -26,12 +25,14 @@ class AddProvenanceToMetaPart(Converter):
 
     def _convert(self, lxmlNode):
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=surfshareNamespaceMap)
-        record_lxml = etree.fromstring(unescape(record_part[0]))
+        # print "RecordPart:", record_part[0]
+        # time.sleep(0.5)
+        record_lxml = etree.fromstring(record_part[0]) # Geen xml.sax.saxutils.unescape() hier? Dat doet lxml reeds voor ons.
         md_format = MetadataFormat.getFormat(record_lxml) #TODO: pass it somehow from DNA, so we need to look this up only once per record...
         
         metapart = lxmlNode.xpath("//document:document/document:part[@name='meta']/text()", namespaces=surfshareNamespaceMap)
         if len(metapart) > 0: # metapart gevonden...
-            meta_lxml = etree.fromstring(unescape(metapart[0]))# Unescape & convert naar lxml...
+            meta_lxml = etree.fromstring(metapart[0])# Convert naar lxml... Ook hier GEEN xml.sax.saxutils.unescape()
             self._insertHarvestDateAndMetadataNamespace(meta_lxml, md_format)# Check en insert harvestDate...
             meta_txt = etree.tostring(meta_lxml, encoding="UTF-8") # convert from lxml to text...
             lxmlNode.find('document:part[@name="meta"]', namespaces=surfshareNamespaceMap).text = meta_txt #Set as text value of the correct tag.

@@ -13,7 +13,7 @@ class MetadataFormat():
     """Determines EduStandaard metadata format from LxmlNode"""
     
     # Current EduStandaard formats in use, chronologically:
-    MD_FORMAT = ['oai_dc', 'didl_mods231', 'didl_mods30', 'mods36']
+    MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36']
     
     NAMESPACEMAP = {
         'dc'            : 'http://purl.org/dc/elements/1.1/',
@@ -26,9 +26,10 @@ class MetadataFormat():
     
     NAMESPACEMAPPER = {
         MD_FORMAT[0] : NAMESPACEMAP.get('oai_dc'),
-        MD_FORMAT[1] : NAMESPACEMAP.get('mods'),
+        MD_FORMAT[1] : NAMESPACEMAP.get('oai_dc'),
         MD_FORMAT[2] : NAMESPACEMAP.get('mods'),
         MD_FORMAT[3] : NAMESPACEMAP.get('mods'),
+        MD_FORMAT[4] : NAMESPACEMAP.get('mods'),
     }
 
 
@@ -44,23 +45,29 @@ class MetadataFormat():
         
         # print "FORMAT:", etree.tostring(lxmlNode, encoding="UTF-8")
 
-        if lxmlNode.xpath('//didl:DIDL[1]', namespaces=MetadataFormat.NAMESPACEMAP): # Check for DIDL container, Max. 1 according to EduStandaard.
+        if len(lxmlNode.xpath('//didl:DIDL[1]', namespaces=MetadataFormat.NAMESPACEMAP)) > 0: # Check for DIDL container, Max. 1 according to EduStandaard.
             
             if int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) == 1: # Check for MODS container.
                 # Found MODS: Check op aanwezigheid rdf namespace, to differentiate between known versions:
                 if lxmlNode.xpath("boolean(count(//rdf:*))", namespaces=MetadataFormat.NAMESPACEMAP):
-                    md_format = MetadataFormat.MD_FORMAT[2] # DIDL_MODS30
+                    md_format = MetadataFormat.MD_FORMAT[3] # DIDL_MODS30
                 else:
-                    md_format = MetadataFormat.MD_FORMAT[1] # DIDL_MODS231
+                    md_format = MetadataFormat.MD_FORMAT[2] # DIDL_MODS231
+            elif int(lxmlNode.xpath("count(//oai_dc:dc)", namespaces=MetadataFormat.NAMESPACEMAP)) == 1: # Check for OAI_DC container.
+                md_format = MetadataFormat.MD_FORMAT[1] # DIDL_DC
             
         elif int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) == 1: # Full MODS (MODS only)
-            md_format = MetadataFormat.MD_FORMAT[3] # MODS 3.?
+            md_format = MetadataFormat.MD_FORMAT[4] # MODS 3.?
         elif lxmlNode.xpath("boolean(count(//oai_dc:dc))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
             md_format = MetadataFormat.MD_FORMAT[0] # OAI_DC
         # elif lxmlNode.xpath("boolean(count(//rdf:RDF/rdf:Description/ore:describes))", namespaces=MetadataFormat.NAMESPACEMAP):#No DIDL, no DC, check for ORE:
         #     md_format = MetadataFormat.MD_FORMAT[5]
 
-        print "Found EduStandaard format:", md_format
+        if md_format == None:
+            print "No known EduStandaard format was found by GATEWAY in the metadata! This record cannot be processed."
+        else:
+            print "Found EduStandaard format:", md_format
+
         return md_format
 
 

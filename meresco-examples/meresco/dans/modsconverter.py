@@ -13,7 +13,6 @@ from lxml.etree import parse, _ElementTree, tostring
 from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
 from meresco.components import lxmltostring, Converter
-from xml.sax.saxutils import unescape
 from meresco.dans.metadataformats import MetadataFormat
 
 import time
@@ -21,10 +20,11 @@ import time
 HVSTR_NS = '{http://meresco.org/namespace/harvester/meta}'
 DOCUMENT_NS = '{http://meresco.org/namespace/harvester/document}'
 namespaceMap = {
-'document'  :  "http://meresco.org/namespace/harvester/document",
-'oai': "http://www.openarchives.org/OAI/2.0/",
-'oai_dc' :"http://www.openarchives.org/OAI/2.0/oai_dc/",
-'dc'            : 'http://purl.org/dc/elements/1.1/',
+    'document'  :  "http://meresco.org/namespace/harvester/document",
+    'oai': "http://www.openarchives.org/OAI/2.0/",
+    'oai_dc' : "http://www.openarchives.org/OAI/2.0/oai_dc/",
+    'dc' : "http://purl.org/dc/elements/1.1/",
+    'mods' : "http://www.loc.gov/mods/v3",
 }
 
 MODS_VERSION = '3.6'
@@ -35,16 +35,18 @@ class ModsConverter(Converter):
 
     def _convert(self, lxmlNode):
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=namespaceMap)
-        record_lxml = etree.fromstring(unescape(record_part[0]))
+        record_lxml = etree.fromstring(record_part[0]) # Geen xml.sax.saxutils.unescape() hier? Dat doet lxml reeds voor ons.
         md_format = MetadataFormat.getFormat(record_lxml) #TODO: pass it somehow from DNA, so we need to look this up only once per record...
-
+        # print "FOUND MetaDataFormat:", md_format
         converted_record_lxml = self._convertRecordMetadataToMods(record_lxml, md_format)# Check en insert normalised mods into record part.
         record_txt = etree.tostring(converted_record_lxml, encoding="UTF-8") # convert from lxml to text...
+        record_txt = record_txt.decode('utf-8')
+        # print "record_txt", record_txt
         lxmlNode.find('document:part[@name="record"]', namespaces=namespaceMap).text = record_txt # Set as text value...
         return lxmlNode
 
     def _convertRecordMetadataToMods(self, lxmlNode, metadataFormat):
-        print "Converting node MODS:", etree.tostring(lxmlNode)
+        # print "Converting this lxmlNode to MODS:", etree.tostring(lxmlNode)
 
 # <record xmlns="http://www.openarchives.org/OAI/2.0/"
 #     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -65,7 +67,7 @@ class ModsConverter(Converter):
 #             <dc:publisher xmlns:dc="http://purl.org/dc/elements/1.1/">Seecr</dc:publisher>
 #             <dc:date xmlns:dc="http://purl.org/dc/elements/1.1/">2016</dc:date>
 #             <dc:type xmlns:dc="http://purl.org/dc/elements/1.1/">Example</dc:type>
-#             <dc:subject xmlns:dc="http://purl.org/dc/elements/1.1/">Search</dc:subject>
+#             <dc:subject xmlns:dc="http://purl.org/dc/elements/1.1/">Search &amp; Destroy</dc:subject>
 #             <dc:language xmlns:dc="http://purl.org/dc/elements/1.1/">en</dc:language>
 #             <dc:rights xmlns:dc="http://purl.org/dc/elements/1.1/">Open Source</dc:rights>
 #         </oai_dc:dc>
@@ -87,38 +89,44 @@ class ModsConverter(Converter):
         e_original_root = etree.Element(NORM_NS + "md_original")
         e_norm_root = etree.Element(NORM_NS + "normalized")
         
-        e_modsroot = etree.SubElement(e_norm_root, MODS + "mods", nsmap=NSMAP)
-        # e_modsroot = etree.Element(MODS + "mods", nsmap=NSMAP)
-        e_modsroot.set("version", MODS_VERSION)
-        e_modsroot.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-"+ MODS_VERSION.replace(".", "-") +".xsd")
-        # e_modsroot.set("xmlns:xsi" , "http://www.w3.org/2001/XMLSchema-instance")
 
-        if metadataFormat == MetadataFormat.MD_FORMAT[0]: # OAI-DC
-            print "CONVERTING MD", MetadataFormat.MD_FORMAT[0]
+        if metadataFormat is not None:
 
-            strTitle = lxmlNode.xpath("//dc:title/text()", namespaces=namespaceMap)
-            e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
-            e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
-# End conversion
+            e_modsroot = etree.SubElement(e_norm_root, MODS + "mods", nsmap=NSMAP)
+            # e_modsroot = etree.Element(MODS + "mods", nsmap=NSMAP)
+            e_modsroot.set("version", MODS_VERSION)
+            e_modsroot.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-"+ MODS_VERSION.replace(".", "-") +".xsd")
+            # e_modsroot.set("xmlns:xsi" , "http://www.w3.org/2001/XMLSchema-instance")
 
-            metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespaceMap)
-            for child in metadata_tags:
-                e_original_root.append(child) # voeg originele md toe aan marker element...
-                metadata_tags.remove(child) # verwijder originele md van oai metadata tag....
+            if metadataFormat == MetadataFormat.MD_FORMAT[0]: # OAI-DC
+                print "CONVERTING MD", MetadataFormat.MD_FORMAT[0]
 
-            print "MD_ORIGINAL:", etree.tostring(e_original_root)
+                strTitle = lxmlNode.xpath("//dc:title/text()", namespaces=namespaceMap)
+                e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
+                e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
 
-            for child in lxmlNode.getchildren():
-                # print child.tag, child.text
-                if child.tag == '{http://www.openarchives.org/OAI/2.0/}metadata':
-                    child.append(e_original_root)
-                    child.append(e_norm_root)
-            print "CONVERTED:", etree.tostring(lxmlNode, encoding="UTF-8")
+            elif metadataFormat == MetadataFormat.MD_FORMAT[2] or metadataFormat == MetadataFormat.MD_FORMAT[3]:
+                print "CONVERTING MD", metadataFormat
+                strTitle = lxmlNode.xpath("//mods:titleInfo/mods:title/text()", namespaces=namespaceMap)
+                if len(strTitle) > 0:
+                    e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
+                    e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
 
-        elif metadataFormat == MetadataFormat.MD_FORMAT[1]:
-            print "CONVERTING MD", MetadataFormat.MD_FORMAT[1]
-        elif metadataFormat == MetadataFormat.MD_FORMAT[2]:
-            print "CONVERTING MD", MetadataFormat.MD_FORMAT[2]
+        metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespaceMap)
+
+        for child in metadata_tags:
+            e_original_root.append(child) # voeg originele md toe aan marker element...
+            metadata_tags.remove(child) # verwijder originele md van oai metadata tag....
+
+        for child in lxmlNode.getchildren():
+            # print child.tag, child.text
+            if child.tag == '{http://www.openarchives.org/OAI/2.0/}metadata':
+                child.append(e_original_root)
+                child.append(e_norm_root)
+                e_original_root.text = child.text # copy erronous textfrom metadata tag
+                child.text = "" # delete erronous text from metadata tag
+        # print "MD_ORIGINAL:", etree.tostring(e_original_root)
+        # print "CONVERTED:", etree.tostring(lxmlNode, encoding="UTF-8")
 
         return lxmlNode
 

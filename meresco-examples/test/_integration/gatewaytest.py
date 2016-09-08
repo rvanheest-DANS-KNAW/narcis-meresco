@@ -34,8 +34,9 @@ class GatewayTest(IntegrationTestCase):
     def testOai(self):
         header, body = getRequest(self.gatewayPort, '/oaix', arguments=dict(verb='ListRecords', metadataPrefix='oai_dc'))
         self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: text/xml; charset=utf-8', header)
+        # print "OAIX body:", etree.tostring(body)
         records = xpath(body, '//oai:record')
-        self.assertEqual(3, len(records))
+        self.assertEqual(12, len(records))
 
         deletes = xpath(body, '//oai:record[oai:header/@status = "deleted"]')
         self.assertEqual(1, len(deletes))

@@ -15,7 +15,7 @@
             &lt;dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Seecr&lt;/dc:creator&gt;
             &lt;dc:publisher xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Seecr&lt;/dc:publisher&gt;
             &lt;dc:date xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;2016&lt;/dc:date&gt;
-            &lt;dc:type xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Example&lt;/dc:type&gt;
+            &lt;dc:type xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Example &amp;amp; 1&lt;/dc:type&gt;
             &lt;dc:subject xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Search&lt;/dc:subject&gt;
             &lt;dc:language xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;en&lt;/dc:language&gt;
             &lt;dc:rights xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Open Source&lt;/dc:rights&gt;
