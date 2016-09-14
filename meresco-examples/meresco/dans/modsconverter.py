@@ -98,12 +98,15 @@ class ModsConverter(Converter):
             e_modsroot.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-"+ MODS_VERSION.replace(".", "-") +".xsd")
             # e_modsroot.set("xmlns:xsi" , "http://www.w3.org/2001/XMLSchema-instance")
 
-            if metadataFormat == MetadataFormat.MD_FORMAT[0]: # OAI-DC
-                print "CONVERTING MD", MetadataFormat.MD_FORMAT[0]
+            if metadataFormat == MetadataFormat.MD_FORMAT[0] or metadataFormat == MetadataFormat.MD_FORMAT[1]:
+                print "CONVERTING MD", metadataFormat
 
                 strTitle = lxmlNode.xpath("//dc:title/text()", namespaces=namespaceMap)
                 e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
                 e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
+                strAbstract = lxmlNode.xpath("//dc:description/text()", namespaces=namespaceMap)
+                if len(strAbstract) > 0:
+                    e_abstract = etree.SubElement(e_modsroot, "abstract").text = strAbstract[0]
 
             elif metadataFormat == MetadataFormat.MD_FORMAT[2] or metadataFormat == MetadataFormat.MD_FORMAT[3]:
                 print "CONVERTING MD", metadataFormat
@@ -111,6 +114,10 @@ class ModsConverter(Converter):
                 if len(strTitle) > 0:
                     e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
                     e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
+
+                strAbstract = lxmlNode.xpath("//mods:abstract/text()", namespaces=namespaceMap)
+                if len(strAbstract) > 0:
+                    e_abstract = etree.SubElement(e_modsroot, "abstract").text = strAbstract[0]
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespaceMap)
 

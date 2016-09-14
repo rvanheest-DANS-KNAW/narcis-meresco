@@ -146,7 +146,7 @@ def main(reactor, port, statePath, **ignored):
                                                         )
                                                     ),
 
-                                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[DEFAULT_PARTNAME]),
+                                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[DEFAULT_PARTNAME, NORMALISED_DOC_NAME]),
                                                         (oaiJazz,),
                                                     ),
                                                 )

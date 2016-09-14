@@ -28,13 +28,14 @@ from seecr.test import IntegrationTestCase
 from seecr.test.utils import getRequest
 from meresco.xml import xpath
 from lxml import etree
+from meresco.examples.gateway.gatewayserver import DEFAULT_PARTNAME, NORMALISED_DOC_NAME
 
 class GatewayTest(IntegrationTestCase):
 
     def testOai(self):
-        header, body = getRequest(self.gatewayPort, '/oaix', arguments=dict(verb='ListRecords', metadataPrefix='oai_dc'))
+        header, body = getRequest(self.gatewayPort, '/oaix', arguments=dict(verb='ListRecords', metadataPrefix=NORMALISED_DOC_NAME))
         self.assertEqual('HTTP/1.0 200 OK\r\nContent-Type: text/xml; charset=utf-8', header)
-        # print "OAIX body:", etree.tostring(body)
+        #print "OAIX body:", etree.tostring(body)
         records = xpath(body, '//oai:record')
         self.assertEqual(12, len(records))
 

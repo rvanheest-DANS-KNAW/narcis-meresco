@@ -62,10 +62,19 @@ from meresco.lucene.fieldregistry import FieldRegistry
 from .dctofieldslist import DcToFieldsList
 from .dcfields import DcFields
 
-from meresco.examples.gateway.gatewayserver import DEFAULT_PARTNAME
+from meresco.examples.gateway.gatewayserver import DEFAULT_PARTNAME, NORMALISED_DOC_NAME
+
+NAMESPACEMAP = {
+    'dc'            : 'http://purl.org/dc/elements/1.1/',
+    'oai_dc'        : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+    'mods'          : 'http://www.loc.gov/mods/v3',
+    'didl'          : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+    'rdf'           : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+    'ore'           : 'http://www.openarchives.org/ore/terms/',
+    'norm'          : 'http://dans.knaw.nl/narcis/normalized',
+}
 
 LUCENE_VM = getJVM()
-
 
 def untokenizedFieldname(fieldname):
     return UNTOKENIZED_PREFIX + fieldname
@@ -81,8 +90,6 @@ drilldownFields = [
 # Add any non-drilldown untokenized fields:
 untokenizedFieldnames = [f.name for f in drilldownFields] + [untokenizedFieldname('dc:identifier')]
 
-
-# DEFAULT_CORE = 'oai_dc'
 DEFAULT_CORE = 'narcis'
 
 def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, luceneserverPort):
@@ -164,7 +171,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
 
     oaiDownload = OaiDownloadProcessor(
         path='/oaix',
-        metadataPrefix='oai_dc',
+        metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
         xWait=True,
         name='gateway',
@@ -205,7 +212,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
                             # (LogComponent("ADD from GATEWAY"),),
                             (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data'),
                                 (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
-                                    (XmlXPath(['/oai:record/oai:metadata/oai_dc:dc'], fromKwarg='lxmlNode'),
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/oai_dc:dc'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
                                         (DcToFieldsList(), # Platte lijst met veldnamen en waardes...
                                             #(LogComponent("DcToFieldsList"),), # [DcToFieldsList] add(*(), **{'fieldslist': [('dc:identifier', 'http://meresco.com?record=1'), ('dc:description', 'This is an example program about Search with Meresco'), ('dc:title', 'Example Program 1'), ('dc:creator', 'Seecr'), ('dc:publisher', 'Seecr'), ('dc:date', '2016'), ('dc:type', 'Example'), ('dc:subject', 'Search'), ('dc:language', 'en'), ('dc:rights', 'Open Source')], 'partname': 'record', 'identifier': 'meresco:record:1'})
                                             (FieldsListToLuceneDocument( # Maakt addDocument messege + creeert de facet/drilldown velden waarvan de value's tot max. 256 chars getruncated worden.

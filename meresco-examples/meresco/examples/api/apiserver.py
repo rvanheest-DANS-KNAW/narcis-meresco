@@ -59,7 +59,17 @@ from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from storage.storageadapter import StorageAdapter
 
 from meresco.examples.index.indexserver import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
-from meresco.examples.gateway.gatewayserver import DEFAULT_PARTNAME
+from meresco.examples.gateway.gatewayserver import DEFAULT_PARTNAME, NORMALISED_DOC_NAME
+
+NAMESPACEMAP = {
+    'dc'            : 'http://purl.org/dc/elements/1.1/',
+    'oai_dc'        : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+    'mods'          : 'http://www.loc.gov/mods/v3',
+    'didl'          : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+    'rdf'           : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+    'ore'           : 'http://www.openarchives.org/ore/terms/',
+    'norm'          : 'http://dans.knaw.nl/narcis/normalized',
+}
 
 
 def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
@@ -68,26 +78,61 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
         (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)), # Convert from plain text to lxml-object.
             (oaiDownload, # Implementation/Protocol of a PeriodicDownload...
                 (UpdateAdapterFromOaiDownloadProcessor(), # Maakt van een SRU update/delete bericht (lxmlNode) een relevante message: 'delete' of 'add' message.
-                    (RewritePartname(DEFAULT_PARTNAME), # Hernoemt partname van 'record' naar DEFAULT_PARTNAME.
+                    # (RewritePartname(DEFAULT_PARTNAME), # Hernoemt partname van 'record' naar DEFAULT_PARTNAME.
                         (FilterMessages(['delete']), # Filtert delete messages
                             (storageComponent,), # Delete from storage
                             (oaiJazz,), # Delete from OAI-pmh repo
                         ),
                         (FilterMessages(['add']),
-                            (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data'),
+                            # TODO: onderstaande toKwarg='data' kan eruit. Dan de volgende regel ook:-)
+                            (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
                                 (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
-                                    (XmlXPath(['/oai:record/oai:metadata/oai_dc:dc'], fromKwarg='lxmlNode'),
-                                        (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
-                                            (storageComponent,)
-                                        ), #metadataPrefixes=None, setSpecs=None, name=None
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=['oai_dc'], setSpecs=['publications'], name='NARCISPORTAL'),
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                        (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
+                                            (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                (storageComponent,)
+                                            ) #metadataPrefixes=None, setSpecs=None, name=None
+                                        ),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[DEFAULT_PARTNAME, NORMALISED_DOC_NAME], setSpecs=['publications'], name='NARCISPORTAL'),
                                             (oaiJazz,),
                                         )
+                                    ),
+
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:normalized/mods:mods'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                        (RewritePartname("mods"), # Hernoemt partname van 'record' naar "mods".
+                                            (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
+                                                (storageComponent,)
+                                            ) #metadataPrefixes=None, setSpecs=None, name=None
+                                        )
+                                    ),
+
+
+                                    # TODO: Check indien conversies misgaan, dat ook de meta en header part niet naar storage gaan: geen 1 part als het even kan...
+                                    # Schrijf headerPart naar storage:
+                                    (XmlXPath(['/oai:record/oai:header'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                        (RewritePartname("header"),
+                                            (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                (storageComponent,)
+                                            )
+                                        )
                                     )
+
                                 )
+                            ), # Schrijf metaPart naar storage:
+                            (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="meta"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
+                                # (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'), # Dit is niet nodig: hieronder weer terug gezet naar 'data'???
+                                        (RewritePartname("meta"),
+                                            # (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                (storageComponent,)
+                                            # )
+                                        )
+                                # )
                             )
+
+
+
                         )
-                    )
+                    # )
                 )
             )
         )
@@ -104,7 +149,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
 
     oaiDownload = OaiDownloadProcessor(
         path='/oaix',
-        metadataPrefix=DEFAULT_PARTNAME,
+        metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
         xWait=True,
         name='gateway',
@@ -137,10 +182,12 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
     luceneRemote = LuceneRemote(host='localhost', port=indexPort, path='/lucene')
 
     strategie = Md5HashDistributeStrategy()
-    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME])
+    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME, NORMALISED_DOC_NAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None) # def updateMetadataFormat(self, prefix, schema, namespace):
+    oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None) #DEFAULT_PARTNAME
+    # def updateMetadataFormat(self, prefix, schema, namespace):
+    # self._prefixes[prefix] = (schema, namespace)
 
     # Wat doet dit?
     cqlClauseConverters = [
@@ -203,7 +250,15 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                             (storage,)
                                         ),
                                         (OaiBranding(url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", link="http://oai.narcis.nl", title="Narcis - The gateway to scholarly information in The Netherlands"),),
-                                        # (OaiProvenance(nsMap={}, baseURL='http://dds.nl', harvestDate='2016-02-02', metadataNamespace='urn:didl', identifier='unique', datestamp='2016-01-01'),),
+                                        # (OaiProvenance(
+                                        #     nsMap=NAMESPACEMAP,
+                                        #     baseURL='http://dds.nl', 
+                                        #     harvestDate='2016-02-02', 
+                                        #     metadataNamespace='urn:didl', 
+                                        #     identifier='unique', 
+                                        #     datestamp='2016-01-01',),
+                                        # ),
+                                        # (storage,)
                                     )
                                 )
                             ),
@@ -212,7 +267,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (SruParser(
                                             host='example.org',
                                             port=80,
-                                            defaultRecordSchema=DEFAULT_PARTNAME,
+                                            defaultRecordSchema=DEFAULT_PARTNAME, #DEFAULT_PARTNAME, #NORMALISED_DOC_NAME
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(
@@ -238,12 +293,13 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (RssItem(
                                             nsMap={
                                                 'dc': "http://purl.org/dc/elements/1.1/",
-                                                'oai_dc': "http://www.openarchives.org/OAI/2.0/oai_dc/"
+                                                'oai_dc': "http://www.openarchives.org/OAI/2.0/oai_dc/",
+                                                'norm' : "http://dans.knaw.nl/narcis/normalized"
                                             },
-                                            title = ('oai_dc', '/oai_dc:dc/dc:title/text()'),
-                                            description = ('oai_dc', '/oai_dc:dc/dc:description/text()'),
+                                            title = (DEFAULT_PARTNAME, '/oai_dc:dc/dc:title/text()'),
+                                            description = (DEFAULT_PARTNAME, '/oai_dc:dc/dc:description/text()'),
                                             linkTemplate = 'http://localhost/sru?operation=searchRetrieve&version=1.2&query=dc:identifier%%3D%(identifier)s',
-                                            identifier = ('oai_dc', '/oai_dc:dc/dc:identifier/text()')),
+                                            identifier = (DEFAULT_PARTNAME, '/oai_dc:dc/dc:identifier/text()')),
                                         (StorageAdapter(),
                                             (storage,)
                                         )
