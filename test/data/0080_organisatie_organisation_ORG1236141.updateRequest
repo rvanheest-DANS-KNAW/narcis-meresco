@@ -1,0 +1,60 @@
+<updateRequest>
+    <srw:version xmlns:srw="http://www.loc.gov/zing/srw/">1.0</srw:version>
+    <ucp:action xmlns:ucp="info:lc/xmlns/update-v1">info:srw/action/1/replace</ucp:action>
+    <ucp:recordIdentifier xmlns:ucp="info:lc/xmlns/update-v1">organisation:ORG1236141</ucp:recordIdentifier>
+    <srw:record xmlns:srw="http://www.loc.gov/zing/srw/">
+        <srw:recordPacking>xml</srw:recordPacking>
+        <srw:recordSchema>metadata</srw:recordSchema>
+        <srw:recordData><document xmlns="http://meresco.org/namespace/harvester/document"><part name="record">&lt;record xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;            
+            &lt;header xmlns="http://www.openarchives.org/OAI/2.0/"&gt;&lt;identifier&gt;ORG1236141&lt;/identifier&gt;&lt;datestamp&gt;2001-03-27&lt;/datestamp&gt;&lt;setSpec&gt;organisaties&lt;/setSpec&gt;&lt;/header&gt;
+            &lt;metadata xmlns="http://www.openarchives.org/OAI/2.0/"&gt;
+            &lt;organisatie xmlns=&quot;http://www.onderzoekinformatie.nl/nod/org&quot; code=&quot;U.EUR.UB.Wink&quot;&gt;
+            &lt;naam_nl&gt;Wetenschapswinkel&lt;/naam_nl&gt;
+            &lt;naam_en&gt;Research Information Centre&lt;/naam_en&gt;
+            &lt;locatie&gt;Rotterdam&lt;/locatie&gt;
+            &lt;invoer_datum&gt;1993-11-19&lt;/invoer_datum&gt;
+            &lt;url&gt;http://www.narcis.nl/organisation/RecordID/ORG1236141&lt;/url&gt;
+            &lt;categories&gt;
+            &lt;category code=&quot;A50000&quot;&gt;
+            &lt;term xml:lang=&quot;nl&quot;&gt;Economie&lt;/term&gt;
+            &lt;term xml:lang=&quot;en&quot;&gt;Economics&lt;/term&gt;
+            &lt;/category&gt;
+            &lt;category code=&quot;A80000&quot;&gt;
+            &lt;term xml:lang=&quot;nl&quot;&gt;Mens en maatschappij&lt;/term&gt;
+            &lt;term xml:lang=&quot;en&quot;&gt;Man and society&lt;/term&gt;
+            &lt;/category&gt;
+            &lt;category code=&quot;D40000&quot;&gt;
+            &lt;term xml:lang=&quot;nl&quot;&gt;Maatschappijwetenschappen&lt;/term&gt;
+            &lt;term xml:lang=&quot;en&quot;&gt;Social sciences &lt;/term&gt;
+            &lt;/category&gt;
+            &lt;category code=&quot;D50000&quot;&gt;
+            &lt;term xml:lang=&quot;nl&quot;&gt;Gedragswetenschappen&lt;/term&gt;
+            &lt;term xml:lang=&quot;en&quot;&gt;Behavioural sciences&lt;/term&gt;
+            &lt;/category&gt;
+            &lt;category code=&quot;D60000&quot;&gt;
+            &lt;term xml:lang=&quot;nl&quot;&gt;Sociaal-culturele wetenschappen&lt;/term&gt;
+            &lt;term xml:lang=&quot;en&quot;&gt;Socio-cultural sciences &lt;/term&gt;
+            &lt;/category&gt;
+            &lt;/categories&gt;
+            &lt;/organisatie&gt;&lt;/metadata&gt;
+            &lt;/record&gt;</part>
+            <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;
+                &lt;upload&gt;
+                &lt;id&gt;organisation:ORG1236141&lt;/id&gt;
+                &lt;/upload&gt;
+                &lt;record&gt;
+                &lt;id&gt;ORG1236141&lt;/id&gt;               
+                &lt;/record&gt;
+                &lt;repository&gt;
+                &lt;id&gt;organisation&lt;/id&gt;
+                &lt;set&gt;organisaties&lt;/set&gt;
+                &lt;baseurl&gt;http://narcis01.bureau.knaw.nl:8181/nodserver-0.0.1/nodbrug&lt;/baseurl&gt;
+                &lt;repositoryGroupId&gt;nod&lt;/repositoryGroupId&gt;
+                &lt;metadataPrefix&gt;nodorganisatie&lt;/metadataPrefix&gt;
+                &lt;collection&gt;organisation&lt;/collection&gt;
+                &lt;/repository&gt;
+                &lt;/meta&gt;</part>
+        </document>
+        </srw:recordData>
+    </srw:record>
+</updateRequest>
