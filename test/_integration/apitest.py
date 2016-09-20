@@ -67,7 +67,7 @@ class ApiTest(IntegrationTestCase):
 
     def testOai(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
-        print "OAI body:", etree.tostring(body)
+        # print "OAI body:", etree.tostring(body)
         records = xpath(body, '//oai:record/oai:metadata')
         self.assertEqual(6, len(records))
 

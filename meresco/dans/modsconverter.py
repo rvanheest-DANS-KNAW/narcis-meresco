@@ -4,11 +4,12 @@
 ## end license ##
 
 import sys
-from lxml.etree import _ElementTree as ElementTreeType
-from lxml import etree
 
+from lxml import etree
 from lxml.etree import parse, _ElementTree, tostring
 
+from StringIO import StringIO
+from xml.sax.saxutils import escape as escapeXml
 
 from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
@@ -19,19 +20,36 @@ import time
 
 HVSTR_NS = '{http://meresco.org/namespace/harvester/meta}'
 DOCUMENT_NS = '{http://meresco.org/namespace/harvester/document}'
+
 namespaceMap = {
     'document'  :  "http://meresco.org/namespace/harvester/document",
     'oai': "http://www.openarchives.org/OAI/2.0/",
     'oai_dc' : "http://www.openarchives.org/OAI/2.0/oai_dc/",
     'dc' : "http://purl.org/dc/elements/1.1/",
     'mods' : "http://www.loc.gov/mods/v3",
+    'prs': 'http://www.onderzoekinformatie.nl/nod/prs',
+    'act': 'http://www.onderzoekinformatie.nl/nod/act',
+    'org': 'http://www.onderzoekinformatie.nl/nod/org',
 }
 
+
 MODS_VERSION = '3.6'
+
+MODS_NAMESPACE = "http://www.loc.gov/mods/v3"
+MODS = "{%s}" % MODS_NAMESPACE
+NSMAP = {
+None : MODS_NAMESPACE,
+'xlink': 'http://www.w3.org/1999/xlink',
+'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+}
+NORM_NAMESPACE = "http://dans.knaw.nl/narcis/normalized"
+NORM_NS = "{%s}" % NORM_NAMESPACE
+
 
 class ModsConverter(Converter):
     def __init__(self, fromKwarg, toKwarg=None, name=None):
         Converter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
+        self._truncate_chars = 300
 
     def _convert(self, lxmlNode):
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=namespaceMap)
@@ -76,17 +94,6 @@ class ModsConverter(Converter):
 # </record>
 
 
-        MODS_NAMESPACE = "http://www.loc.gov/mods/v3"
-        MODS = "{%s}" % MODS_NAMESPACE
-        NSMAP = {
-        None : MODS_NAMESPACE,
-        'xlink': 'http://www.w3.org/1999/xlink',
-        'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        }
-        NORM_NAMESPACE = "http://dans.knaw.nl/narcis/normalized"
-        NORM_NS = "{%s}" % NORM_NAMESPACE
-
-
         e_original_root = etree.Element(NORM_NS + "md_original")
         e_norm_root = etree.Element(NORM_NS + "normalized")
         
@@ -127,6 +134,11 @@ class ModsConverter(Converter):
                 strGenre = lxmlNode.xpath("//mods:genre/text()", namespaces=namespaceMap)
                 if len(strGenre) > 0:
                     e_genre = etree.SubElement(e_modsroot, "genre").text = strGenre[0]
+        else: #NOD records
+            NODLxml = self._convertNODRecord2smods(lxmlNode)
+            if NODLxml is not None:
+                print 'NODE:' , tostring(NODLxml)
+                e_norm_root.append(NODLxml.getroot())
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespaceMap)
 
@@ -139,19 +151,113 @@ class ModsConverter(Converter):
             if child.tag == '{http://www.openarchives.org/OAI/2.0/}metadata':
                 child.append(e_original_root)
                 child.append(e_norm_root)
-                e_original_root.text = child.text # copy erronous textfrom metadata tag
+                e_original_root.text = child.text # copy erronous text from metadata tag
                 child.text = "" # delete erronous text from metadata tag
         # print "MD_ORIGINAL:", etree.tostring(e_original_root)
         # print "CONVERTED:", etree.tostring(lxmlNode, encoding="UTF-8")
 
         return lxmlNode
 
-# Try xslt (1.0 only)?
 
-# import lxml.etree as ET
+    def _convertNODRecord2smods(self, lxmlNode):
+        
 
-# dom = ET.parse(xml_filename)
-# xslt = ET.parse(xsl_filename)
-# transform = ET.XSLT(xslt)
-# newdom = transform(dom)
-# print(ET.tostring(newdom, pretty_print=True))
+        penvoerder, penvoerder_en, abstract, abstract_en, locatie, status, knaw_long = '', '', '', '', '', '', None
+        # ORGANISATIE:
+        if lxmlNode.xpath("boolean(count(//org:organisatie))", namespaces=namespaceMap):
+            title = self._findAndBind(lxmlNode, '\n<titleInfo><title>%s</title></titleInfo>', '//org:naam_nl/text()')
+            title_en = self._findAndBind(lxmlNode, '\n<titleInfo xml:lang="en"><title>%s</title></titleInfo>', '//org:naam_en/text()')
+        
+            taak = lxmlNode.xpath("//org:taak_nl/text()", namespaces=namespaceMap)
+            if taak: abstract = '\n<abstract>%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
+            taak = lxmlNode.xpath("//org:taak_en/text()", namespaces=namespaceMap)
+            if taak: abstract_en = '\n<abstract xml:lang="en">%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
+        
+            # Locatie: In Dutch (NL) only!
+            location = lxmlNode.xpath("//org:locatie/text()", namespaces=namespaceMap)
+            if location: locatie = '\n<locatie>%s</locatie>' % escapeXml(location[0])
+        
+            knaw_long = '''<knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/"><metadata>%s%s<genre>organisation</genre>%s%s%s</metadata></knaw_long>''' % (
+                title, title_en, locatie, abstract, abstract_en)
+        # ACTIVITEIT:
+        elif lxmlNode.xpath("boolean(count(//act:activiteit))", namespaces=namespaceMap):
+            title = self._findAndBind(lxmlNode, '\n<titleInfo><title>%s</title></titleInfo>', '//act:title_nl/text()')
+            title_en = self._findAndBind(lxmlNode, '\n<titleInfo xml:lang="en"><title>%s</title></titleInfo>',
+                                         '//act:title_en/text()')
+        
+            # Samenvatting:
+            taak = lxmlNode.xpath("//act:summary_nl/text()", namespaces=namespaceMap)
+            if taak: abstract = '\n<abstract>%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
+            taak = lxmlNode.xpath("//act:summary_en/text()", namespaces=namespaceMap)
+            if taak: abstract_en = '\n<abstract xml:lang="en">%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
+        
+            # Penvoerder:
+            taak = lxmlNode.xpath("//act:penvoerder/act:naam[@xml:lang='nl']/text()", namespaces=namespaceMap)
+            if taak: penvoerder = '\n<penvoerder xml:lang="nl">%s</penvoerder>' % escapeXml(taak[0])
+            taak = lxmlNode.xpath("//act:penvoerder/act:naam[@xml:lang='en']/text()", namespaces=namespaceMap)
+            if taak: penvoerder_en = '\n<penvoerder xml:lang="en">%s</penvoerder>' % escapeXml(taak[0])
+        
+            # Status onderzoek (C/D):
+            taak = lxmlNode.xpath("//act:status/text()", namespaces=namespaceMap)
+            if taak: status = '\n<status>%s</status>' % escapeXml(taak[0])
+        
+            knaw_long = '''<knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/"><metadata>%s%s<genre>research</genre>%s%s%s%s%s</metadata></knaw_long>''' % (
+                title, title_en, penvoerder, penvoerder_en, abstract, abstract_en, status)
+        # PERSOON:
+        elif lxmlNode.xpath("boolean(count(//prs:persoon))", namespaces=namespaceMap):
+            # TODO: Moeten de expertise keywords wel in de abstract verschijnen?
+            fullName = lxmlNode.xpath("//prs:fullName/text()", namespaces=namespaceMap)
+            if not fullName:
+                fullName.append('n.a.')
+            else:
+                fullName[0] = escapeXml(fullName[0])
+            title = ('\n<titleInfo><title>%s</title></titleInfo>' % fullName[0])
+            title_en = ('\n<titleInfo xml:lang="en"><title>%s</title></titleInfo>' % fullName[0])
+        
+            taak = lxmlNode.xpath("//prs:expertise_nl/text()", namespaces=namespaceMap)
+            if taak: abstract = '\n<abstract>%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
+            taak = lxmlNode.xpath("//prs:expertise_en/text()", namespaces=namespaceMap)
+            if taak: abstract_en = '\n<abstract xml:lang="en">%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
+        
+            # Copy ALL nameIdentifiers + OLD <dai> tag ########
+            str_name = '\n<name><type>personal</type><name>' + fullName[0] + '</name>'
+            # Kijk of er een 'oude' dai-only tag aanwezig is:
+            dai = self._findAndBind(lxmlNode, '\n<dai>info:eu-repo/dai/nl/%s</dai>', '//prs:persoon/prs:dai/text()')
+            if dai: str_name += dai
+        
+            nids = lxmlNode.xpath("//prs:persoon/prs:nameIdentifier", namespaces=namespaceMap)
+        
+            for nid in nids:  # serialize complete tag and remove default namespace...
+                nid_type = nid.xpath('self::prs:nameIdentifier/@type', namespaces=namespaceMap)
+                nid_val = nid.xpath('self::prs:nameIdentifier/text()', namespaces=namespaceMap)
+                if len(nid_type) > 0 and len(nid_val) > 0:
+                    str_name += '''<nameIdentifier type="%s">%s</nameIdentifier>''' % (nid_type[0], nid_val[0])
+            str_name += '</name>'
+            # Einde nameIdentifier ########
+        
+            knaw_long = '''<knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/"><metadata>%s%s%s<genre>person</genre>%s%s</metadata></knaw_long>''' % (
+                title, title_en, str_name, abstract, abstract_en)
+        
+        # We'll return a Lxml node here:
+        parser = etree.XMLParser(remove_blank_text=True)
+        if knaw_long is not None:
+            try:
+                return parse(StringIO(knaw_long), parser)
+            except:
+                print 'Error while parsing', knaw_long
+                raise
+        return knaw_long
+
+    def _findAndBind(self, node, template, *xpaths):
+        items = []
+        for p in xpaths:
+            items += node.xpath(p, namespaces=namespaceMap)
+        return '\n'.join(template % escapeXml(item) for item in items)
+
+    
+    def smart_truncate(self, content, suffix=''):
+        if len(content) <= self._truncate_chars:
+            return content
+        else:
+            return ' '.join(content[:self._truncate_chars+1].split(' ')[0:-1]) + suffix
+

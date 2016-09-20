@@ -47,7 +47,7 @@ class MetadataFormat():
 
         if len(lxmlNode.xpath('//didl:DIDL[1]', namespaces=MetadataFormat.NAMESPACEMAP)) > 0: # Check for DIDL container, Max. 1 according to EduStandaard.
             
-            if int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) == 1: # Check for MODS container.
+            if int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) >= 1: # Check for MODS container.
                 # Found MODS: Check op aanwezigheid rdf namespace, to differentiate between known versions:
                 if lxmlNode.xpath("boolean(count(//rdf:*))", namespaces=MetadataFormat.NAMESPACEMAP):
                     md_format = MetadataFormat.MD_FORMAT[3] # DIDL_MODS30
@@ -56,7 +56,7 @@ class MetadataFormat():
             elif int(lxmlNode.xpath("count(//oai_dc:dc)", namespaces=MetadataFormat.NAMESPACEMAP)) == 1: # Check for OAI_DC container.
                 md_format = MetadataFormat.MD_FORMAT[1] # DIDL_DC
             
-        elif int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) == 1: # Full MODS (MODS only)
+        elif int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) >= 1: # Full MODS (MODS only)
             md_format = MetadataFormat.MD_FORMAT[4] # MODS 3.?
         elif lxmlNode.xpath("boolean(count(//oai_dc:dc))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
             md_format = MetadataFormat.MD_FORMAT[0] # OAI_DC
