@@ -2,6 +2,7 @@
 *.py~
 *.prefs
 *.settings
+*.temp
 .DS_Store
 .project
 /.pydevproject
