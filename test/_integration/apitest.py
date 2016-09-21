@@ -26,10 +26,12 @@
 
 from seecr.test import IntegrationTestCase
 from seecr.test.utils import getRequest, sleepWheel, htmlXPath
-from meresco.xml import xpathFirst, xpath
+from meresco.xml import xpathFirst, xpath, namespaces
 from lxml import etree
 
 # TODO: create UnitTestCase for o.a. writeDelete / unDelete
+
+testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/OAI/2.0/branding/'})
 
 class ApiTest(IntegrationTestCase):
 
@@ -42,7 +44,6 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(**{"query": 'untokenized.dc:identifier exact "http://meresco.com?record=1"'})        
         # print "DC:Identifier:", etree.tostring(response)
         self.assertEqual('meresco:record:1', xpathFirst(response, '//srw:recordIdentifier/text()'))
-
         response = self.doSruQuery(**{"query": 'untokenized.dc:date exact "2016"'})
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
 
@@ -67,18 +68,20 @@ class ApiTest(IntegrationTestCase):
 
     def testOai(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
-        # print "OAI body:", etree.tostring(body)
+        # print "OAI body:", etree.tostring(body) #
         records = xpath(body, '//oai:record/oai:metadata')
         self.assertEqual(6, len(records))
 
     def testOaiPovenance(self):
-        header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="metadata"))
+        header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
         # print "OAI body:", etree.tostring(body)
-        # self.assertEqual('oai_dc', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
+        self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
     def testOaiIdentify(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="Identify"))
+        # print "OAI body:", etree.tostring(body)
         self.assertEqual('NARCIS OAI-pmh', xpathFirst(body, '//oai:Identify/oai:repositoryName/text()'))
+        self.assertEqual('Narcis - The gateway to scholarly information in The Netherlands', testNamespaces.xpathFirst(body, '//oai:Identify/oai:description/oaibrand:branding/oaibrand:collectionIcon/oaibrand:title/text()'))
 
     def testOaiListSets(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))

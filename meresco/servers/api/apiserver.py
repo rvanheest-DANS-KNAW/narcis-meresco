@@ -55,21 +55,29 @@ from meresco.components.drilldownqueries import DrilldownQueries
 from storage import StorageComponent
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
+# from meresco.dans.oaiprovenance import OaiProvenance
+from meresco.xml import namespaces
 
 from storage.storageadapter import StorageAdapter
 
 from meresco.servers.index.indexserver import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
 from meresco.servers.gateway.gatewayserver import DEFAULT_PARTNAME, NORMALISED_DOC_NAME
 
-NAMESPACEMAP = {
-    'dc'            : 'http://purl.org/dc/elements/1.1/',
-    'oai_dc'        : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-    'mods'          : 'http://www.loc.gov/mods/v3',
-    'didl'          : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
-    'rdf'           : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-    'ore'           : 'http://www.openarchives.org/ore/terms/',
-    'norm'          : 'http://dans.knaw.nl/narcis/normalized',
-}
+
+NAMESPACEMAP = namespaces.copyUpdate({
+    'prs'   : 'http://www.onderzoekinformatie.nl/nod/prs',
+    'ond'   : 'http://www.onderzoekinformatie.nl/nod/act',
+    'org'   : 'http://www.onderzoekinformatie.nl/nod/org',
+    'long'  : 'http://www.knaw.nl/narcis/1.0/long/',
+    'short' : 'http://www.knaw.nl/narcis/1.0/short/',
+    'oai'   : 'http://www.openarchives.org/OAI/2.0/',
+    'meta'  : 'http://meresco.org/namespace/harvester/meta',
+    'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+    'dc'    : 'http://purl.org/dc/elements/1.1/',
+    'mods'  :'http://www.loc.gov/mods/v3',
+    'didl'  : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+    'norm'  : 'http://dans.knaw.nl/narcis/normalized',
+})
 
 
 def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
@@ -272,16 +280,21 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                         (StorageAdapter(),
                                             (storage,)
                                         ),
-                                        (OaiBranding(url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", link="http://oai.narcis.nl", title="Narcis - The gateway to scholarly information in The Netherlands"),),
-                                        # (OaiProvenance(
-                                        #     nsMap=NAMESPACEMAP,
-                                        #     baseURL='http://dds.nl', 
-                                        #     harvestDate='2016-02-02', 
-                                        #     metadataNamespace='urn:didl', 
-                                        #     identifier='unique', 
-                                        #     datestamp='2016-01-01',),
-                                        # ),
-                                        # (storage,)
+                                        (OaiBranding(
+                                            url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", 
+                                            link="http://oai.narcis.nl", 
+                                            title="Narcis - The gateway to scholarly information in The Netherlands"),
+                                        ),
+                                        (OaiProvenance(
+                                            nsMap=NAMESPACEMAP,
+                                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 
+                                            harvestDate=('meta', '//meta:record/meta:harvestDate/text()'),
+                                            metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
+                                            identifier=('header','//oai:identifier/text()'),
+                                            datestamp=('header', '//oai:datestamp/text()')
+                                            ),
+                                            (storage,)
+                                        )
                                     )
                                 )
                             ),
