@@ -17,7 +17,7 @@
 &lt;dc:type xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Example&lt;/dc:type&gt;
 &lt;dc:subject xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Programming&lt;/dc:subject&gt;
 &lt;dc:language xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;en&lt;/dc:language&gt;
-&lt;dc:rights xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Open Source&lt;/dc:rights&gt;
+&lt;dc:rights xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;restrictedAccess&lt;/dc:rights&gt;
 &lt;/oai_dc:dc&gt;noot&lt;/metadata&gt;
                 &lt;/record&gt;</part>
                 <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;

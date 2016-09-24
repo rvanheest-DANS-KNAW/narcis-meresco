@@ -13,15 +13,34 @@ class MetadataFormat():
     """Determines EduStandaard metadata format from LxmlNode"""
     
     # Current EduStandaard formats in use, chronologically:
-    MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36']
+    # TODO: refactor to a dict, instead of a list:
+    # So: MetadataFormat.format['org'], instead of MetadataFormat.MD_FORMAT[5]
+    format = {
+        'oai_dc':'',
+        'didl_dc':'',
+        'didl_mods231':'',
+        'didl_mods30':'',
+        'didl_mods36':'',
+        'org':'',
+        'proj':'',
+        'prs':'',
+    }
+
+
+
+
+    MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs']
     
     NAMESPACEMAP = {
-        'dc'            : 'http://purl.org/dc/elements/1.1/',
-        'oai_dc'        : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-        'mods'          : 'http://www.loc.gov/mods/v3',
-        'didl'          : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
-        'rdf'           : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-        'ore'           : 'http://www.openarchives.org/ore/terms/',
+        'dc'        : 'http://purl.org/dc/elements/1.1/',
+        'oai_dc'    : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
+        'mods'      : 'http://www.loc.gov/mods/v3',
+        'didl'      : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+        'rdf'       : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+        'ore'       : 'http://www.openarchives.org/ore/terms/',
+        'prs'       : 'http://www.onderzoekinformatie.nl/nod/prs',
+        'proj'      : 'http://www.onderzoekinformatie.nl/nod/act',
+        'org'       : 'http://www.onderzoekinformatie.nl/nod/org',
     }
     
     NAMESPACEMAPPER = {
@@ -30,6 +49,9 @@ class MetadataFormat():
         MD_FORMAT[2] : NAMESPACEMAP.get('mods'),
         MD_FORMAT[3] : NAMESPACEMAP.get('mods'),
         MD_FORMAT[4] : NAMESPACEMAP.get('mods'),
+        MD_FORMAT[5] : NAMESPACEMAP.get('org'),
+        MD_FORMAT[6] : NAMESPACEMAP.get('proj'),
+        MD_FORMAT[7] : NAMESPACEMAP.get('prs'),
     }
 
 
@@ -60,8 +82,12 @@ class MetadataFormat():
             md_format = MetadataFormat.MD_FORMAT[4] # MODS 3.?
         elif lxmlNode.xpath("boolean(count(//oai_dc:dc))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
             md_format = MetadataFormat.MD_FORMAT[0] # OAI_DC
-        # elif lxmlNode.xpath("boolean(count(//rdf:RDF/rdf:Description/ore:describes))", namespaces=MetadataFormat.NAMESPACEMAP):#No DIDL, no DC, check for ORE:
-        #     md_format = MetadataFormat.MD_FORMAT[5]
+        elif lxmlNode.xpath("boolean(count(//org:organisatie))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
+            md_format = MetadataFormat.MD_FORMAT[5] # NOD Organisatie
+        elif lxmlNode.xpath("boolean(count(//proj:activiteit))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
+            md_format = MetadataFormat.MD_FORMAT[6] # NOD Project
+        elif lxmlNode.xpath("boolean(count(//prs:persoon))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
+            md_format = MetadataFormat.MD_FORMAT[7] # NOD Persoon
 
         if md_format == None:
             print "No known EduStandaard format was found by GATEWAY in the metadata! This record cannot be processed."

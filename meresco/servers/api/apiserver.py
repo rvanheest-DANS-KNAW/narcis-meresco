@@ -61,8 +61,9 @@ from meresco.xml import namespaces
 from storage.storageadapter import StorageAdapter
 
 from meresco.servers.index.indexserver import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
-from meresco.servers.gateway.gatewayserver import DEFAULT_PARTNAME, NORMALISED_DOC_NAME
+from meresco.servers.gateway.gatewayserver import NORMALISED_DOC_NAME
 
+DEFAULT_PARTNAME = 'oai_dc'
 
 NAMESPACEMAP = namespaces.copyUpdate({
     'prs'   : 'http://www.onderzoekinformatie.nl/nod/prs',
@@ -70,10 +71,6 @@ NAMESPACEMAP = namespaces.copyUpdate({
     'org'   : 'http://www.onderzoekinformatie.nl/nod/org',
     'long'  : 'http://www.knaw.nl/narcis/1.0/long/',
     'short' : 'http://www.knaw.nl/narcis/1.0/short/',
-    'oai'   : 'http://www.openarchives.org/OAI/2.0/',
-    'meta'  : 'http://meresco.org/namespace/harvester/meta',
-    'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-    'dc'    : 'http://purl.org/dc/elements/1.1/',
     'mods'  :'http://www.loc.gov/mods/v3',
     'didl'  : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
     'norm'  : 'http://dans.knaw.nl/narcis/normalized',
@@ -216,7 +213,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
     storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME, NORMALISED_DOC_NAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None) #DEFAULT_PARTNAME
+    oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None)
     # def updateMetadataFormat(self, prefix, schema, namespace):
     # self._prefixes[prefix] = (schema, namespace)
 
@@ -303,7 +300,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (SruParser(
                                             host='example.org',
                                             port=80,
-                                            defaultRecordSchema=DEFAULT_PARTNAME, #DEFAULT_PARTNAME, #NORMALISED_DOC_NAME
+                                            defaultRecordSchema=DEFAULT_PARTNAME,
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(

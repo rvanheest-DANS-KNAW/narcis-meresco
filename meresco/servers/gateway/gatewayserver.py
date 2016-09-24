@@ -56,9 +56,9 @@ from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.metapartconverter import AddProvenanceToMetaPart
 from meresco.dans.addmetadataformat import AddMetadataFormat
 from meresco.dans.modsconverter import ModsConverter
+from meresco.dans.longconverter import NormaliseOaiRecord
 from meresco.dans.writedeleted import WriteTombstone, ResurrectTombstone
 
-DEFAULT_PARTNAME = 'oai_dc'
 NORMALISED_DOC_NAME = 'normdoc'
 
 def main(reactor, port, statePath, **ignored):
@@ -70,7 +70,7 @@ def main(reactor, port, statePath, **ignored):
     ))
 
     # WST:
-    # strategie = HashDistributeStrategy() # filename (=partname) is also hashed...
+    # strategie = HashDistributeStrategy() # filename (=partname) is also hashed: difficult to read by human eye...
     strategie = Md5HashDistributeStrategy()
 
     storeComponent = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[NORMALISED_DOC_NAME])
@@ -118,49 +118,44 @@ def main(reactor, port, statePath, **ignored):
                                 ),
                             ),
                             (PathFilter('/update'),
-                                (SruRecordUpdate(
-                                        sendRecordData=False,
-                                        logErrors=True,
-                                    ),
-                                    # (RewritePartname(DEFAULT_PARTNAME),
-                                        (FilterMessages(allowed=['delete']),
+                                (SruRecordUpdate(sendRecordData=False, logErrors=True,),
+                                    (FilterMessages(allowed=['delete']),
+                                        (storeComponent,),
+                                        (oaiJazz,),
+                                        # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
+                                        (WriteTombstone(),
                                             (storeComponent,),
-                                            (oaiJazz,),
-                                            # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
-                                            (WriteTombstone(),
-                                                (storeComponent,),
+                                        )
+                                    ),
+                                    (FilterMessages(allowed=['add']),
+
+                                         # Does not work? See comments in component...
+                                        # (AddMetadataFormat(fromKwarg="lxmlNode", name='md_format'),
+                                        #     (LogComponent("AddMetadataFormat"),),
+                                        # ),
+
+                                        (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
+                                            (AddProvenanceToMetaPart(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to metaPart.
+                                                # (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False), # Store original record.
+                                                #     (storeComponent,),
+                                                # ),
+                                                (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts.
+                                                    (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
+                                                        (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
+                                                            (storeComponent,), # Store converted/renamed part.
+                                                        )
+                                                    )
+                                                ),
+
+                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[NORMALISED_DOC_NAME]),
+                                                    (oaiJazz,),
+                                                ),
                                             )
                                         ),
-                                        (FilterMessages(allowed=['add']),
-
-                                             # Does not work? See comments in component...
-                                            # (AddMetadataFormat(fromKwarg="lxmlNode", name='md_format'),
-                                            #     (LogComponent("AddMetadataFormat"),),
-                                            # ),
-
-                                            (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
-                                                (AddProvenanceToMetaPart(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to metaPart.
-                                                    # (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False), # Store original record.
-                                                    #     (storeComponent,),
-                                                    # ),
-                                                    (ModsConverter(fromKwarg='lxmlNode'), # Convert original to: mods & original
-                                                        (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                                            (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
-                                                                (storeComponent,), # Store converted/renamed part.
-                                                            ),
-                                                        )
-                                                    ),
-
-                                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[NORMALISED_DOC_NAME]),
-                                                        (oaiJazz,),
-                                                    ),
-                                                )
-                                            ),
-                                            (ResurrectTombstone(),
-                                                (storeComponent,),
-                                            )                                            
-                                        )
-                                    # )
+                                        (ResurrectTombstone(),
+                                            (storeComponent,),
+                                        )                                            
+                                    )
                                 )
                             )
                         )

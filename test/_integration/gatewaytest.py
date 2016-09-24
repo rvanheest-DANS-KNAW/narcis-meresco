@@ -28,7 +28,7 @@ from seecr.test import IntegrationTestCase
 from seecr.test.utils import getRequest
 from meresco.xml import xpath
 from lxml import etree
-from meresco.servers.gateway.gatewayserver import DEFAULT_PARTNAME, NORMALISED_DOC_NAME
+from meresco.servers.gateway.gatewayserver import NORMALISED_DOC_NAME
 
 class GatewayTest(IntegrationTestCase):
 

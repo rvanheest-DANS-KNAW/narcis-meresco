@@ -62,7 +62,9 @@ from meresco.lucene.fieldregistry import FieldRegistry
 from .dctofieldslist import DcToFieldsList
 from .dcfields import DcFields
 
-from meresco.servers.gateway.gatewayserver import DEFAULT_PARTNAME, NORMALISED_DOC_NAME
+from meresco.servers.gateway.gatewayserver import NORMALISED_DOC_NAME
+
+DEFAULT_PARTNAME = 'oai_dc'
 
 NAMESPACEMAP = {
     'dc'            : 'http://purl.org/dc/elements/1.1/',

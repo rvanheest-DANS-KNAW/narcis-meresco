@@ -15,22 +15,24 @@ from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
 from meresco.components import lxmltostring, Converter
 from meresco.dans.metadataformats import MetadataFormat
+from meresco.xml import namespaces
 
 import time
 
 HVSTR_NS = '{http://meresco.org/namespace/harvester/meta}'
 DOCUMENT_NS = '{http://meresco.org/namespace/harvester/document}'
 
-namespaceMap = {
-    'document'  :  "http://meresco.org/namespace/harvester/document",
-    'oai': "http://www.openarchives.org/OAI/2.0/",
-    'oai_dc' : "http://www.openarchives.org/OAI/2.0/oai_dc/",
-    'dc' : "http://purl.org/dc/elements/1.1/",
-    'mods' : "http://www.loc.gov/mods/v3",
-    'prs': 'http://www.onderzoekinformatie.nl/nod/prs',
-    'act': 'http://www.onderzoekinformatie.nl/nod/act',
-    'org': 'http://www.onderzoekinformatie.nl/nod/org',
-}
+
+namespaceMap = namespaces.copyUpdate({
+    'prs'   : 'http://www.onderzoekinformatie.nl/nod/prs',
+    'ond'   : 'http://www.onderzoekinformatie.nl/nod/act',
+    'org'   : 'http://www.onderzoekinformatie.nl/nod/org',
+    'long'  : 'http://www.knaw.nl/narcis/1.0/long/',
+    'short' : 'http://www.knaw.nl/narcis/1.0/short/',
+    'mods'  : 'http://www.loc.gov/mods/v3',
+    'didl'  : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+    'norm'  : 'http://dans.knaw.nl/narcis/normalized',
+})
 
 
 MODS_VERSION = '3.6'
@@ -101,7 +103,6 @@ class ModsConverter(Converter):
         if metadataFormat is not None:
 
             e_modsroot = etree.SubElement(e_norm_root, MODS + "mods", nsmap=NSMAP)
-            # e_modsroot = etree.Element(MODS + "mods", nsmap=NSMAP)
             e_modsroot.set("version", MODS_VERSION)
             e_modsroot.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-"+ MODS_VERSION.replace(".", "-") +".xsd")
             # e_modsroot.set("xmlns:xsi" , "http://www.w3.org/2001/XMLSchema-instance")
@@ -180,25 +181,25 @@ class ModsConverter(Converter):
             knaw_long = '''<knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/"><metadata>%s%s<genre>organisation</genre>%s%s%s</metadata></knaw_long>''' % (
                 title, title_en, locatie, abstract, abstract_en)
         # ACTIVITEIT:
-        elif lxmlNode.xpath("boolean(count(//act:activiteit))", namespaces=namespaceMap):
-            title = self._findAndBind(lxmlNode, '\n<titleInfo><title>%s</title></titleInfo>', '//act:title_nl/text()')
+        elif lxmlNode.xpath("boolean(count(//ond:activiteit))", namespaces=namespaceMap):
+            title = self._findAndBind(lxmlNode, '\n<titleInfo><title>%s</title></titleInfo>', '//ond:title_nl/text()')
             title_en = self._findAndBind(lxmlNode, '\n<titleInfo xml:lang="en"><title>%s</title></titleInfo>',
-                                         '//act:title_en/text()')
+                                         '//ond:title_en/text()')
         
             # Samenvatting:
-            taak = lxmlNode.xpath("//act:summary_nl/text()", namespaces=namespaceMap)
+            taak = lxmlNode.xpath("//ond:summary_nl/text()", namespaces=namespaceMap)
             if taak: abstract = '\n<abstract>%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
-            taak = lxmlNode.xpath("//act:summary_en/text()", namespaces=namespaceMap)
+            taak = lxmlNode.xpath("//ond:summary_en/text()", namespaces=namespaceMap)
             if taak: abstract_en = '\n<abstract xml:lang="en">%s</abstract>' % escapeXml(taak[0][:self._truncate_chars])
         
             # Penvoerder:
-            taak = lxmlNode.xpath("//act:penvoerder/act:naam[@xml:lang='nl']/text()", namespaces=namespaceMap)
+            taak = lxmlNode.xpath("//ond:penvoerder/ond:naam[@xml:lang='nl']/text()", namespaces=namespaceMap)
             if taak: penvoerder = '\n<penvoerder xml:lang="nl">%s</penvoerder>' % escapeXml(taak[0])
-            taak = lxmlNode.xpath("//act:penvoerder/act:naam[@xml:lang='en']/text()", namespaces=namespaceMap)
+            taak = lxmlNode.xpath("//ond:penvoerder/ond:naam[@xml:lang='en']/text()", namespaces=namespaceMap)
             if taak: penvoerder_en = '\n<penvoerder xml:lang="en">%s</penvoerder>' % escapeXml(taak[0])
         
             # Status onderzoek (C/D):
-            taak = lxmlNode.xpath("//act:status/text()", namespaces=namespaceMap)
+            taak = lxmlNode.xpath("//ond:status/text()", namespaces=namespaceMap)
             if taak: status = '\n<status>%s</status>' % escapeXml(taak[0])
         
             knaw_long = '''<knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/"><metadata>%s%s<genre>research</genre>%s%s%s%s%s</metadata></knaw_long>''' % (
