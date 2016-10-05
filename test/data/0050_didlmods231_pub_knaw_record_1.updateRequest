@@ -43,7 +43,7 @@
                     &lt;/didl:Descriptor&gt;
                     &lt;didl:Component&gt;
                         &lt;didl:Resource mimeType=&quot;application/xml&quot;&gt;
-                            &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; version=&quot;3.0&quot; xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-0.xsd&quot;&gt;
+                            &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; version=&quot;3.6&quot; xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-6.xsd&quot;&gt;
                                 &lt;mods:originInfo&gt;
                                     &lt;mods:dateIssued encoding=&quot;iso8601&quot;&gt;opgraafdatum 3000 jaar voor christus&lt;/mods:dateIssued&gt;
                                     &lt;mods:place&gt;
@@ -73,6 +73,13 @@
                                     &lt;mods:role&gt;
                                         &lt;mods:roleTerm type=&quot;code&quot; authority=&quot;marcrelator&quot;&gt;aut&lt;/mods:roleTerm&gt;
                                     &lt;/mods:role&gt;
+                                    &lt;!--DAI--&gt;
+                                    &lt;mods:nameIdentifier type=&quot;dai-nl&quot; typeURI=&quot;info:eu-repo/dai/nl&quot;&gt;071792279&lt;/mods:nameIdentifier&gt;
+                                    &lt;!--ISNI--&gt;
+                                    &lt;mods:nameIdentifier type=&quot;isni&quot; typeURI=&quot;http://id.loc.gov/vocabulary/identifiers/isni&quot;&gt;http://isni.org/isni/0000 0000 8150 8690&lt;/mods:nameIdentifier&gt;
+                                    &lt;!--ORCID (FAKE)--&gt;
+                                    &lt;mods:nameIdentifier type=&quot;orcid&quot; typeURI=&quot;http://id.loc.gov/vocabulary/identifiers/orcid&quot;&gt;http://orcid.org/0000-0002-1825-0097&lt;/mods:nameIdentifier&gt;
+                                    
                                 &lt;/mods:name&gt;
                                 &lt;mods:name type=&quot;personal&quot; ID=&quot;n565-aut1&quot;&gt;
                                     &lt;mods:namePart type=&quot;given&quot;&gt;Lorum&lt;/mods:namePart&gt;
@@ -83,9 +90,10 @@
                                     &lt;/mods:role&gt;
                                 &lt;/mods:name&gt;
                                 &lt;mods:extension&gt;
-                                    &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot; xsi:schemaLocation=&quot;info:eu-repo/dai https://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;
-                                        &lt;dai:identifier IDref=&quot;n565-aut0&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;071792279600&lt;/dai:identifier&gt;
-                                        &lt;dai:identifier IDref=&quot;n565-aut2&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;071792279666&lt;/dai:identifier&gt;
+                                    &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot;
+                                        xsi:schemaLocation=&quot;info:eu-repo/dai https://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;
+                                        &lt;dai:identifier IDref=&quot;n565-aut0&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;071792279&lt;/dai:identifier&gt;
+                                        &lt;dai:identifier IDref=&quot;n565-aut2&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;07193555X&lt;/dai:identifier&gt;
                                     &lt;/dai:daiList&gt;
                                 &lt;/mods:extension&gt;
                                 &lt;mods:typeOfResource&gt;text&lt;/mods:typeOfResource&gt;

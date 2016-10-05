@@ -56,7 +56,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dc:date"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('2016', '2')], drilldown)
+        self.assertEqual([('2016', '2'), ('tweeduizendzestien', '1')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dc:subject"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -70,7 +70,7 @@ class ApiTest(IntegrationTestCase):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
         # print "OAI body:", etree.tostring(body) #
         records = xpath(body, '//oai:record/oai:metadata')
-        self.assertEqual(9, len(records))
+        self.assertEqual(10, len(records))
 
     def testOaiPovenance(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))

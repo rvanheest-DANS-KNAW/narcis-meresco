@@ -49,17 +49,17 @@ class AddProvenanceToMetaPart(Converter):
                 for recordkind in child.iterchildren():
                     if recordkind.tag == HVSTR_NS + 'harvestDate':
                         _bln_has_harvestdate = True
-                        print 'HarvestDate tag already available from meta part:' , recordkind.text , '. Skipping adding harvestDate...'
+                        # print 'HarvestDate tag already available from meta part:' , recordkind.text , '. Skipping adding harvestDate...'
                     if recordkind.tag == HVSTR_NS + 'metadataNamespace':
                         _bln_has_metadataNamespace = True
-                        print 'MetadataNamespace tag already available from meta part:' , recordkind.text , '. Skipping adding metadataNamespace...'                        
+                        # print 'MetadataNamespace tag already available from meta part:' , recordkind.text , '. Skipping adding metadataNamespace...'                        
                 if not _bln_has_harvestdate:
                     e_harvestdate = etree.SubElement(child, HVSTR_NS + 'harvestDate')
                     e_harvestdate.text = time.strftime(self._dateformat, time.gmtime())
-                    print 'Added harvestDate tag to meta part:', e_harvestdate.text
+                    # print 'Added harvestDate tag to meta part:', e_harvestdate.text
                 if not _bln_has_metadataNamespace:
                     e_metadataNamespace = etree.SubElement(child, HVSTR_NS + 'metadataNamespace')
                     e_metadataNamespace.text = MetadataFormat.getMetadataNamespace(metadataFormat)
-                    print 'Added metadataNamespace tag to meta part:', e_metadataNamespace.text
+                    # print 'Added metadataNamespace tag to meta part:', e_metadataNamespace.text
                 break
         return lxmlNode        

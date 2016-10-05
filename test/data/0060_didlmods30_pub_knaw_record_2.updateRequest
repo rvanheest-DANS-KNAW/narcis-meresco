@@ -34,50 +34,76 @@
                                 &lt;/nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Component&gt;
                                     &lt;nl_didl:Resource mimeType=&quot;application/xml&quot;&gt;
-                                        &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; version=&quot;3.4&quot; xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd&quot;&gt;
+                                        &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; version=&quot;3.6&quot; xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-6.xsd&quot;&gt;
+                                            
                                             &lt;mods:location&gt;
                                                 &lt;mods:url&gt;http://repository.cwi.nl/search/fullrecord.php?publnr=2271&lt;/mods:url&gt;
                                             &lt;/mods:location&gt;
-                                            
+
                                             &lt;mods:titleInfo xml:lang=&quot;en&quot;&gt;
                                                 &lt;mods:title&gt;Paths and flows---a historical survey&lt;/mods:title&gt;
                                             &lt;/mods:titleInfo&gt;
                                             &lt;mods:titleInfo&gt;
                                                 &lt;mods:title&gt;Paden en stromingen---a historical survey&lt;/mods:title&gt;
                                             &lt;/mods:titleInfo&gt;
-                                            
+
                                             &lt;mods:name type=&quot;personal&quot; ID=&quot;_2271_10&quot;&gt;
                                                 &lt;mods:displayForm&gt;Schrijver, A.&lt;/mods:displayForm&gt;
                                                 &lt;mods:namePart type=&quot;family&quot;&gt;Schrijver&lt;/mods:namePart&gt;
-                                                &lt;mods:namePart type=&quot;given&quot;&gt;A.&lt;/mods:namePart&gt;                                            
+                                                &lt;mods:namePart type=&quot;given&quot;&gt;A.&lt;/mods:namePart&gt;
                                                 &lt;mods:role&gt;
                                                     &lt;mods:roleTerm type=&quot;code&quot; authority=&quot;marcrelator&quot;&gt;aut&lt;/mods:roleTerm&gt;
                                                 &lt;/mods:role&gt;
                                             &lt;/mods:name&gt;
-                                            
+
                                             &lt;mods:name ID=&quot;FND_1&quot; type=&quot;corporate&quot;&gt;
                                                 &lt;mods:namePart&gt;European Commission CORDIS&lt;/mods:namePart&gt;
                                                 &lt;mods:role&gt;
                                                     &lt;mods:roleTerm authority=&quot;marcrelator&quot; type=&quot;code&quot;&gt;fnd&lt;/mods:roleTerm&gt;
                                                 &lt;/mods:role&gt;
                                             &lt;/mods:name&gt;
+
+                                            &lt;mods:extension&gt;
+                                                &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot;
+                                                    xsi:schemalocation=&quot;info:eu-repo/dai http://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;
+                                                    &lt;dai:identifier IDref=&quot;_2271_10&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;29806278&lt;/dai:identifier&gt;
+                                                &lt;/dai:daiList&gt;
+                                            &lt;/mods:extension&gt;
                                             
                                             &lt;mods:extension&gt;
-                                                &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot; xsi:schemalocation=&quot;info:eu-repo/dai http://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;&lt;dai:identifier IDref=&quot;_2271_10&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;29806278&lt;/dai:identifier&gt;&lt;/dai:daiList&gt;
+                                                &lt;wmp:rights xmlns:wmp=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus&quot;
+                                                    xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
+                                                    xsi:schemaLocation=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus rights.xsd&quot;&gt;
+                                                    &lt;dc:description&gt;Copyright (c) Aiki, T (Toyohiko)&lt;/dc:description&gt;
+                                                &lt;/wmp:rights&gt;
+                                                &lt;wmp:rights xmlns:wmp=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus&quot;
+                                                    xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
+                                                    xsi:schemaLocation=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus rights.xsd&quot;&gt;
+                                                    &lt;dc:description&gt;Copyright (c) Hilhorst, D&lt;/dc:description&gt;
+                                                &lt;/wmp:rights&gt;
+                                                &lt;wmp:rights xmlns:wmp=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus&quot;
+                                                    xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
+                                                    xsi:schemaLocation=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus rights.xsd&quot;&gt;
+                                                    &lt;dc:description&gt;Copyright (c) Mimura, M&lt;/dc:description&gt;
+                                                &lt;/wmp:rights&gt;
+                                                &lt;wmp:rights xmlns:wmp=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus&quot;
+                                                    xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
+                                                    xsi:schemaLocation=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus rights.xsd&quot;&gt;
+                                                    &lt;dc:description&gt;Copyright (c) Muntean, A (Adrian)&lt;/dc:description&gt;
+                                                &lt;/wmp:rights&gt;
                                             &lt;/mods:extension&gt;
                                             
                                             &lt;mods:extension&gt;
                                                 &lt;gal:grantAgreementList xmlns:gal=&quot;info:eu-repo/grantAgreement&quot;
                                                     xsi:schemaLocation=&quot;info:eu-repo/grantAgreement http://purl.org/REP/standards/gal-extension.xsd&quot;&gt;
                                                     &lt;gal:grantAgreement code=&quot;info:eu-repo/grantAgreement/EC/FP7/282797&quot;&gt;
-                                                        &lt;gal:funder IDref=&quot;FND_1&quot; /&gt;
+                                                        &lt;gal:funder IDref=&quot;FND_1&quot;/&gt;
                                                         &lt;gal:title&gt;EERA Design Tools for Offshore Wind Farm Cluster (EERA-DTOC)&lt;/gal:title&gt;
-                                                        &lt;gal:description&gt;The European Energy Research Alliance (EERA)
-                                                            together with some high-impact industry partners addresses
-                                                            the call proposing an integrated and validated design tool
-                                                            combining the state-of-the-art wake, yield and electrical
-                                                            models available in the consortium, as a plug-in architecture
-                                                            with possibility for third party models.&lt;/gal:description&gt;
+                                                        &lt;gal:description&gt;The European Energy Research Alliance (EERA) together with some
+                                                            high-impact industry partners addresses the call proposing an integrated and
+                                                            validated design tool combining the state-of-the-art wake, yield and electrical
+                                                            models available in the consortium, as a plug-in architecture with possibility
+                                                            for third party models.&lt;/gal:description&gt;
                                                     &lt;/gal:grantAgreement&gt;
                                                     &lt;gal:grantAgreement code=&quot;info:eu-repo/grantAgreement/EC/FP7/23456&quot;&gt;
                                                         &lt;gal:funder IDref=&quot;_2271_10&quot;/&gt;
@@ -85,21 +111,41 @@
                                                     &lt;gal:grantAgreement code=&quot;info:eu-repo/grantAgreement/EC/FP7/34567&quot;/&gt;
                                                 &lt;/gal:grantAgreementList&gt;
                                             &lt;/mods:extension&gt;
-                                            
+
                                             &lt;mods:language&gt;
                                                 &lt;mods:languageTerm type=&quot;code&quot; authority=&quot;rfc3066&quot;&gt;en&lt;/mods:languageTerm&gt;
                                             &lt;/mods:language&gt;
                                             &lt;mods:originInfo&gt;
                                                 &lt;mods:publisher&gt;cwi&lt;/mods:publisher&gt;
-                                                &lt;mods:dateIssued encoding=&quot;iso8601&quot;&gt;1993-01-01&lt;/mods:dateIssued&gt;                                            
+                                                &lt;mods:dateIssued encoding=&quot;iso8601&quot;&gt;1993-1-01&lt;/mods:dateIssued&gt;
                                             &lt;/mods:originInfo&gt;
+                                            
+                                            &lt;mods:physicalDescription&gt;
+                                                &lt;mods:extent&gt;144&lt;/mods:extent&gt;
+                                            &lt;/mods:physicalDescription&gt;
+
+                                            &lt;mods:subject&gt;
+                                                &lt;mods:topic&gt;freight&lt;/mods:topic&gt;
+                                                &lt;mods:topic&gt;intermodal&lt;/mods:topic&gt;
+                                                &lt;mods:topic&gt;rail&lt;/mods:topic&gt;
+                                                &lt;mods:topic&gt;terminals&lt;/mods:topic&gt;
+                                                &lt;mods:topic&gt;shunting&lt;/mods:topic&gt;
+                                                &lt;mods:topic&gt;hub-and-spoke&lt;/mods:topic&gt;
+                                            &lt;/mods:subject&gt;
+
+                                            &lt;mods:subject xml:lang=&quot;en&quot;&gt;
+                                                &lt;mods:topic&gt;In english please.&lt;/mods:topic&gt;
+                                            &lt;/mods:subject&gt;
+
                                             &lt;mods:typeOfResource&gt;text&lt;/mods:typeOfResource&gt;
-                                            &lt;mods:genre&gt;info:eu-repo/semantics/article&lt;/mods:genre&gt;
+                                            &lt;mods:genre&gt;info:eu-repo/semantics/book&lt;/mods:genre&gt;
                                             &lt;mods:classification authority=&quot;msc&quot;&gt;05C38&lt;/mods:classification&gt;
                                             &lt;mods:classification authority=&quot;msc&quot;&gt;05C90&lt;/mods:classification&gt;
-                                            &lt;mods:classification authority=&quot;msc&quot;&gt;90B10&lt;/mods:classification&gt;                                        
+                                            &lt;mods:classification authority=&quot;msc&quot;&gt;90B10&lt;/mods:classification&gt;
                                             &lt;mods:classification authority=&quot;msc&quot;&gt;90C35&lt;/mods:classification&gt;
                                             &lt;mods:identifier type=&quot;uri&quot;&gt;URN:ISSN:0010-440MODS&lt;/mods:identifier&gt;
+                                            &lt;mods:identifier type=&quot;uri&quot;&gt;urn:isbn:90022333&lt;/mods:identifier&gt;
+                                            
                                         &lt;/mods:mods&gt;
                                     &lt;/nl_didl:Resource&gt;
                                 &lt;/nl_didl:Component&gt;

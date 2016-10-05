@@ -55,6 +55,8 @@ from meresco.components.drilldownqueries import DrilldownQueries
 from storage import StorageComponent
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
+from meresco.dans.shortconverter import ShortConverter
+from meresco.dans.oai_dcconverter import DcConverter
 # from meresco.dans.oaiprovenance import OaiProvenance
 from meresco.xml import namespaces
 
@@ -106,13 +108,14 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                     #     (oaiJazz,),
                                     # )
                                 ),
-                                (XmlXPath(['/oai:record/oai:metadata/norm:normalized/mods:mods'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
-                                    (RewritePartname("mods"), # Hernoemt partname van 'record' naar "mods".
+                                (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                    (RewritePartname("long"), # Hernoemt partname van 'record' naar "long".
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                            (storageComponent,),                                 
+                                            (storageComponent,),
                                         ),
-                                        (XsltCrosswalk([join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'MODS_SMODS_XSLT1-0.xsl')], fromKwarg="lxmlNode"),
-                                            (RewritePartname("smods"),
+                                        # (XsltCrosswalk([join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'LONG_SHORT_XSLT1-0.xsl')], fromKwarg="lxmlNode"),
+                                        (ShortConverter(fromKwarg='lxmlNode'),
+                                            (RewritePartname("short"),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                     # (LogComponent("XSLT-SMODS"),),
                                                     (storageComponent,)
@@ -120,7 +123,8 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                             )
                                         ),
                                         # Hernoemt partname van 'record' naar "mods". #metadataPrefixes=None, setSpecs=None, name=None
-                                        (XsltCrosswalk([join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'MODS3-5_DC_XSLT1-0.xsl')], fromKwarg="lxmlNode"),
+                                        # (XsltCrosswalk([join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'MODS3-5_DC_XSLT1-0.xsl')], fromKwarg="lxmlNode"),
+                                        (DcConverter(fromKwarg='lxmlNode'),
                                             (RewritePartname("oai_dc"),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                     # (LogComponent("XSLT-OAI_DC"),),
