@@ -35,8 +35,8 @@ class DcToFieldsList(Observable):
             fieldname = tagToCurie(child.tag)
             fieldslist.append((fieldname, child.text))
             if fieldname == 'dc:identifier' and child.text=='http://meresco.com?record=1':
-            	fieldslist.append(('genre', 'boek'))
+            	fieldslist.append(('dc:genre', 'boek'))
             elif fieldname == 'dc:identifier':
-            	fieldslist.append(('genre', 'boek'))
+            	fieldslist.append(('dc:genre', 'boek'))
 
         yield self.all.add(fieldslist=fieldslist, **kwargs)

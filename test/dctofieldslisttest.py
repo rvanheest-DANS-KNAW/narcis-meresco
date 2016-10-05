@@ -25,7 +25,7 @@
 ## end license ##
 
 from seecr.test import SeecrTestCase, CallTrace
-from meresco.examples.index.dctofieldslist import DcToFieldsList
+from meresco.servers.index.dctofieldslist import DcToFieldsList
 from lxml.etree import XML, ElementTree
 from weightless.core import consume
 
@@ -41,6 +41,7 @@ class DcToFieldsListTest(SeecrTestCase):
         self.assertEqual({
                 'fieldslist': [
                     ('dc:identifier', 'http://meresco.com?record=1'),
+                    ('dc:genre', 'boek'),
                     ('dc:description', 'This is an example program about Search with Meresco'),
                     ('dc:title', 'Example Program 1'),
                     ('dc:creator', 'Seecr'),
