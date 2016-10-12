@@ -35,19 +35,30 @@ testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/
 
 class ApiTest(IntegrationTestCase):
 
-    def testQuery(self):
+    def testSruQuery(self):
         response = self.doSruQuery(query='*')
-        self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
-        self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
+        # print "doSruQuery(query='*'):", etree.tostring(response)
+        self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual(set(['Example Program 1',
+            'Example Program 2', 
+            'Paden en stromingen---a historical survey',
+            'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)',
+            'Conditiebepaling PVC',
+            'Appositie en de interne struktuur van de NP',
+            'Wetenschapswinkel',
+            'Late-type Giants in the Inner Galaxy',
+            'H.J. Bennis',
+            'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate']
+            ), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title[1]/text()')))
 
-    def testQueryWithUntokenized(self):
+    def testSruQueryWithUntokenized(self):
         response = self.doSruQuery(**{"query": 'untokenized.dc:identifier exact "http://meresco.com?record=1"'})        
         # print "DC:Identifier:", etree.tostring(response)
         self.assertEqual('meresco:record:1', xpathFirst(response, '//srw:recordIdentifier/text()'))
         response = self.doSruQuery(**{"query": 'untokenized.dc:date exact "2016"'})
         self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
 
-    def testQueryWithDrilldown(self):
+    def testSruQueryWithDrilldown(self):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dc:date,dc:subject,genre"})
         response = self.doSruQuery(**{"query": 'dc:title = "Example Program"', "x-term-drilldown": "dc:date,dc:subject"})
         # print "DD body:", etree.tostring(response)
@@ -86,10 +97,10 @@ class ApiTest(IntegrationTestCase):
     def testOaiListSets(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))
         # print "ListSets", etree.tostring(body)
-        self.assertEqual(set(['publications']), set(xpath(body, '//oai:setSpec/text()')))
+        self.assertEqual(set(['publication' ]), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
-        header, body = getRequest(self.apiPort, '/rss', dict(query="dc:title=program"))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="dc:title=en"))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(2, len(items))

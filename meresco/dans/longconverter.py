@@ -11,10 +11,10 @@ from lxml.etree import parse, _ElementTree, tostring
 from StringIO import StringIO
 from xml.sax.saxutils import escape as escapeXml
 
-from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
-from meresco.components import lxmltostring, Converter
+from meresco.components import lxmltostring
 from meresco.dans.metadataformats import MetadataFormat
+from meresco.dans.uiaconverter import UiaConverter
 from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
 from meresco.xml import namespaces
 
@@ -43,23 +43,7 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
 })
 
 
-# HVSTR_NS = '{%s}' % namespacesmap['meta'] # '{http://meresco.org/namespace/harvester/meta}' 
-# DOCUMENT_NS = '{%s}' % namespacesmap['document'] # '{http://meresco.org/namespace/harvester/document}' 
-
-# MODS_VERSION = '3.6'
-
 LONG_VERSION = '1.0'
-
-# MODS_NAMESPACE = namespacesmap['mods']
-# MODS = "{%s}" % MODS_NAMESPACE
-
-# NSMAP = {
-#     None : MODS_NAMESPACE,
-#     'xlink': 'http://www.w3.org/1999/xlink',
-#     'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-# }
-
-# NORM_NS = '{%s}' % namespacesmap['norm'] 
 
 marcRelatorRoleTerms=['abr','acp','act','adi','adp','aft','anl','anm','ann','ant','ape','apl','app','aqt','arc','ard','arr','art','asg','asn','ato','att','auc','aud','aui','aus','aut','bdd','bjd','bkd','bkp','blw','bnd','bpd','brd','brl','bsl','cas','ccp','chr','clb','cli','cll','clr','clt','cmm','cmp','cmt','cnd','cng','cns','coe','col','com','con','cor','cos','cot','cou','cov','cpc','cpe','cph','cpl','cpt','cre','crp','crr','crt','csl','csp','cst','ctb','cte','ctg','ctr','cts','ctt','cur','cwt','dbp','dfd','dfe','dft','dgg','dgs','dis','dln','dnc','dnr','dpc','dpt','drm','drt','dsr','dst','dtc','dte','dtm','dto','dub','edc','edm','edt','egr','elg','elt','eng','enj','etr','evp','exp','fac','fds','fld','flm','fmd','fmk','fmo','fmp','fnd','fpy','frg','gis','grt','his','hnr','hst','ill','ilu','ins','inv','isb','itr','ive','ivr','jud','jug','lbr','lbt','ldr','led','lee','lel','len','let','lgd','lie','lil','lit','lsa','lse','lso','ltg','lyr','mcp','mdc','med','mfp','mfr','mod','mon','mrb','mrk','msd','mte','mtk','mus','nrt','opn','org','orm','osp','oth','own','pan','pat','pbd','pbl','pdr','pfr','pht','plt','pma','pmn','pop','ppm','ppt','pra','prc','prd','pre','prf','prg','prm','prn','pro','prp','prs','prt','prv','pta','pte','ptf','pth','ptt','pup','rbr','rcd','rce','rcp','rdd','red','ren','res','rev','rpc','rps','rpt','rpy','rse','rsg','rsp','rsr','rst','rth','rtm','sad','sce','scl','scr','sds','sec','sgd','sgn','sht','sll','sng','spk','spn','spy','srv','std','stg','stl','stm','stn','str','tcd','tch','ths','tld','tlp','trc','trl','tyd','tyg','uvp','vac','vdg','voc','wac','wal','wam','wat','wdc','wde','win','wit','wpr','wst']
 
@@ -71,29 +55,29 @@ ISO639 = ["aar", "abk", "ace", "ach", "ada", "ady", "afa", "afh", "afr", "ain", 
 
 BINDING_DELIMITER = '; '
 
-class NormaliseOaiRecord(Converter):
+class NormaliseOaiRecord(UiaConverter):
 
     ACCESS_LEVELS = ['openAccess', 'restrictedAccess', 'closedAccess', 'embargoedAccess']
 
     def __init__(self, fromKwarg, toKwarg=None, name=None):
-        Converter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
-        self._truncate_chars = 300
+        UiaConverter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
         self._metadataformat = None
         self._openAccess = True
-        
 
     def _convert(self, lxmlNode):
         self._openAccess = True #Reset AccesRights to openAcces
 
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=namespacesmap)
         record_lxml = etree.fromstring(record_part[0]) # Geen xml.sax.saxutils.unescape() hier: Dat doet lxml reeds voor ons.
-        self._metadataformat = MetadataFormat.getFormat(record_lxml) #TODO: pass it somehow from DNA, so we need to look this up only once per record.
+        self._metadataformat = MetadataFormat.getFormat(record_lxml, self._uploadid) #TODO: pass it somehow from DNA, so we need to look this up only once per record.
         converted_record_lxml = self._convertRecordMetadataToLong(record_lxml)# Check en insert normalised mods into record part.
         record_txt = etree.tostring(converted_record_lxml, encoding="UTF-8") # convert from lxml to text.
         record_txt = record_txt.decode('utf-8') # Soms worden er chars opgestuurd die geen unicode zijn. Deze converteren we 'brute force'.
         lxmlNode.find('document:part[@name="record"]', namespaces=namespacesmap).text = record_txt # Set as text value.
         # etree.cleanup_namespaces(lxmlNode)
         return lxmlNode
+
+
 
     def _convertRecordMetadataToLong(self, lxmlNode):
         
@@ -178,53 +162,15 @@ class NormaliseOaiRecord(Converter):
                 # print "CONVERTED:", type(savedxml)
                 # We need to parse the _Element type first to be able to use proper xpath with namespaces on the nodes? WHY? Conversion to _ElementTree does NOT work??
                 # tree_long = None
-                try: # try this: .getroot().getroottree()
+                try: # TODO: try this: .getroot().getroottree()
                     e_longroot = parse(StringIO(tostring(e_longroot)))
                 except:
                     print 'Error while parsing', tostring(e_longroot)
                     raise
                 self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'long' node.
 
-            print 'Long:', tostring(e_norm_root)
+            print 'Long convertion succeeded...' # , tostring(e_norm_root)
 
-
-            # e_modsroot = etree.SubElement(e_norm_root, namespacesmap.curieToTag('mods:mods'), nsmap=NSMAP)
-            # e_modsroot.set("version", MODS_VERSION)
-            # e_modsroot.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-"+ MODS_VERSION.replace(".", "-") +".xsd")
-            # # e_modsroot.set("xmlns:xsi" , "http://www.w3.org/2001/XMLSchema-instance")
-
-            # if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
-
-            #     strTitle = lxmlNode.xpath("//dc:title/text()", namespaces=namespacesmap)
-            #     e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
-            #     e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
-            #     strAbstract = lxmlNode.xpath("//dc:description/text()", namespaces=namespacesmap)
-            #     if len(strAbstract) > 0:
-            #         e_abstract = etree.SubElement(e_modsroot, "abstract").text = strAbstract[0]
-
-            #     strGenre = lxmlNode.xpath("//dc:type/text()", namespaces=namespacesmap)
-            #     if len(strGenre) > 0:
-            #         e_genre = etree.SubElement(e_modsroot, "genre").text = strGenre[0]        
-
-            # elif self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3]):
-                
-            #     strTitle = lxmlNode.xpath("//mods:titleInfo/mods:title/text()", namespaces=namespacesmap)
-            #     if len(strTitle) > 0:
-            #         e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
-            #         e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
-
-            #     strAbstract = lxmlNode.xpath("//mods:abstract/text()", namespaces=namespacesmap)
-            #     if len(strAbstract) > 0:
-            #         e_abstract = etree.SubElement(e_modsroot, "abstract").text = strAbstract[0]
-
-            #     strGenre = lxmlNode.xpath("//mods:genre/text()", namespaces=namespacesmap)
-            #     if len(strGenre) > 0:
-            #         e_genre = etree.SubElement(e_modsroot, "genre").text = strGenre[0]
-
-            # elif self._metadataformat in (MetadataFormat.MD_FORMAT[5], MetadataFormat.MD_FORMAT[6], MetadataFormat.MD_FORMAT[7]): #NOD records
-            #     NODLxml = self._convertNODRecord2long(lxmlNode, )
-            #     if NODLxml is not None:
-            #         e_norm_root.append(NODLxml.getroot())
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespacesmap)
 
@@ -1029,14 +975,6 @@ class NormaliseOaiRecord(Converter):
         elif(dctype.find('book')>=0 ): return pubTypes[3]
         return ''
 
-    # TODO: uitfaseren, niet meer met text templates werken; of omzetten naar lxml element(s).
-    def _findAndBind(self, node, template, *xpaths):
-        items = []
-        for p in xpaths:
-            items += node.xpath(p, namespaces=namespacesmap)
-        return '\n'.join(template % escapeXml(item) for item in items)
-
-
     def _findFirstXpath(self, node, *xpaths):
         # Will return the first non-empty list that matches an xpath.
         for x in xpaths:
@@ -1044,13 +982,6 @@ class NormaliseOaiRecord(Converter):
             if len(items) > 0:
                 return items
         return []
-
-
-    def smart_truncate(self, content, suffix=''):
-        if len(content) <= self._truncate_chars:
-            return content
-        else:
-            return ' '.join(content[:self._truncate_chars+1].split(' ')[0:-1]) + suffix
 
     def _isValidAccessLevel(self, description):
         for al in NormaliseOaiRecord.ACCESS_LEVELS:

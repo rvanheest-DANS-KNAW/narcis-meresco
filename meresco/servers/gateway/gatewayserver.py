@@ -54,8 +54,7 @@ from storage.storageadapter import StorageAdapter
 from storage.storagecomponent import HashDistributeStrategy, DefaultStrategy
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.metapartconverter import AddProvenanceToMetaPart
-from meresco.dans.addmetadataformat import AddMetadataFormat
-from meresco.dans.modsconverter import ModsConverter
+# from meresco.dans.addmetadataformat import AddMetadataFormat
 from meresco.dans.longconverter import NormaliseOaiRecord
 from meresco.dans.writedeleted import WriteTombstone, ResurrectTombstone
 
@@ -91,7 +90,7 @@ def main(reactor, port, statePath, **ignored):
     return \
     (Observable(),
         # (scheduledCommitPeriodicCall,),
-        (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
+        # (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
         (ObservableHttpServer(reactor=reactor, port=port),
             (LogCollector(),
                 (ApacheLogWriter(apacheLogStream),),
@@ -135,16 +134,18 @@ def main(reactor, port, statePath, **ignored):
                                         # ),
 
                                         (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
-                                            (AddProvenanceToMetaPart(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to metaPart.
+                                            # (LogComponent("TO LONG CONVERTER:"),),
+                                            (AddProvenanceToMetaPart(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to meta part in the message.
                                                 # (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False), # Store original record.
                                                 #     (storeComponent,),
                                                 # ),
-                                                (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts.
+                                                (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts. Raises ValidationException if no 'known' metadataformat 
                                                     (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
                                                         (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
                                                             (storeComponent,), # Store converted/renamed part.
                                                         )
-                                                    )
+                                                    ),
+                                                    # (AddToSiteMap(),),
                                                 ),
 
                                                 (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[NORMALISED_DOC_NAME]),

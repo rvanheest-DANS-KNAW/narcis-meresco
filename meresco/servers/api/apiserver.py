@@ -101,7 +101,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
                                     (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
-                                            (storageComponent,)
+                                            (storageComponent,) # Schrijft oai:metadata (=origineel) naar storage.
                                         )
                                     )
                                     # (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publications'], name='NARCISPORTAL'),
@@ -111,27 +111,23 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
                                     (RewritePartname("long"), # Hernoemt partname van 'record' naar "long".
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                            (storageComponent,),
+                                            (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
                                         ),
-                                        # (XsltCrosswalk([join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'LONG_SHORT_XSLT1-0.xsl')], fromKwarg="lxmlNode"),
                                         (ShortConverter(fromKwarg='lxmlNode'),
                                             (RewritePartname("short"),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                                    # (LogComponent("XSLT-SMODS"),),
-                                                    (storageComponent,)
+                                                    (storageComponent,) # Schrijft 'short' naar storage.
                                                 )
                                             )
                                         ),
-                                        # Hernoemt partname van 'record' naar "mods". #metadataPrefixes=None, setSpecs=None, name=None
-                                        # (XsltCrosswalk([join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'MODS3-5_DC_XSLT1-0.xsl')], fromKwarg="lxmlNode"),
+                                        # Hernoem partname van 'record' naar "oai_dc".
                                         (DcConverter(fromKwarg='lxmlNode'),
                                             (RewritePartname("oai_dc"),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                                    # (LogComponent("XSLT-OAI_DC"),),
-                                                    (storageComponent,)
+                                                    (storageComponent,) # Schrijft 'oai_dc' naar storage.
                                                 ),
-                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publications'], name='NARCISPORTAL'),
-                                                    (oaiJazz,),
+                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc", "long"], setSpecs=['publication'], name='NARCISPORTAL'),
+                                                    (oaiJazz,), # Stop alles wat geconverteerd is naar DC ook in OAI-PMH repo.
                                                 )
                                             )
                                         )
@@ -142,7 +138,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 (XmlXPath(['/oai:record/oai:header'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
                                     (RewritePartname("header"),
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
-                                            (storageComponent,)
+                                            (storageComponent,) # Schrijft OAI-header naar storage.
                                         )
                                     )
                                 )
@@ -150,7 +146,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                         ), # Schrijf metaPart naar storage:
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="meta"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
                             (RewritePartname("meta"),
-                                (storageComponent,)
+                                (storageComponent,) # Schrijft harvester 'meta' data naar storage.
                             )
                         )
                     ),
@@ -304,7 +300,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (SruParser(
                                             host='example.org',
                                             port=80,
-                                            defaultRecordSchema=DEFAULT_PARTNAME,
+                                            defaultRecordSchema='oai_dc',
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(

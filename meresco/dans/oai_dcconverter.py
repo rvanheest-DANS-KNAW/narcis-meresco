@@ -9,9 +9,9 @@ from lxml import etree
 from lxml.etree import parse, _ElementTree, tostring
 
 from StringIO import StringIO
-from xml.sax.saxutils import escape as escapeXml
+#from xml.sax.saxutils import escape as escapeXml
 from copy import deepcopy
-from weightless.core import NoneOfTheObserversRespond, DeclineMessage
+# from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
 from meresco.components import lxmltostring, Converter
 from meresco.dans.metadataformats import MetadataFormat

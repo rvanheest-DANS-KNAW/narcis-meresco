@@ -34,6 +34,11 @@
                                 &lt;oai_dc:dc xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
                                     xmlns:oai_dc=&quot;http://www.openarchives.org/OAI/2.0/oai_dc/&quot;&gt;
                                     &lt;dc:coverage&gt;years 1971-2100&lt;/dc:coverage&gt;
+                                    &lt;dc:coverage&gt;Europe&lt;/dc:coverage&gt;
+                                    &lt;dc:format&gt;application/pdf&lt;/dc:format&gt;
+                                    &lt;dc:format&gt;application/pdf&lt;/dc:format&gt;
+                                    &lt;dc:format&gt;image/jpeg&lt;/dc:format&gt;
+                                    &lt;dc:format&gt;image/pdf&lt;/dc:format&gt;
                                     &lt;dc:creator&gt;European Severe Storms Laboratory&lt;/dc:creator&gt;
                                     &lt;dc:creator&gt;TU Delft, Faculty of Civil Engineering and Geosciences, Department of Hydraulic Engineering&lt;/dc:creator&gt;
                                     &lt;dc:creator&gt;Freie Universität Berlin, Institute of Meteorology&lt;/dc:creator&gt;

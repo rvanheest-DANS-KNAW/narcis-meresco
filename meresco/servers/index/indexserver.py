@@ -54,6 +54,8 @@ from meresco.dans.fieldslisttolucenedocument import FieldsListToLuceneDocument
 
 from meresco.pylucene import getJVM
 
+from meresco.xml import namespaces
+
 from meresco.lucene import Lucene, MultiLucene, UNTOKENIZED_PREFIX, SORTED_PREFIX
 from meresco.lucene.adaptertolucenequery import AdapterToLuceneQuery
 from meresco.lucene.remote import LuceneRemoteService
@@ -61,20 +63,33 @@ from meresco.lucene.fieldregistry import FieldRegistry
 
 from .dctofieldslist import DcToFieldsList
 from .dcfields import DcFields
+from .metaparttofieldslist import MetaToFieldsList
+from .normdoctofieldslist import NormdocToFieldsList
 
 from meresco.servers.gateway.gatewayserver import NORMALISED_DOC_NAME
 
 DEFAULT_PARTNAME = 'oai_dc'
 
-NAMESPACEMAP = {
-    'dc'            : 'http://purl.org/dc/elements/1.1/',
-    'oai_dc'        : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-    'mods'          : 'http://www.loc.gov/mods/v3',
-    'didl'          : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
-    'rdf'           : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-    'ore'           : 'http://www.openarchives.org/ore/terms/',
-    'norm'          : 'http://dans.knaw.nl/narcis/normalized',
-}
+
+NAMESPACEMAP = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco-xml/blob/master/meresco/xml/namespaces.py
+    
+    'dip'    : 'urn:mpeg:mpeg21:2005:01-DIP-NS',
+    'dii'    : 'urn:mpeg:mpeg21:2002:01-DII-NS',
+    'dai'    : 'info:eu-repo/dai',
+    'gal'    : 'info:eu-repo/grantAgreement',
+    'wmp'    : 'http://www.surfgroepen.nl/werkgroepmetadataplus',
+    'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
+    'proj'   : 'http://www.onderzoekinformatie.nl/nod/act',
+    'org'    : 'http://www.onderzoekinformatie.nl/nod/org',
+    'long'   : 'http://www.knaw.nl/narcis/1.0/long/',
+    'short'  : 'http://www.knaw.nl/narcis/1.0/short/',
+    'mods'   : 'http://www.loc.gov/mods/v3',
+    'didl'   : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+    'norm'   : 'http://dans.knaw.nl/narcis/normalized',
+})
+
+
+
 
 LUCENE_VM = getJVM()
 
@@ -87,6 +102,7 @@ drilldownFields = [
     DrilldownField(untokenizedFieldname('dc:date')), # def __init__(self, name, hierarchical=False, multiValued=True, indexFieldName=None):
     DrilldownField(untokenizedFieldname('dc:subject')),
     DrilldownField(untokenizedFieldname('genre'), hierarchical=False),
+    DrilldownField(untokenizedFieldname('meta:collection')),
 ]
 
 # Add any non-drilldown untokenized fields:
@@ -209,27 +225,55 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
             (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)),
                 (oaiDownload, # Haal OAI spulletjes van de Gateway...
                     (UpdateAdapterFromOaiDownloadProcessor(), # Maakt van een SRU update/delete bericht (lxmlNode) een relevante message: 'delete' of 'add' message.
-                        (LogComponent("SRU harvest van GATEWAY"),), #[SRU harvest van GATEWAY] add(*(), **{'partname': 'record', 'identifier': 'meresco:record:1', 'lxmlNode': '_ElementTree(<record xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><header><identifier>meresco:record:1</identifier><datestamp>2016-07-13T15:31:10Z</datestamp></header><metadata><document xmlns="http://meres
+                        # (LogComponent("SRU harvest van GATEWAY"),), #[SRU harvest van GATEWAY] add(*(), **{'partname': 'record', 'identifier': 'meresco:record:1', 'lxmlNode': '_ElementTree(<record xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><header><identifier>meresco:record:1</identifier><datestamp>2016-07-13T15:31:10Z</datestamp></header><metadata><document xmlns="http://meres
                         (FilterMessages(allowed=['add']),
                             # (LogComponent("ADD from GATEWAY"),),
                             (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data'),
                                 (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
                                     (XmlXPath(['/oai:record/oai:metadata/norm:md_original/oai_dc:dc'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                        # (LogComponent("DCToFieldsList"),),
                                         (DcToFieldsList(), # Platte lijst met veldnamen en waardes...
-                                            #(LogComponent("DcToFieldsList"),), # [DcToFieldsList] add(*(), **{'fieldslist': [('dc:identifier', 'http://meresco.com?record=1'), ('dc:description', 'This is an example program about Search with Meresco'), ('dc:title', 'Example Program 1'), ('dc:creator', 'Seecr'), ('dc:publisher', 'Seecr'), ('dc:date', '2016'), ('dc:type', 'Example'), ('dc:subject', 'Search'), ('dc:language', 'en'), ('dc:rights', 'Open Source')], 'partname': 'record', 'identifier': 'meresco:record:1'})
-                                            (FieldsListToLuceneDocument( # Maakt addDocument messege + creeert de facet/drilldown velden waarvan de value's tot max. 256 chars getruncated worden.
+                                            # (LogComponent("DcToFieldsList"),), # [DcToFieldsList] add(*(), **{'fieldslist': [('dc:identifier', 'http://meresco.com?record=1'), ('dc:description', 'This is an example program about Search with Meresco'), ('dc:title', 'Example Program 1'), ('dc:creator', 'Seecr'), ('dc:publisher', 'Seecr'), ('dc:date', '2016'), ('dc:type', 'Example'), ('dc:subject', 'Search'), ('dc:language', 'en'), ('dc:rights', 'Open Source')], 'partname': 'record', 'identifier': 'meresco:record:1'})
+                                            (FieldsListToLuceneDocument( # Maakt addDocument message + creeert de facet/drilldown velden waarvan de value's tot max. 256 chars getruncated worden.
                                                     fieldRegistry=luceneWriter.settings.fieldRegistry, # o.a. drilldownfields definitie
                                                     untokenizedFieldnames=untokenizedFieldnames, # untokenized fields
                                                     indexFieldFactory=DcFields, # Creeert een "__all__", veldnaam en optioneel "untokenized.veldnaam"... 
                                                     #rewriteIdentifier=(lambda idee: idee.split(':', 1)[-1]) # meresco:record:1' => 'record:1'
-                                                ),
-                                                (LogComponent("LUCENE_WRITER"), # [LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': 'dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'StringField', 'name': 'untokenized.dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': '__all__', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': 'dc:description', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': 'dc:title', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:creator', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:publisher', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': '2016'}, {'type': 'TextField', 'name': 'dc:date', 'value': '2016'}, {'path': ['2016'], 'type': 'FacetField', 'name': 'untokenized.dc:date'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example'}, {'type': 'TextField', 'name': 'dc:type', 'value': 'Example'}, {'type': 'TextField', 'name': '__all__', 'value': 'Search'}, {'type': 'TextField', 'name': 'dc:subject', 'value': 'Search'}, {'path': ['Search'], 'type': 'FacetField', 'name': 'untokenized.dc:subject'}, {'type': 'TextField', 'name': '__all__', 'value': 'en'}, {'type': 'TextField', 'name': 'dc:language', 'value': 'en'}, {'type': 'TextField', 'name': '__all__', 'value': 'Open Source'}, {'type': 'TextField', 'name': 'dc:rights', 'value': 'Open Source'}], 'identifier': 'meresco:record:1'})
-                                                    (luceneWriter,),
-                                                ),
+                                                ), # LET OP: Een reeds bestaand Document voor deze identifier/uploadId zal overschreven worden in Lucene (=delete) !!!
+                                            # Dus GAAT ERVAN UIT DAT ALLES IN 1 KEER WEGGESCHREVEN WORDT.
+
+                                                (LogComponent("DC_WRITER"),), # [LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': 'dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'StringField', 'name': 'untokenized.dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': '__all__', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': 'dc:description', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': 'dc:title', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:creator', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:publisher', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': '2016'}, {'type': 'TextField', 'name': 'dc:date', 'value': '2016'}, {'path': ['2016'], 'type': 'FacetField', 'name': 'untokenized.dc:date'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example'}, {'type': 'TextField', 'name': 'dc:type', 'value': 'Example'}, {'type': 'TextField', 'name': '__all__', 'value': 'Search'}, {'type': 'TextField', 'name': 'dc:subject', 'value': 'Search'}, {'path': ['Search'], 'type': 'FacetField', 'name': 'untokenized.dc:subject'}, {'type': 'TextField', 'name': '__all__', 'value': 'en'}, {'type': 'TextField', 'name': 'dc:language', 'value': 'en'}, {'type': 'TextField', 'name': '__all__', 'value': 'Open Source'}, {'type': 'TextField', 'name': 'dc:rights', 'value': 'Open Source'}], 'identifier': 'meresco:record:1'})
+                                                (luceneWriter,),
+                                                # ),
                                             )
                                         )
-                                    )
+                                    ),
                                 )
+                            ),
+                            
+                            (XmlXPath(['/oai:record/oai:metadata/document:document'], fromKwarg='lxmlNode'),   
+                                # (LogComponent("NormdocToFieldsList"),),                             
+                                # (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
+                                    # (LogComponent("NormdocToFieldsList"),),
+                                    # (NormdocToFieldsList(),),
+                                    # (XmlXPath(['/oai:record/oai:metadata/norm:md_original/oai_dc:dc'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                        # (MetaToFieldsList(), # Platte lijst met veldnamen en waardes...
+                                        (NormdocToFieldsList(), # Platte lijst met veldnamen en waardes...
+                                            (LogComponent("MetaToFieldsList"),), # [DcToFieldsList] add(*(), **{'fieldslist': [('dc:identifier', 'http://meresco.com?record=1'), ('dc:description', 'This is an example program about Search with Meresco'), ('dc:title', 'Example Program 1'), ('dc:creator', 'Seecr'), ('dc:publisher', 'Seecr'), ('dc:date', '2016'), ('dc:type', 'Example'), ('dc:subject', 'Search'), ('dc:language', 'en'), ('dc:rights', 'Open Source')], 'partname': 'record', 'identifier': 'meresco:record:1'})
+                                            # (FieldsListToLuceneDocument( # Maakt addDocument messege + creeert de facet/drilldown velden waarvan de value's tot max. 256 chars getruncated worden.
+                                            #         fieldRegistry=luceneWriter.settings.fieldRegistry, # o.a. drilldownfields definitie
+                                            #         untokenizedFieldnames=untokenizedFieldnames, # untokenized fields
+                                            #         indexFieldFactory=DcFields, # Creeert een "__all__", veldnaam en optioneel "untokenized.veldnaam"... 
+                                            #         #rewriteIdentifier=(lambda idee: idee.split(':', 1)[-1]) # meresco:record:1' => 'record:1'
+                                            #     ),
+                                            #     # (LogComponent("####LUCENE_WRITER"),), # [LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': 'dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'StringField', 'name': 'untokenized.dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': '__all__', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': 'dc:description', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': 'dc:title', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:creator', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:publisher', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': '2016'}, {'type': 'TextField', 'name': 'dc:date', 'value': '2016'}, {'path': ['2016'], 'type': 'FacetField', 'name': 'untokenized.dc:date'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example'}, {'type': 'TextField', 'name': 'dc:type', 'value': 'Example'}, {'type': 'TextField', 'name': '__all__', 'value': 'Search'}, {'type': 'TextField', 'name': 'dc:subject', 'value': 'Search'}, {'path': ['Search'], 'type': 'FacetField', 'name': 'untokenized.dc:subject'}, {'type': 'TextField', 'name': '__all__', 'value': 'en'}, {'type': 'TextField', 'name': 'dc:language', 'value': 'en'}, {'type': 'TextField', 'name': '__all__', 'value': 'Open Source'}, {'type': 'TextField', 'name': 'dc:rights', 'value': 'Open Source'}], 'identifier': 'meresco:record:1'})
+                                            #     #     # [####LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:id', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'olddata'}, {'type': 'TextField', 'name': 'meta:set', 'value': 'olddata'}, {'type': 'TextField', 'name': '__all__', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': 'meta:baseurl', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:repositoryGroupId', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'nl_didl'}, {'type': 'TextField', 'name': 'meta:metadataPrefix', 'value': 'nl_didl'}, {'type': 'TextField', 'name': '__all__', 'value': 'publication'}, {'type': 'TextField', 'name': 'meta:collection', 'value': 'publication'}, {'path': ['publication'], 'type': 'FacetField', 'name': 'untokenized.meta:collection'}], 'identifier': 'knaw:record:3'})
+                                            #     # (luceneWriter,),
+                                            #     # ),
+                                            # )
+                                        )
+                                    # )
+                                # )
                             )
                         ),
                         (FilterMessages(allowed=['delete']),                            

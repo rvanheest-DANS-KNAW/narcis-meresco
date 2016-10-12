@@ -6,6 +6,7 @@
 
 from lxml.etree import _ElementTree
 from lxml import etree
+from meresco.components.xml_generic.validate import ValidateException
 
 
 class MetadataFormat():
@@ -56,16 +57,14 @@ class MetadataFormat():
 
 
     @staticmethod
-    def getFormat(lxmlNode): # Returns a known metadata format, None otherwise. 
-        """Returns MD_FORMAT, or None if not found"""
+    def getFormat(lxmlNode, uploadId): # Returns a known metadata format, None otherwise. 
+        """Returns MD_FORMAT, or ValidateException if not found"""
         
         md_format = None
         # print "FORMATBEFORE:", etree.tostring(lxmlNode, encoding="UTF-8")
         # Quit if no lxmlnode is provided:
         # if type(lxmlNode) != _ElementTree:
         #     return md_format
-        
-        # print "FORMAT:", etree.tostring(lxmlNode, encoding="UTF-8")
 
         if len(lxmlNode.xpath('//didl:DIDL[1]', namespaces=MetadataFormat.NAMESPACEMAP)) > 0: # Check for DIDL container, Max. 1 according to EduStandaard.
             
@@ -90,7 +89,7 @@ class MetadataFormat():
             md_format = MetadataFormat.MD_FORMAT[7] # NOD Persoon
 
         if md_format == None:
-            print "No known EduStandaard format was found by GATEWAY in the metadata! This record cannot be processed."
+            raise ValidateException("No known EduStandaard format was found in the metadata for uploadid: %s! This record cannot be processed." % (uploadId))
         else:
             print "Found EduStandaard format:", md_format
 

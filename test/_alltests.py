@@ -36,6 +36,12 @@ __builtins__.__test__ = True
 from unittest import main
 
 from dctofieldslisttest import DcToFieldsListTest
+from storagesplittest import StorageSplitTest
+from metaparttofieldslisttest import MeatToFieldsListTest
+
+# Converters:
+from convertertest import ConverterTest
+# from addprovenancetometaparttest import AddProvenanceToMetaPartTest
 
 if __name__ == '__main__':
     main()
