@@ -28,9 +28,14 @@ from meresco.core import Observable
 from meresco.xml.namespaces import tagToCurie, curieToTag
 
 from lxml import etree
-from lxml.etree import parse, _ElementTree, tostring
+from lxml.etree import parse, _ElementTree, tostring, _Element
 from StringIO import StringIO
 from meresco.xml import namespaces
+
+from meresco.dans.longconverter import NormaliseOaiRecord
+
+from re import compile
+from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
 
 
 namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco-xml/blob/master/meresco/xml/namespaces.py
@@ -41,7 +46,7 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
     'gal'    : 'info:eu-repo/grantAgreement',
     'wmp'    : 'http://www.surfgroepen.nl/werkgroepmetadataplus',
     'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
-    'proj'   : 'http://www.onderzoekinformatie.nl/nod/act',
+    'prj'   : 'http://www.onderzoekinformatie.nl/nod/act',
     'org'    : 'http://www.onderzoekinformatie.nl/nod/org',
     'long'   : 'http://www.knaw.nl/narcis/1.0/long/',
     'short'  : 'http://www.knaw.nl/narcis/1.0/short/',
@@ -50,11 +55,83 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
     'norm'   : 'http://dans.knaw.nl/narcis/normalized',
 })
 
+WCPNODCOLLECTION = ['project', 'organisation', 'person']
+WCPCOLLECTION = ['publication', 'dataset' ] + WCPNODCOLLECTION
+
+
+# print "TAGTOCURIE:", tagToCurie(repokind.tag), repokind.tag
+# namespaces.tagToCurie('{http://steiny.org/steiny}:steiny')
+# TAGTOCURIE: meta:id {http://meresco.org/namespace/harvester/meta}id
+
+# RegEx to find dd_price field value's (price's name, without year and prefix 'NWO'):
+priceRegex = compile('NWO\\s{0,1}\\-\\s{0,1}(\\w*?)\\s[1-2]{1}[0-9]{3}.*?')
+
+# MarcrelatorRoleTerms which are considered "authors":
+marcrelatorAuthorRoles = ['aut','dis','pta','rev','ctb','cre','prg','edt']
+
+# Known (NOD person) nameIdentifiers to look for:
+personNameIdentifiers = ['dai-nl', 'orcid', 'isni', 'nod-prs']
+
+
+def enum(**enums):
+    reverse = dict((value, key) for key, value in enums.iteritems())
+    enums['reverse_mapping'] = reverse
+    return type('Enum', (), enums)
+
+
+Coll = enum(PUB='publication', DAT='dataset', ORG='organisation', PRJ='project', PRS='person')
+# print "DATA:", Collection.DAT
+
+
+
+def removeNamespace(tagName):
+    return '}' in tagName and tagName.split('}')[1] or tagName
+
+
+def getNamespace(tagName):
+    return '}' in tagName and tagName.split('}')[0][1:] or ''
+
+# Een simpele mapping van velden die 'slechts' hernoemt dienen te worden, voordat ze de index in verwdijnen.
+# Voor (samengestelde) velden die nog een (inhoudelijke) bewerking nodig hebben moet Xpath gebruikt worden.
+fieldnamesMapping = {
+    'long.metadata.dateIssued.parsed'      : 'dateissued',
+    'long.metadata.genre'                  : 'genre',
+    'long.metadata.publisher'              : 'publisher',
+    'long.metadata.language'               : 'language',
+    'long.metadata.coverage'               : 'coverage',
+    'long.metadata.format'                 : 'format',
+    'long.metadata.relatedItem.placeTerm'       : '', # __all__
+    'long.metadata.relatedItem.titleInfo.title' : '', # __all__
+    'long.metadata.relatedItem.publisher'       : '', # __all__
+    'long.metadata.grantAgreements.grantAgreement.code' : 'funding_id',
+    'long.accessRights'                    : 'access',
+    'long.persistentIdentifier'            : 'persistentidentifier',
+    'organisatie.acroniem'             : 'acroniem',
+    'organisatie.taak_en'              : 'abstract_en',
+    'organisatie.taak_nl'              : 'abstract',
+    'organisatie.categories.category.term' : 'category_term',
+    'activiteit.summary_nl'            : 'abstract',
+    'activiteit.summary_en'            : 'abstract_en',
+    'activiteit.title_en'              : 'title_en',
+    'activiteit.title_nl'              : 'title',
+    'activiteit.status'                : 'status',
+    'persoon.titulatuur_achter'        : 'titulatuur_achter',
+    'persoon.categories.category.term' : 'category_term',
+    }
+
+MetaFieldNamesToXpath = {
+    'oai:identifier'        : '/meta:meta/meta:record/meta:id/text()',
+    'dare:identifier'       : '/meta:meta/meta:record/meta:id/text()',
+    'meta:repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
+    'meta:repositorygroupid': '/meta:meta/meta:repository/meta:repositoryGroupId/text()',
+    'meta:collection'       : '/meta:meta/meta:repository/meta:collection/text()',
+    }
+
 
 fieldNamesXpathMap = {
-    'subject'        : "//*[local-name()='topic' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from knawLong:
-    # 'leeropdracht'   : "//*[local-name()='leeropdracht_en' or local-name()='leeropdracht_nl']/text()", # Leeropdracht from personrecord
-    # 'dais'           : "//long:dai/text()", # All dai's: also from relatedItems
+    'subject'        : "//*[local-name()='topic' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from Long:
+    'leeropdracht'   : "//*[local-name()='leeropdracht_en' or local-name()='leeropdracht_nl']/text()", # Leeropdracht from personrecord
+    # 'nameidentifiers'           : "//long:dai/text()", # All dai's: also from relatedItems
     'abstract'       : "//long:metadata/long:abstract[not (@xml:lang)]/text()", # 'abstract' field from KNAWLONG.
     'abstract_en'    : "//long:metadata/long:abstract[@xml:lang='en']/text()", # 'abstract_en' field from KNAWLONG.
     'title'          : "//long:metadata/long:titleInfo[not (@xml:lang)]/long:*/text()", #'title'+'subtitle' field from KNAWLONG.
@@ -62,75 +139,125 @@ fieldNamesXpathMap = {
     'dd_year'        : "//long:metadata/long:dateIssued/long:parsed/text()", # Parsed (normalized) datefield from KNAWLONG.
     'coverage'       : "//long:metadata/long:coverage/text()", # 'coverage' field from KNAWLONG.
     'format'         : "//long:metadata/long:format/text()", # 'format' field from KNAWLONG.
-    # 'dd_prices'      : "//prs:persoon/prs:prices/prs:price/text()",
-    # 'dd_werkzaamheid': "//prs:persoon/prs:jobs/prs:job",
-    # 'titulatuur'     : "//prs:persoon/prs:titulatuur/text()",
-    # 'dd_cat'         : "//*[local-name()='category' and (@code)]", # Alle category elementen met attribuut 'code=', zonder namespace...(staan in zowel PRS als ORG...)
-    # 'dd_thesis'      : "//ond:dissertatie[contains(.='true')]", # Alle promotie onderzoeken... xpath retourneerd een boolean...
-    # 'dd_institute'   : "//org:organisatie/@code",
-    # 'dd_os'          : "//org:organisatie/@code", # Onderzoekschool
-    # 'dd_penv'        : "//ond:activiteit/ond:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
-    # 'dd_fin'         : "//ond:activiteit/ond:financier/@instituut_code", # HarremaCode van financierend instituut.
+    'dd_prices'      : "//prs:persoon/prs:prices/prs:price/text()",
+    'dd_werkzaamheid': "//prs:persoon/prs:jobs/prs:job",
+    'titulatuur'     : "//prs:persoon/prs:titulatuur/text()",
+    'dd_cat'         : "//*[local-name()='category' and (@code)]", # Alle category elementen met attribuut 'code=', zonder namespace...(staan in zowel PRS als ORG...)
+    'dd_thesis'      : "//prj:dissertatie[contains(.='true')]", # Alle promotie onderzoeken... xpath retourneerd een boolean...
+    'dd_institute'   : "//org:organisatie/@code",
+    'dd_os'          : "//org:organisatie/@code", # Onderzoekschool
+    'dd_penv'        : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
+    'dd_fin'         : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
     'publication_identifier': "//long:publication_identifier/text()", # MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
     }
 
 
+
+
 class NormdocToFieldsList(Observable):
 
-    def __init__(self, verbose=True, truncate_chars=300):
+    def __init__(self, verbose=False, truncate_chars=300):
         Observable.__init__(self)
         self._verbose = verbose
         self._truncate_chars = truncate_chars
+        self._fieldslist = []
 
     def add(self, lxmlNode, **kwargs):
+        
+        self._fieldslist = [] # reset list
         # hier komt een compleet meresco:document binnen als LXMLnode:
-        identifier = kwargs['identifier']
+        # uploadid = kwargs['identifier']
+        print '###', kwargs['identifier'], '###'
 
-        # print "LXML:" , identifier, tostring(lxmlNode)
         # Get meta, header and metadata part(='long') from the normdoc:
-        #  meta
-        metapart = lxmlNode.xpath('/document:document/document:part[@name="meta"]/text()', namespaces=namespacesmap)
-        e_metapart = etree.fromstring(metapart[0])
+        e_metapart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="meta"]/text()', namespaces=namespacesmap)[0])
+        wcp_collection = e_metapart.xpath('/meta:meta/meta:repository/meta:collection/text()', namespaces=namespacesmap)[0]
+         
         # print "lxml metapart:", tostring(e_metapart)
 
-
-        recordpart = lxmlNode.xpath('/document:document/document:part[@name="record"]/text()', namespaces=namespacesmap)
-        e_recordpart = etree.fromstring(recordpart[0])
+        e_recordpart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="record"]/text()', namespaces=namespacesmap)[0])
         # print "lxml recordpart:", tostring(e_recordpart)
 
-        nodrecord = e_recordpart.xpath('//prs:persoon | //proj:activiteit | //org:organisatie', namespaces=namespacesmap)
-        if len(nodrecord) > 0:
-            print "lxml NOD-record:", tostring(e_recordpart)
+        # Add known meta fields for all records: 
+        for field, xpad in MetaFieldNamesToXpath.iteritems():
+            self._fieldslist.append((field, e_metapart.xpath(xpad, namespaces=namespacesmap)[0]))
+            if self._verbose: print 'addField:', field.upper(), "-->", "Waarde..."
 
+        record = None
+        if wcp_collection in WCPNODCOLLECTION:
+            record = e_recordpart.xpath('//prs:persoon | //prj:activiteit | //org:organisatie', namespaces=namespacesmap)
+        else:
+            record = e_recordpart.xpath('//norm:normalized/long:long', namespaces=namespacesmap)
+        self._fillFieldslist(record[0], '')
 
-        fieldslist = []
+        
+        for field, xpad in fieldNamesXpathMap.iteritems():
+            self._findAndAddToFieldslist(record[0], field, xpad)
 
-        # Add repository info from meta part to fieldslist:
-        for child in e_metapart.getchildren():
-            if child.tag == curieToTag('meta:repository'):
-                for repokind in child.iterchildren():
-                    # fieldname = tagToCurie(repokind.tag)
-                    fieldslist.append((tagToCurie(repokind.tag), repokind.text))
-
-        # Add OAI identifier:
-        fieldslist.append(('oai_identifier', e_recordpart.xpath('/oai:record/oai:header/oai:identifier/text()', namespaces=namespacesmap)[0]))
-
-
-        for field, xpath in fieldNamesXpathMap.iteritems():
-            self._findAndAddFieldToList(fieldslist, e_recordpart, field, xpath)
+        # # Add repository info from meta part to fieldslist:
+        # for child in e_metapart.getchildren():
+        #     if child.tag == curieToTag('meta:repository'):
+        #         for repokind in child.iterchildren():
+        #             # fieldname = tagToCurie(repokind.tag)
+        #             # print "TAGTOCURIE:", tagToCurie(repokind.tag), repokind.tag
+        #             fieldslist.append((tagToCurie(repokind.tag), repokind.text))
 
 
         # Ready filling, now call add method:
-        yield self.all.add(fieldslist=fieldslist, **kwargs)
+        yield self.all.add(fieldslist=self._fieldslist, **kwargs)
 
 
-    def _findAndAddFieldToList(self, fieldslist, lxmlNode, fieldName, xpath):
+    def _fillFieldslist(self, aNode, parentName): # NOD-nodes and Long nodes will pass here...
+        if type(aNode) != _Element:
+            print "type(aNode) != _Element"
+            return
+        if parentName:
+            parentName += '.'
+        localName = removeNamespace(aNode.tag)
+        fieldname = parentName + localName
+        value = aNode.text
+        # send addField message
+        if value and value.strip() and fieldnamesMapping.has_key(fieldname):
+            # Map all accessRights other than 'openAccess' to 'closedAccess' into the index:
+            if fieldname == 'long.accessRights' and value.strip().lower() not in (NormaliseOaiRecord.ACCESS_LEVELS[0].lower(), NormaliseOaiRecord.ACCESS_LEVELS[2].lower()):
+                if self._verbose: print 'Changing', value, 'to', NormaliseOaiRecord.ACCESS_LEVELS[2]
+                value = NormaliseOaiRecord.ACCESS_LEVELS[2]
+            self._fieldslist.append((fieldnamesMapping.get(fieldname), value.strip().replace('\n', '')))
+            if self._verbose: print 'addField:', fieldnamesMapping.get(fieldname).upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+            #Old dare-id for resolving old record pages:
+            # if fieldname == 'header.identifier': self.do.addField(name='dare-identifier', value=value.strip().replace('\n', '').replace('.', '').replace(':', '').replace('/', '').replace('&', ''))
+        elif value and value.strip() and fieldname=='persoon.fullName': # uit NOD_PRS
+            self._fieldslist.append(('title', value.strip().replace('\n', '')))
+            self._fieldslist.append(('title_en', value.strip().replace('\n', '')))
+            self._fieldslist.append(('sort_title', value.strip().replace('\n', ''))) #PRS sorteren op achternaam
+            self._fieldslist.append(('sort_title_en', value.strip().replace('\n', ''))) #PRS sorteren op achternaam
+            if self._verbose:
+                print 'addField:', 'title'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+                print 'addField:', 'title_en'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+                print 'addField:', 'sort_title'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+                print 'addField:', 'sort_title_en'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+        elif value and value.strip() and fieldname=='organisatie.naam_en': # uit NOD_ORG
+            self._fieldslist.append(('title_en', value.strip().replace('\n', '')))
+            self._fieldslist.append(('sort_title_en', value.strip().replace('\n', ''))) #ORG sorteren op naam
+            if self._verbose:
+                print 'addField:', 'title_en'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+                print 'addField:', 'sort_title_en'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+        elif value and value.strip() and fieldname=='organisatie.naam_nl': # uit NOD_ORG
+            self._fieldslist.append(('title', value.strip().replace('\n', '')))
+            self._fieldslist.append(('sort_title', value.strip().replace('\n', ''))) #ORG sorteren op naam
+            if self._verbose:
+                print 'addField:', 'title'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+                print 'addField:', 'sort_title'.upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+        for child in aNode.getchildren():  # Recursief verder...
+            self._fillFieldslist(child, fieldname)
+
+
+    def _findAndAddToFieldslist(self, lxmlNode, fieldName, xpath):
         # Adds fieldnames and values to the fieldslist list.
         results = lxmlNode.xpath(xpath, namespaces=namespacesmap)
         if not results:
             return
-
-        # if fieldName == 'dais':
+        # elif fieldName == 'dais':
         #     # Unfortunately tokenizing DAIs goes wrong: 'nl/071791013' will be added to the index instead of '071791013', so searching on postfix ('071791013') is not possible.
         #     # Problem seems to be some 'intelligent' escaping (StandardTokenizer), since a dai like 'info:eu-repo/dai/nl/lettershereinsteadofnumbers' is tokenized correctly / allows for searching on postfix ('lettershereinsteadofnumbers')??
         #     # Escaping '/' with '\' doesn't do the job: one cannot search for a 'complete' DAI anymore, but postfix search OK...
@@ -143,82 +270,142 @@ class NormdocToFieldsList(Observable):
         #             for variant in nameId.getTypedVariants():
         #                 self.do.addField( name=UNQUALIFIED_TERMS, value=variant )
         #                 if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
-        # elif fieldName == 'dd_year':
-        #     if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
-        #     self.do.addField(name=fieldName, value=self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') ))
-        # elif fieldName == 'dd_prices':
-        #     for price in results:
-        #         if self._verbose: print 'addField:', fieldName.upper(), price.strip().replace('\n', ''), "--->", self._getPriceNameForDrilldown( price.strip().replace('\n', '') )
-        #         self.do.addField(name=fieldName, value=self._getPriceNameForDrilldown( price.strip().replace('\n', '') ))
-        # elif fieldName == 'dd_cat':
-        #     for category in results:
-        #         #if self._verbose: print 'addField:', fieldName.upper(), self._getCodeFromCategory( category )
-        #         #self.do.addField(name=fieldName, self._getCodeFromCategory( category ))
-        #         class6 = self._getCodeFromCategory( category )
-        #         #Upload the catagory itself:
-        #         if self._verbose: print 'addField:', fieldName.upper(), "-->", class6
-        #         self.do.addField(name=fieldName, value=class6)
-        #         #Upload the parent catagories:
-        #         for index, char in enumerate(class6[::-1]):
-        #             if char!='0' and index < 4:
-        #                 if self._verbose: print 'addField:', fieldName.upper(), "-->", class6[:5-index].ljust(6, '0')
-        #                 self.do.addField(name=fieldName, value=class6[:5-index].ljust(6, '0'))
-        # elif fieldName == 'titulatuur': #'Prof.dr.ing.' persons should be found searching 'prof' only!?
-        #     subtitles = results[0].split('.')
-        #     if self._verbose: print 'addField:', fieldName.upper(), "-->", results[0]
-        #     self.do.addField(name=fieldName, value=results[0])
-        #     for title in subtitles:
-        #         if self._verbose and not title=='': print 'addField:', "-->", fieldName.upper(), title
-        #         if not title=='': self.do.addField(name=fieldName, value=title)
-        # elif fieldName == 'dd_werkzaamheid':
-        #     for werkzaamheid in results:
-        #         inst, func = self._getWerkzaamheidForDrilldownFromJobs(werkzaamheid)
-        #         if (inst and func):
-        #             if self._verbose: print 'addField:', "dd_institute".upper(), "-->", inst
-        #             if self._verbose: print 'addField:', "dd_position".upper(), "-->", func
-        #             if self._verbose: print 'addField:', fieldName.upper(), "-->", inst+':'+func
-        #             self.do.addField(name="dd_institute", value=inst)
-        #             self.do.addField(name="dd_position", value=func)
-        #             self.do.addField(name=fieldName, value=inst+':'+func)
-        #         elif (func): # Only function was given: 'LCT' only!
-        #             if self._verbose: print 'addField:', "dd_position".upper(), "-->", func
-        #             self.do.addField(name="dd_position", value=func)
-        # elif fieldName == 'dd_thesis': #results is a boolean (returned by Xpath)...
-        #     if self._verbose: print 'addField:', fieldName.upper(), "-->", str(results).lower()
-        #     self.do.addField(name=fieldName, value=str(results).lower())
-        # elif fieldName == 'publication_identifier': #results are all <publication_identifier> tags from mods root, as well as mods/related_item.
-        #     for pid in results:
-        #         if self._verbose: print 'addField:', fieldName.upper(), "-->", pid
-        #         self.do.addField(name=fieldName, value=pid)
-        # elif fieldName == 'dd_institute': #Harrema code from an organisation. =Bovenliggend instituut: exactly 1
-        #     dd_inst = self._getInstForDD(results[0])
-        #     if (dd_inst):
-        #         if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
-        #         self.do.addField(name=fieldName, value=dd_inst)
-        # elif fieldName == 'dd_penv': #Harrema code from an organisation. (Penvoerder): zero or more.
-        #     for instituut_code in results:
-        #         dd_inst = self._getInstForDD(instituut_code)
-        #         if (dd_inst):
-        #             if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
-        #             self.do.addField(name=fieldName, value=dd_inst)
-        # elif fieldName == 'dd_fin': #Harrema code from an organisation. (Financier): zero or more.
-        #     for instituut_code in results:
-        #         dd_inst = self._getInstForFin_DD(instituut_code)
-        #         if (dd_inst):
-        #             if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
-        #             self.do.addField(name=fieldName, value=dd_inst)
-        # elif fieldName == 'dd_os': #Onderzoekschool:
-        #     dd_inst = self._getOSchoolForDD(results[0])
-        #     if (dd_inst):
-        #         if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
-        #         self.do.addField(name=fieldName, value=dd_inst)
-        elif fieldName in ('coverage', 'format'):
+        elif fieldName == 'dd_year':
+            if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
+            self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )))
+        elif fieldName == 'dd_prices':
+            for price in results:
+                if self._verbose: print 'addField:', fieldName.upper(), price.strip().replace('\n', ''), "--->", self._getPriceNameForDrilldown( price.strip().replace('\n', '') )
+                self._fieldslist.append((fieldName, self._getPriceNameForDrilldown( price.strip().replace('\n', '') )))
+        elif fieldName == 'dd_cat':
+            for category in results:
+                class6 = self._getCodeFromCategory( category )
+                # Add the catagory itself:
+                if self._verbose: print 'addField:', fieldName.upper(), "-->", class6
+                self._fieldslist.append((fieldName, class6))
+                # Add the parent catagories:
+                for index, char in enumerate(class6[::-1]):
+                    if char!='0' and index < 4:
+                        if self._verbose: print 'addField:', fieldName.upper(), "-->", class6[:5-index].ljust(6, '0')
+                        self._fieldslist.append((fieldName, class6[:5-index].ljust(6, '0')))
+        elif fieldName == 'titulatuur': #'Prof.dr.ing.' persons should be found searching 'prof' only!?
+            subtitles = results[0].split('.')
+            if self._verbose: print 'addField:', fieldName.upper(), "-->", results[0]
+            self._fieldslist.append((fieldName, results[0]))
+            for title in subtitles:
+                if self._verbose and not title=='': print 'addField:', "-->", fieldName.upper(), title
+                if not title=='': self._fieldslist.append((fieldName, title))
+        elif fieldName == 'dd_werkzaamheid':
+            for werkzaamheid in results:
+                inst, func = self._getWerkzaamheidForDrilldownFromJobs(werkzaamheid)
+                if (inst and func):
+                    if self._verbose: print 'addField:', "dd_institute".upper(), "-->", inst
+                    if self._verbose: print 'addField:', "dd_position".upper(), "-->", func
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", inst+':'+func
+                    self._fieldslist.append(("dd_institute", inst))
+                    self._fieldslist.append(("dd_position", func))
+                    self._fieldslist.append((fieldName, inst+':'+func))
+                elif (func): # Only function was given: 'LCT' only!
+                    if self._verbose: print 'addField:', "dd_position".upper(), "-->", func
+                    self._fieldslist.append(("dd_position", func))
+        elif fieldName == 'dd_thesis': #results is a boolean (returned by Xpath)...
+            if self._verbose: print 'addField:', fieldName.upper(), "-->", str(results).lower()
+            self._fieldslist.append((fieldName, str(results).lower()))
+            # Replaced to generic elif@bottom ;-)
+            # elif fieldName == 'publication_identifier': #results are all <publication_identifier> tags from mods root, as well as mods/related_item.
+            #     for pid in results:
+            #         if self._verbose: print 'addField:', fieldName.upper(), "-->", pid
+            #         self.do.addField(name=fieldName, value=pid)
+        elif fieldName == 'dd_institute': #Harrema code from an organisation. =Bovenliggend instituut: exactly 1
+            dd_inst = self._getInstForDD(results[0])
+            if (dd_inst):
+                if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
+                self._fieldslist.append((fieldName, dd_inst))
+        elif fieldName == 'dd_penv': #Harrema code from an organisation. (Penvoerder): zero or more.
+            for instituut_code in results:
+                dd_inst = self._getInstForDD(instituut_code)
+                if (dd_inst):
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
+                    self._fieldslist.append((fieldName, dd_inst))
+        elif fieldName == 'dd_fin': #Harrema code from an organisation. (Financier): zero or more.
+            for instituut_code in results:
+                dd_inst = self._getInstForFin_DD(instituut_code)
+                if (dd_inst):
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
+                    self._fieldslist.append((fieldName, dd_inst))
+        elif fieldName == 'dd_os': #Onderzoekschool:
+            dd_inst = self._getOSchoolForDD(results[0])
+            if (dd_inst):
+                if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
+                self._fieldslist.append((fieldName, dd_inst))
+        elif fieldName in ('coverage', 'format', 'publication_identifier'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
-                fieldslist.append((fieldName, result))               
-        else:     # All other remaining results are joined with a space:
-            fieldslist.append((fieldName, ' '.join(results).replace('\n', ''))) 
+                self._fieldslist.append((fieldName, result))               
+        else:  # All other remaining results are joined with a space:
+            self._fieldslist.append((fieldName, ' '.join(results).replace('\n', ''))) 
             if self._verbose: print 'addField:', fieldName.upper(), "-->", ' '.join(results).replace('\n', '')[:self._truncate_chars]
+
+    # returns the year category, used for drilldown: <1900, <1910 etc.
+    def _getYearGroupForDrilldown(self, date_string):
+        if date_string and date_string.strip() and len(date_string.strip()) >= 4:
+            YYYY = int(date_string.strip()[:4])
+            if YYYY < 1900: # first category (all before 1900)
+                return '1000'
+            elif YYYY >= 1990: # per year category (starting from 1990)
+                return str(YYYY)
+            else:
+                return str(YYYY)[:3]+'0' # per decennium category (between 1900 and the seventies)
+        return
+
+    # returns the prices/grants category, used for drilldown: veni, vidi, vici, etc.
+    def _getPriceNameForDrilldown(self, price_string):
+        if price_string and price_string.strip():
+            m = priceRegex.match(price_string.strip())
+            if m:
+                return m.group(1).lower().strip()
+        #for pricename in ['veni','vidi','vici','spinoza']:
+        #    if price_string and price_string.strip() and price_string.lower().find(pricename) >= 0: return pricename
+        return
+
+    # returns the category code for drilldown use. 
+    def _getCodeFromCategory(self, element):        
+        if type(element) == _Element:
+            func = element.xpath('attribute::code')
+            if(func):
+                return func[0][:6].upper()
+
+    # returns the composed werkzaamheid, used for drilldown: ie. 'U.WUR:HGL', if it matches our businessrules, 'None' otherwise.
+    def _getWerkzaamheidForDrilldownFromJobs(self, element):
+        if type(element) == _Element:
+            func = element.xpath('self::prs:job/prs:functie_nl/@acronym', namespaces=namespacesmap)
+            if(func and func[0].upper() in ['BHL', 'GHL', 'HGL', 'OHL', 'PTH', 'UHD', 'UHL', 'ADL', 'HHL', 'LCT']): #, 'LCT'  #Continue, we are interested in this 'werkzaamheid'.
+                if func[0].upper() == 'LCT': return None, func[0] # Lectoren will be added to dd_position only (NOT dd_institute)
+                inst = element.xpath('self::prs:job/prs:organisatie/@code', namespaces=namespacesmap)
+                if inst:
+                    lijst = inst[0].split('.',3)
+                    if(len(lijst)>=3 and lijst[0]=='U' and lijst[1].isupper()): return lijst[0]+'_'+lijst[1], func[0] # university. i.e: U_UVA (mind the underscore, not a dot!)
+                    elif (lijst[0]=='A' or lijst[0]=='W' or lijst[0]=='T') : return lijst[0], func[0] # KNAW, NWO, TNO, Minus Hogescholen => or lijst[0]=='V' or lijst[0]=='N'
+        return None, None
+
+
+    def _getInstForDD(self, code):
+        if code:
+            lijst = code.split('.',3)
+            if(len(lijst)>=3 and lijst[0]=='U' and lijst[1].isupper()): return lijst[0]+'_'+lijst[1] # university. i.e: U_UVA (mind the underscore, not a dot!)
+            elif (lijst[0]=='A' or lijst[0]=='W' or lijst[0]=='T' ) : return lijst[0] # KNAW, NWO or TNO.
+
+
+    def _getInstForFin_DD(self, code): # Retourneer de instituut_code zonder punten, maar met underscore.
+        if code:
+            return code.strip().replace('.', '_') # Mind the underscore, not a dot!
+
+            
+    def _getOSchoolForDD(self, code):
+        if code:
+            lijst = code.split('.',3)
+            if(len(lijst)>=3 and lijst[0]=='U' and lijst[1].isupper() and lijst[2]=='OS'): return lijst[0]+'_'+lijst[1] # university. i.e: U_UVA (mind the underscore, not a dot!)
+
 
 
 # Incoming:

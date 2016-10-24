@@ -53,7 +53,7 @@ from storage.storageadapter import StorageAdapter
 
 from storage.storagecomponent import HashDistributeStrategy, DefaultStrategy
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
-from meresco.dans.metapartconverter import AddProvenanceToMetaPart
+from meresco.dans.metapartconverter import AddHarvestDateAndMetadataNamespace
 # from meresco.dans.addmetadataformat import AddMetadataFormat
 from meresco.dans.longconverter import NormaliseOaiRecord
 from meresco.dans.writedeleted import WriteTombstone, ResurrectTombstone
@@ -135,23 +135,20 @@ def main(reactor, port, statePath, **ignored):
 
                                         (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
                                             # (LogComponent("TO LONG CONVERTER:"),),
-                                            (AddProvenanceToMetaPart(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to meta part in the message.
-                                                # (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False), # Store original record.
-                                                #     (storeComponent,),
-                                                # ),
+                                            (AddHarvestDateAndMetadataNamespace(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds harvestDate & metadataNamespace to meta part in the message.
                                                 (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts. Raises ValidationException if no 'known' metadataformat 
+                                                    # TODO: Carriage return \n in gateway store normdoc checken
                                                     (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
                                                         (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
                                                             (storeComponent,), # Store converted/renamed part.
                                                         )
-                                                    ),
-                                                    # (AddToSiteMap(),),
+                                                    )
                                                 ),
-
                                                 (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[NORMALISED_DOC_NAME]),
                                                     (oaiJazz,),
                                                 ),
                                             )
+
                                         ),
                                         (ResurrectTombstone(),
                                             (storeComponent,),

@@ -19,7 +19,7 @@ HVSTR_NS = '{http://meresco.org/namespace/harvester/meta}'
 DOCUMENT_NS = '{http://meresco.org/namespace/harvester/document}'
 surfshareNamespaceMap = {'document'  :  "http://meresco.org/namespace/harvester/document" }
 
-class AddProvenanceToMetaPart(UiaConverter):
+class AddHarvestDateAndMetadataNamespace(UiaConverter):
     def __init__(self, dateformat, fromKwarg, toKwarg=None, name=None):
         UiaConverter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
         self._dateformat = dateformat
