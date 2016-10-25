@@ -56,7 +56,9 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
 })
 
 WCPNODCOLLECTION = ['project', 'organisation', 'person']
-WCPCOLLECTION = ['publication', 'dataset' ] + WCPNODCOLLECTION
+WCPEDUCOLLECTION = ['publication', 'dataset' ]
+WCPCOLLECTION =  WCPEDUCOLLECTION + WCPNODCOLLECTION
+UNQUALIFIED_TERMS = ''  #'__all__'
 
 
 # print "TAGTOCURIE:", tagToCurie(repokind.tag), repokind.tag
@@ -100,9 +102,9 @@ fieldnamesMapping = {
     'long.metadata.language'               : 'language',
     'long.metadata.coverage'               : 'coverage',
     'long.metadata.format'                 : 'format',
-    'long.metadata.relatedItem.placeTerm'       : '', # __all__
-    'long.metadata.relatedItem.titleInfo.title' : '', # __all__
-    'long.metadata.relatedItem.publisher'       : '', # __all__
+    'long.metadata.relatedItem.placeTerm'       : UNQUALIFIED_TERMS, # __all__
+    'long.metadata.relatedItem.titleInfo.title' : UNQUALIFIED_TERMS, # __all__
+    'long.metadata.relatedItem.publisher'       : UNQUALIFIED_TERMS, # __all__
     'long.metadata.grantAgreements.grantAgreement.code' : 'funding_id',
     'long.accessRights'                    : 'access',
     'long.persistentIdentifier'            : 'persistentidentifier',
@@ -131,7 +133,7 @@ MetaFieldNamesToXpath = {
 fieldNamesXpathMap = {
     'subject'        : "//*[local-name()='topic' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from Long:
     'leeropdracht'   : "//*[local-name()='leeropdracht_en' or local-name()='leeropdracht_nl']/text()", # Leeropdracht from personrecord
-    # 'nameidentifiers'           : "//long:dai/text()", # All dai's: also from relatedItems
+    'nids'           : "//long:nameidentifier/text()", # All dai's: also from relatedItems
     'abstract'       : "//long:metadata/long:abstract[not (@xml:lang)]/text()", # 'abstract' field from KNAWLONG.
     'abstract_en'    : "//long:metadata/long:abstract[@xml:lang='en']/text()", # 'abstract_en' field from KNAWLONG.
     'title'          : "//long:metadata/long:titleInfo[not (@xml:lang)]/long:*/text()", #'title'+'subtitle' field from KNAWLONG.
@@ -190,18 +192,10 @@ class NormdocToFieldsList(Observable):
             record = e_recordpart.xpath('//norm:normalized/long:long', namespaces=namespacesmap)
         self._fillFieldslist(record[0], '')
 
+        self._addAuthorsAndNamesFields(record[0], wcp_collection)
         
         for field, xpad in fieldNamesXpathMap.iteritems():
             self._findAndAddToFieldslist(record[0], field, xpad)
-
-        # # Add repository info from meta part to fieldslist:
-        # for child in e_metapart.getchildren():
-        #     if child.tag == curieToTag('meta:repository'):
-        #         for repokind in child.iterchildren():
-        #             # fieldname = tagToCurie(repokind.tag)
-        #             # print "TAGTOCURIE:", tagToCurie(repokind.tag), repokind.tag
-        #             fieldslist.append((tagToCurie(repokind.tag), repokind.text))
-
 
         # Ready filling, now call add method:
         yield self.all.add(fieldslist=self._fieldslist, **kwargs)
@@ -257,7 +251,7 @@ class NormdocToFieldsList(Observable):
         results = lxmlNode.xpath(xpath, namespaces=namespacesmap)
         if not results:
             return
-        # elif fieldName == 'dais':
+        # elif fieldName == 'nids':
         #     # Unfortunately tokenizing DAIs goes wrong: 'nl/071791013' will be added to the index instead of '071791013', so searching on postfix ('071791013') is not possible.
         #     # Problem seems to be some 'intelligent' escaping (StandardTokenizer), since a dai like 'info:eu-repo/dai/nl/lettershereinsteadofnumbers' is tokenized correctly / allows for searching on postfix ('lettershereinsteadofnumbers')??
         #     # Escaping '/' with '\' doesn't do the job: one cannot search for a 'complete' DAI anymore, but postfix search OK...
@@ -266,10 +260,10 @@ class NormdocToFieldsList(Observable):
         #         nameId = Dai(dai.replace('\n', ''))
         #         if nameId.is_valid():
         #             if self._verbose: print 'addField:', fieldName.upper(), "-->", nameId.get_id()
-        #             self.do.addField(name=fieldName, value=nameId.get_id())
+        #             self._fieldslist.append((fieldName, nameId.get_id()))
         #             for variant in nameId.getTypedVariants():
-        #                 self.do.addField( name=UNQUALIFIED_TERMS, value=variant )
-        #                 if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+        #                 self._fieldslist.append(( '', variant ))
+        #                 if self._verbose: print 'addField:',  "__all__ -->", variant
         elif fieldName == 'dd_year':
             if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
             self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )))
@@ -407,6 +401,130 @@ class NormdocToFieldsList(Observable):
             if(len(lijst)>=3 and lijst[0]=='U' and lijst[1].isupper() and lijst[2]=='OS'): return lijst[0]+'_'+lijst[1] # university. i.e: U_UVA (mind the underscore, not a dot!)
 
 
+
+    def _addAuthorsAndNamesFields(self, lxmlNode, wcpcollection):
+
+        authors = [] # i.e.: Messineo, Maria;Bennis, prof.dr. H.J.
+        names = [] # i.e.: Maastricht Universiteit;Messineo, Maria;Bal, M.P.;Bennis, prof.dr. H.J.
+        ds_creators = [] # Beta: List of dataset creators, which will be sent to the index for drilldown(!)
+
+        if wcpcollection in WCPEDUCOLLECTION:
+            # LONG ONLY:
+            pubnames = lxmlNode.xpath('//long:metadata/long:name', namespaces=namespacesmap)
+            for name in pubnames:
+                # Get sub-elements: Either family and/or unstructed is available...
+                roleterm = name.xpath('self::long:name/long:mcRoleTerm/text()', namespaces=namespacesmap)
+                unstructured = name.xpath('self::long:name/long:unstructured/text()', namespaces=namespacesmap)
+                family = name.xpath('self::long:name/long:family/text()', namespaces=namespacesmap)
+                given = name.xpath('self::long:name/long:given/text()', namespaces=namespacesmap)
+                nids = name.xpath('self::long:name/long:nameIdentifier', namespaces=namespacesmap)
+                patroniem = name.xpath('self::long:name/long:termsOfAddress/text()', namespaces=namespacesmap)
+                tiepe = name.xpath('self::long:name/long:type/text()', namespaces=namespacesmap)
+                strdai='' #temp DAI container
+                fg_naam = [] #fg = Family + Given name...
+                
+                if family: fg_naam.append(family[0])
+                if given: fg_naam.append(given[0])
+                if patroniem: fg_naam.append(patroniem[0])
+
+                if unstructured: #use unstructured value as NAMES field
+                    names.append(unstructured[0])
+                else:
+                    names.append(', '.join(fg_naam))
+
+                # Compose qualified author string and index author/non-author dais:
+                nidFieldname = 'nids_non_aut'
+                if roleterm and tiepe:
+                    if roleterm[0] in marcrelatorAuthorRoles and tiepe[0] == 'personal':
+                        if (family or given): #authors need to be F+Given, NOT unstructured; this may contain 'noise' (other stuff, not related to the person name.
+                            authors.append(', '.join(fg_naam))
+                        else:
+                            authors.append(unstructured[0])
+                        nidFieldname = 'nids_aut'
+
+                        #BETA functionality: Add dataset creators for dataset creators drilldown:  collection == 'dataset' and
+                        if wcpcollection == 'dataset':
+                            if roleterm[0].lower() == 'cre' and (family or given): #We're NOT interested in unstractured/displayForm labels here...
+                                ds_creators.append(', '.join(fg_naam))
+                if len(nids) > 0:
+                    print "Aantal name nameIdentifiers (pub):", len(nids)
+                    for nid in nids:
+                        nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
+                        if nameId.is_valid():
+                            #  Add 'known' ID format to dais/nameID field:
+                            self._fieldslist.append(( nidFieldname, nameId.get_id() ))
+                            self._fieldslist.append(( 'nids', nameId.get_id() ))
+                            if self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id()
+                            if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
+                            #  Add all ID formats to general field:
+                            for variant in nameId.getTypedVariants():
+                                self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
+                                if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+
+        # NOD_PRS:
+        elif wcpcollection == 'person':
+            prs_name = lxmlNode.xpath('//prs:persoon/prs:fullName/text()', namespaces=namespacesmap)
+            if prs_name:
+                names.append(prs_name[0])
+                #All orgs from <jobs>: Need to be unique?
+                prs_orgs = lxmlNode.xpath('//prs:organisatie/text()', namespaces=namespacesmap)
+                if prs_orgs:
+                    orgs_set = set([])
+                    for org in prs_orgs:
+                        orgs_set.add(org)
+                    for org in orgs_set:
+                        names.append(org)
+ 
+            nids = lxmlNode.xpath('//prs:persoon/prs:nameIdentifier', namespaces=namespacesmap)
+            if len(nids) > 0:
+                print "Aantal nod Persoon nameIdentifiers:", len(nids)
+                for nid in nids:
+                    nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
+                    if nameId.is_valid():
+                        #  Add 'known' ID format to dais/nameID field:
+                        self._fieldslist.append(( 'nids', nameId.get_id() ))
+                        if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
+                        #  Add all ID formats to general field:
+                        for variant in nameId.getTypedVariants():
+                            self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
+                            if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+
+
+        elif wcpcollection == 'organisation':
+            # NOD_ORG: (naam_en + naam_nl)
+            org_names = lxmlNode.xpath('//org:organisatie/org:*[local-name()="naam_nl" or local-name()="naam_en"]/text()', namespaces=namespacesmap)
+            for org_name in org_names:
+                names.append(org_name)
+
+
+        elif wcpcollection == 'project':
+            # NOD_ACT: (fullnames + dais)
+            act_persons = lxmlNode.xpath('//prj:activiteit/prj:person', namespaces=namespacesmap)
+            for act_person in act_persons:
+                act_name = act_person.xpath('self::prj:person/prj:fullName/text()', namespaces=namespacesmap)
+                names.append(act_name[0])
+
+            nids = lxmlNode.xpath('//prj:person/prj:nameIdentifier', namespaces=namespacesmap)
+            if len(nids) > 0:
+                print "Aantal nod Project nameIdentifiers:", len(nids)
+                for nid in nids:
+                    nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
+                    if nameId.is_valid():
+                        #  Add 'known' ID format to dais/nameID field:
+                        self._fieldslist.append(( 'nids', nameId.get_id() ))
+                        if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
+                        #  Add all ID formats to general field:
+                        for variant in nameId.getTypedVariants():
+                            self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
+                            if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+
+        # Add fields to the fieldslist:
+        for author in authors:
+            if self._verbose: print 'addField:', 'authors'.upper(), "-->", author.replace('\n', '')[:MAX_CHAR]
+            self._fieldslist.append(('authors', author.replace('\n', '')))
+        for name in names:
+            if self._verbose: print 'addField:', 'names'.upper(), "-->", name.replace('\n', '')[:MAX_CHAR]
+            self._fieldslist.append(('names', name.replace('\n', '')))
 
 # Incoming:
 # <document xmlns="http://meresco.org/namespace/harvester/document">
