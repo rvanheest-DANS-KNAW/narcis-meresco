@@ -69,7 +69,7 @@ DEFAULT_PARTNAME = 'oai_dc'
 
 NAMESPACEMAP = namespaces.copyUpdate({
     'prs'   : 'http://www.onderzoekinformatie.nl/nod/prs',
-    'ond'   : 'http://www.onderzoekinformatie.nl/nod/act',
+    'prj'   : 'http://www.onderzoekinformatie.nl/nod/act',
     'org'   : 'http://www.onderzoekinformatie.nl/nod/org',
     'long'  : 'http://www.knaw.nl/narcis/1.0/long/',
     'short' : 'http://www.knaw.nl/narcis/1.0/short/',
@@ -327,12 +327,13 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                             nsMap={
                                                 'dc': "http://purl.org/dc/elements/1.1/",
                                                 'oai_dc': "http://www.openarchives.org/OAI/2.0/oai_dc/",
-                                                'norm' : "http://dans.knaw.nl/narcis/normalized"
+                                                'norm' : "http://dans.knaw.nl/narcis/normalized",
+                                                'long'  : 'http://www.knaw.nl/narcis/1.0/long/',
                                             },
-                                            title = ("metadata", '/oai_dc:dc/dc:title/text()'),
-                                            description = ("metadata", '/oai_dc:dc/dc:description/text()'),
+                                            title = ("oai_dc", '/oai_dc:dc/dc:title/text()'),
+                                            description = ("oai_dc", '/oai_dc:dc/dc:description/text()'),
                                             linkTemplate = 'http://localhost/sru?operation=searchRetrieve&version=1.2&query=dc:identifier%%3D%(identifier)s',
-                                            identifier = ("metadata", '/oai_dc:dc/dc:identifier/text()')),
+                                            identifier = ("long", '/long:long/long:humanStartPage/text()')),
                                         (StorageAdapter(),
                                             (storage,)
                                         )

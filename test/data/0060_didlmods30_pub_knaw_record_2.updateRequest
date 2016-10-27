@@ -56,6 +56,10 @@
                                                 &lt;/mods:role&gt;
                                             &lt;/mods:name&gt;
 
+                                            &lt;mods:abstract&gt;
+                                                Samenvatting
+                                            &lt;/mods:abstract&gt;
+
                                             &lt;mods:name ID=&quot;FND_1&quot; type=&quot;corporate&quot;&gt;
                                                 &lt;mods:namePart&gt;European Commission CORDIS&lt;/mods:namePart&gt;
                                                 &lt;mods:role&gt;

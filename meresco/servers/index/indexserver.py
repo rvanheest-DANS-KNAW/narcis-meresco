@@ -99,9 +99,9 @@ UNQUALIFIED_TERM_FIELDS = [('__all__', 1.0)]
 
 drilldownFields = [
     # def __init__(self, name, hierarchical=False, multiValued=True, indexFieldName=None):
-    DrilldownField(untokenizedFieldname('meta:repositorygroupid')),
-    DrilldownField(untokenizedFieldname('meta:collection')),
-    DrilldownField(untokenizedFieldname('genre')),
+    DrilldownField(untokenizedFieldname('meta:repositorygroupid')), # Was:
+    DrilldownField(untokenizedFieldname('meta:collection')), # was:
+    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Echter lijkt dit een 'reserved' keyword: Zowel veldnaam als waarden verdijnen automagic: Nergens meer te vinden...
     DrilldownField(untokenizedFieldname('access')),
     DrilldownField(untokenizedFieldname('dd_year')),
     DrilldownField(untokenizedFieldname('status')),
@@ -120,19 +120,21 @@ drilldownFields = [
 
 # Add any non-drilldown untokenized fields:
 untokenizedFieldnames = [f.name for f in drilldownFields] + [
-    untokenizedFieldname('oai:identifier'),
-    untokenizedFieldname('meta:repositoryid'),
-    untokenizedFieldname('funding_id'),
-    untokenizedFieldname('dare:identifier'),
-    untokenizedFieldname('publication_identifier'),
+    untokenizedFieldname('oai:id'), # Was: 
+    untokenizedFieldname('meta:repositoryid'), # Was:
+    untokenizedFieldname('fundingid'), # Was funding_id
+    untokenizedFieldname('dare:id'), #Was: dare_identifier
+    untokenizedFieldname('publicationid'), # Was: publication_identifier
     untokenizedFieldname('mutatiedatum'),
     untokenizedFieldname('dateissued'),
     untokenizedFieldname('dais'),
     untokenizedFieldname('dais_aut'),
     untokenizedFieldname('dais_non_aut'),
-    untokenizedFieldname('persistentidentifier'),
+    untokenizedFieldname('persistentid'),
     untokenizedFieldname('sort_title_en'),
     untokenizedFieldname('sort_title'),
+    untokenizedFieldname('pidref'),
+    untokenizedFieldname('humanstartpage'),
 ]
 
 DEFAULT_CORE = 'narcis'
@@ -286,7 +288,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
                                     # (XmlXPath(['/oai:record/oai:metadata/norm:md_original/oai_dc:dc'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
                                         # (MetaToFieldsList(), # Platte lijst met veldnamen en waardes...
                                         (NormdocToFieldsList(), # Platte lijst met veldnamen en waardes...
-                                            (LogComponent("NormdocToFieldsList"),), # [DcToFieldsList] add(*(), **{'fieldslist': [('dc:identifier', 'http://meresco.com?record=1'), ('dc:description', 'This is an example program about Search with Meresco'), ('dc:title', 'Example Program 1'), ('dc:creator', 'Seecr'), ('dc:publisher', 'Seecr'), ('dc:date', '2016'), ('dc:type', 'Example'), ('dc:subject', 'Search'), ('dc:language', 'en'), ('dc:rights', 'Open Source')], 'partname': 'record', 'identifier': 'meresco:record:1'})
+                                            # (LogComponent("NormdocToFieldsList"),), # [DcToFieldsList] add(*(), **{'fieldslist': [('dc:identifier', 'http://meresco.com?record=1'), ('dc:description', 'This is an example program about Search with Meresco'), ('dc:title', 'Example Program 1'), ('dc:creator', 'Seecr'), ('dc:publisher', 'Seecr'), ('dc:date', '2016'), ('dc:type', 'Example'), ('dc:subject', 'Search'), ('dc:language', 'en'), ('dc:rights', 'Open Source')], 'partname': 'record', 'identifier': 'meresco:record:1'})
                                             (FieldsListToLuceneDocument( # Maakt addDocument messege + creeert de facet/drilldown velden waarvan de value's tot max. 256 chars getruncated worden.
                                                     fieldRegistry=luceneWriter.settings.fieldRegistry, # o.a. drilldownfields definitie
                                                     untokenizedFieldnames=untokenizedFieldnames, # untokenized fields

@@ -95,9 +95,10 @@ def getNamespace(tagName):
 
 # Een simpele mapping van velden die 'slechts' hernoemt dienen te worden, voordat ze de index in verwdijnen.
 # Voor (samengestelde) velden die nog een (inhoudelijke) bewerking nodig hebben moet Xpath gebruikt worden.
+# TODO: alle index field names met ergens 'identifier' zijn hernoemt naar 'id'...
 fieldnamesMapping = {
     'long.metadata.dateIssued.parsed'      : 'dateissued',
-    'long.metadata.genre'                  : 'genre',
+    'long.metadata.genre'                  : 'pubtype',
     'long.metadata.publisher'              : 'publisher',
     'long.metadata.language'               : 'language',
     'long.metadata.coverage'               : 'coverage',
@@ -105,9 +106,10 @@ fieldnamesMapping = {
     'long.metadata.relatedItem.placeTerm'       : UNQUALIFIED_TERMS, # __all__
     'long.metadata.relatedItem.titleInfo.title' : UNQUALIFIED_TERMS, # __all__
     'long.metadata.relatedItem.publisher'       : UNQUALIFIED_TERMS, # __all__
-    'long.metadata.grantAgreements.grantAgreement.code' : 'funding_id',
+    'long.metadata.grantAgreements.grantAgreement.code' : 'fundingid',
     'long.accessRights'                    : 'access',
-    'long.persistentIdentifier'            : 'persistentidentifier',
+    'long.persistentIdentifier'            : 'persistentid',
+    'long.humanStartPage'            : 'humanstartpage',
     'organisatie.acroniem'             : 'acroniem',
     'organisatie.taak_en'              : 'abstract_en',
     'organisatie.taak_nl'              : 'abstract',
@@ -122,8 +124,8 @@ fieldnamesMapping = {
     }
 
 MetaFieldNamesToXpath = {
-    'oai:identifier'        : '/meta:meta/meta:record/meta:id/text()',
-    'dare:identifier'       : '/meta:meta/meta:record/meta:id/text()',
+    'oai:id'        : '/meta:meta/meta:record/meta:id/text()',
+    'dare:id'       : '/meta:meta/meta:record/meta:id/text()',
     'meta:repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
     'meta:repositorygroupid': '/meta:meta/meta:repository/meta:repositoryGroupId/text()',
     'meta:collection'       : '/meta:meta/meta:repository/meta:collection/text()',
@@ -150,7 +152,8 @@ fieldNamesXpathMap = {
     'dd_os'          : "//org:organisatie/@code", # Onderzoekschool
     'dd_penv'        : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
     'dd_fin'         : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
-    'publication_identifier': "//long:publication_identifier/text()", # MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
+    'publicationid'  : "//long:publication_identifier/text()", # TODO: Bestaat dit veld in LONG??? MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
+    'pidref'         : "//long:long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
     }
 
 
@@ -183,7 +186,7 @@ class NormdocToFieldsList(Observable):
         # Add known meta fields for all records: 
         for field, xpad in MetaFieldNamesToXpath.iteritems():
             self._fieldslist.append((field, e_metapart.xpath(xpad, namespaces=namespacesmap)[0]))
-            if self._verbose: print 'addField:', field.upper(), "-->", "Waarde..."
+            if self._verbose: print 'addField:', field.upper(), "-->", e_metapart.xpath(xpad, namespaces=namespacesmap)[0]
 
         record = None
         if wcp_collection in WCPNODCOLLECTION:
@@ -447,7 +450,7 @@ class NormdocToFieldsList(Observable):
                             if roleterm[0].lower() == 'cre' and (family or given): #We're NOT interested in unstractured/displayForm labels here...
                                 ds_creators.append(', '.join(fg_naam))
                 if len(nids) > 0:
-                    print "Aantal name nameIdentifiers (pub):", len(nids)
+                    # print "Aantal name nameIdentifiers (pub):", len(nids)
                     for nid in nids:
                         nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
                         if nameId.is_valid():

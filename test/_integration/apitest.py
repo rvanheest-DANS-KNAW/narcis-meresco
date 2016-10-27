@@ -52,26 +52,40 @@ class ApiTest(IntegrationTestCase):
             ), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title[1]/text()')))
 
     def testSruQueryWithUntokenized(self):
-        response = self.doSruQuery(**{"query": 'untokenized.dc:identifier exact "http://meresco.com?record=1"'})        
-        # print "DC:Identifier:", etree.tostring(response)
+        response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "long"})        
+        # print "humanStartPage:", etree.tostring(response)
         self.assertEqual('meresco:record:1', xpathFirst(response, '//srw:recordIdentifier/text()'))
-        response = self.doSruQuery(**{"query": 'untokenized.dc:date exact "2016"'})
-        self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        response = self.doSruQuery(**{"query": 'untokenized.dd_year exact "2016"'})
+        # print "dd_year:", etree.tostring(response)
+        self.assertEqual('3', xpathFirst(response, '//srw:numberOfRecords/text()'))
 
     def testSruQueryWithDrilldown(self):
-        # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dc:date,dc:subject,genre"})
-        response = self.doSruQuery(**{"query": 'dc:title = "Example Program"', "x-term-drilldown": "dc:date,dc:subject"})
+        # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
+        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '1', "x-term-drilldown": "dd_cat:0"})
         # print "DD body:", etree.tostring(response)
-        self.assertEqual('2', xpathFirst(response, '//srw:numberOfRecords/text()'))
-        self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
+        self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        # self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
-        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dc:date"]/drilldown:item')
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('2016', '2'), ('tweeduizendzestien', '1')], drilldown)
+        # print 'DD:', drilldown
+        self.assertEqual([('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
 
-        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dc:subject"]/drilldown:item')
+        # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
+        # drilldown = [(i.text, i.attrib['count']) for i in ddItems]
+        # self.assertEqual([('Search', '1'), ('Programming', '1')], drilldown)
+
+    def testSruQueryWithMultipleDrilldown(self):
+        # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
+        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta:collection:0,meta:repositorygroupid:0,access:0,pubtype:0"})
+
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('Search', '1'), ('Programming', '1')], drilldown)
+        self.assertEqual([('openAccess', '4'), ('closedAccess', '3')], drilldown)
+
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="pubtype"]/drilldown:item')
+        drilldown = [(i.text, i.attrib['count']) for i in ddItems]
+        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1')], drilldown)
 
     def testSruLimitStartRecord(self):
         response = self.doSruQuery(**{'maximumRecords': '1', 'startRecord': '4002', 'query':'*'})
@@ -100,12 +114,12 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(set(['publication' ]), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
-        header, body = getRequest(self.apiPort, '/rss', dict(query="dc:title=en"))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="title=en"))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(2, len(items))
-        self.assertEqual(set(["Example Program 1", "Example Program 2"]), set(xpath(body, "//item/title/text()")))
-        self.assertEqual(set(["This is an example program about Search with Meresco", "This is an example program about Programming with Meresco"]), set(xpath(body, "//item/description/text()")))
+        self.assertEqual(set(["Paden en stromingen---a historical survey", "Appositie en de interne struktuur van de NP"]), set(xpath(body, "//item/title/text()")))
+        self.assertEqual(set(["Samenvatting", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
 
     def testLog(self):
         header, body = getRequest(self.apiPort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
