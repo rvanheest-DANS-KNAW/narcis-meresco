@@ -99,9 +99,9 @@ UNQUALIFIED_TERM_FIELDS = [('__all__', 1.0)]
 
 drilldownFields = [
     # def __init__(self, name, hierarchical=False, multiValued=True, indexFieldName=None):
-    DrilldownField(untokenizedFieldname('meta:repositorygroupid')), # Was:
-    DrilldownField(untokenizedFieldname('meta:collection')), # was:
-    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Echter lijkt dit een 'reserved' keyword: Zowel veldnaam als waarden verdijnen automagic: Nergens meer te vinden...
+    DrilldownField(untokenizedFieldname('meta:repositorygroupid')), # Was: 'repositorygroup_id'
+    DrilldownField(untokenizedFieldname('meta:collection')), # was: 'collection'
+    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdijnen automagic: Nergens meer te vinden...
     DrilldownField(untokenizedFieldname('access')),
     DrilldownField(untokenizedFieldname('dd_year')),
     DrilldownField(untokenizedFieldname('status')),
@@ -120,7 +120,7 @@ drilldownFields = [
 
 # Add any non-drilldown untokenized fields:
 untokenizedFieldnames = [f.name for f in drilldownFields] + [
-    untokenizedFieldname('oai:id'), # Was: 
+    untokenizedFieldname('oai:id'), # Was: 'oai_identifier'
     untokenizedFieldname('meta:repositoryid'), # Was:
     untokenizedFieldname('fundingid'), # Was funding_id
     untokenizedFieldname('dare:id'), #Was: dare_identifier
@@ -130,11 +130,11 @@ untokenizedFieldnames = [f.name for f in drilldownFields] + [
     untokenizedFieldname('nids'),
     untokenizedFieldname('nids_aut'),
     untokenizedFieldname('nids_non_aut'),
-    untokenizedFieldname('persistentid'),
+    untokenizedFieldname('persistentid'), # Was: 'persistentidentifier'
     untokenizedFieldname('sort_title_en'),
     untokenizedFieldname('sort_title'),
-    untokenizedFieldname('pidref'),
-    untokenizedFieldname('humanstartpage'),
+    untokenizedFieldname('pidref'), # new in m4.
+    untokenizedFieldname('humanstartpage'), # new in m4.
 ]
 
 DEFAULT_CORE = 'narcis'
