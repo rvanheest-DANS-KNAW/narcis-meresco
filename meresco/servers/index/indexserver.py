@@ -127,9 +127,9 @@ untokenizedFieldnames = [f.name for f in drilldownFields] + [
     untokenizedFieldname('publicationid'), # Was: publication_identifier
     untokenizedFieldname('mutatiedatum'),
     untokenizedFieldname('dateissued'),
-    untokenizedFieldname('dais'),
-    untokenizedFieldname('dais_aut'),
-    untokenizedFieldname('dais_non_aut'),
+    untokenizedFieldname('nids'),
+    untokenizedFieldname('nids_aut'),
+    untokenizedFieldname('nids_non_aut'),
     untokenizedFieldname('persistentid'),
     untokenizedFieldname('sort_title_en'),
     untokenizedFieldname('sort_title'),
