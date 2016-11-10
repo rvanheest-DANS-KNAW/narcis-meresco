@@ -31,7 +31,16 @@ from lxml import etree
 
 # TODO: create UnitTestCase for o.a. writeDelete / unDelete
 
-testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/OAI/2.0/branding/'})
+testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/OAI/2.0/branding/',
+    'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
+    'proj'   : 'http://www.onderzoekinformatie.nl/nod/act',
+    'org'    : 'http://www.onderzoekinformatie.nl/nod/org',
+    'long'   : 'http://www.knaw.nl/narcis/1.0/long/',
+    'short'  : 'http://www.knaw.nl/narcis/1.0/short/',
+    'mods'   : 'http://www.loc.gov/mods/v3',
+    'didl'   : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+    'norm'   : 'http://dans.knaw.nl/narcis/normalized',
+    })
 
 class ApiTest(IntegrationTestCase):
 
@@ -65,13 +74,39 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(2, 'title = program')
         self.assertSruQuery(3, 'untokenized.oai:id exact "record:1"')
         self.assertSruQuery(3, 'untokenized.dd_year exact "2016"')
-        self.assertSruQuery(1, 'untokenized.nids exact "info:eu-repo/dai/nl/29806278"', False)
-        # self.assertSruQuery(1, 'coverage = Europe')
-        # self.assertSruQuery(1, 'format = "text/xml"')
-        # self.assertSruQuery(2, 'untokenized.nids exact "PRS1242583"')
-        # self.assertSruQuery(2, 'untokenized.nids exact "http://orcid.org/0000-0002-4703-3788"')
-        # self.assertSruQuery(3, 'untokenized.nids exact "http://isni.org/isni/0000000081508690"')
-        # self.assertSruQuery(2, 'untokenized.nids exact "info:eu-repo/dai/nl/071792279"')
+        self.assertSruQuery(1, 'untokenized.nids exact "info:eu-repo/dai/nl/29806278"')
+        self.assertSruQuery(1, 'coverage = Europe')
+        self.assertSruQuery(2, 'format = "application/pdf"')
+        self.assertSruQuery(2, 'untokenized.nids exact "PRS1242583"')
+        self.assertSruQuery(2, 'untokenized.nids exact "http://orcid.org/0000-0002-4703-3788"')
+        self.assertSruQuery(2, 'untokenized.nids exact "http://orcid.org/0000-0002-1825-0097"')
+        self.assertSruQuery(3, 'untokenized.nids exact "http://isni.org/isni/0000000081508690"')
+        self.assertSruQuery(1, 'untokenized.nids_non_aut exact "info:eu-repo/dai/nl/071792279"')
+        self.assertSruQuery(1, 'untokenized.nids_aut exact "info:eu-repo/dai/nl/071792279"')
+        self.assertSruQuery(4, '"info:eu-repo/dai/nl/071792279"')
+        self.assertSruQuery(1, '"OND1272024"')
+        self.assertSruQuery(1, '"ORG1236141"')
+        self.assertSruQuery(1, 'untokenized.oai:id exact "ORG1236141"')
+        self.assertSruQuery(1, '"1937-1632-REL"')
+        self.assertSruQuery(3, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/282797"')
+        self.assertSruQuery(1, '"Veenendaal"')
+
+
+    def testPublIdentifier(self):
+        response = self.doSruQuery(**{'query':'1937-1632-REL', 'maximumRecords': '1', 'recordSchema':'long'})
+        # print "DD body:", etree.tostring(response)
+        #print body.searchRetrieveResponse.records.record.recordData.knaw_long.metadata.relatedItem.publication_identifier
+        self.assertEqual('Springer', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:publisher/text()'))
+        self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
+    
+        
+    def testNODPRSnameIdentifiers(self):
+        self.assertSruQuery(2, '"PRS1242583"')
+        self.assertSruQuery(2, '0000000247033788')
+        self.assertSruQuery(2, '"0000-0002-4703-3788"')
+        self.assertSruQuery(2, '"0000 0002 4703 3788"')
+        self.assertSruQuery(2, '"orcid.org/0000-0002-4703-3788"')
+        self.assertSruQuery(2, '"http://orcid.org/0000-0002-4703-3788"')
 
 
     def testSruQueryWithDrilldown(self):
@@ -141,8 +176,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('"Example Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
 
     def assertSruQuery(self, numberOfRecords, query, printout=False):
-        response = self.doSruQuery(**{'query':query, "recordSchema": "short", 'maximumRecords': '1'})
-        if printout: print "SruQuery response:", etree.tostring(response)
+        response = self.doSruQuery(**{'query':query, "recordSchema": "short", "x-recordSchema": "header"}) # , 'maximumRecords': '1'
+        if printout: print "SruQuery response:", etree.tostring(response, pretty_print = True, encoding='utf-8')
         self.assertEquals(numberOfRecords, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
 
     def doSruQuery(self, **arguments):
