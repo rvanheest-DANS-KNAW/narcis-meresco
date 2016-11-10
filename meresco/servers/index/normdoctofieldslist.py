@@ -135,7 +135,7 @@ MetaFieldNamesToXpath = {
 fieldNamesXpathMap = {
     'subject'        : "//*[local-name()='topic' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from Long:
     'leeropdracht'   : "//*[local-name()='leeropdracht_en' or local-name()='leeropdracht_nl']/text()", # Leeropdracht from personrecord
-    'nids'           : "//long:nameidentifier/text()", # All dai's: also from relatedItems
+    'nids'           : "//long:relatedItem//long:nameIdentifier/text()", # All nid's: also from relatedItems
     'abstract'       : "//long:metadata/long:abstract[not (@xml:lang)]/text()", # 'abstract' field from KNAWLONG.
     'abstract_en'    : "//long:metadata/long:abstract[@xml:lang='en']/text()", # 'abstract_en' field from KNAWLONG.
     'title'          : "//long:metadata/long:titleInfo[not (@xml:lang)]/long:*/text()", #'title'+'subtitle' field from KNAWLONG.
@@ -341,7 +341,7 @@ class NormdocToFieldsList(Observable):
                 self._fieldslist.append((fieldName, result))               
         else:  # All other remaining results are joined with a space:
             self._fieldslist.append((fieldName, ' '.join(results).replace('\n', ''))) 
-            if self._verbose: print 'addField:', fieldName.upper(), "-->", ' '.join(results).replace('\n', '')[:self._truncate_chars]
+            if self._verbose: print 'adddField:', fieldName.upper(), "-->", ' '.join(results).replace('\n', '')[:self._truncate_chars]
 
     # returns the year category, used for drilldown: <1900, <1910 etc.
     def _getYearGroupForDrilldown(self, date_string):
@@ -423,8 +423,8 @@ class NormdocToFieldsList(Observable):
                 nids = name.xpath('self::long:name/long:nameIdentifier', namespaces=namespacesmap)
                 patroniem = name.xpath('self::long:name/long:termsOfAddress/text()', namespaces=namespacesmap)
                 tiepe = name.xpath('self::long:name/long:type/text()', namespaces=namespacesmap)
-                strdai='' #temp DAI container
-                fg_naam = [] #fg = Family + Given name...
+                strdai='' # temp DAI container
+                fg_naam = [] # fg = Family + Given name...
                 
                 if family: fg_naam.append(family[0])
                 if given: fg_naam.append(given[0])
@@ -457,12 +457,12 @@ class NormdocToFieldsList(Observable):
                             #  Add 'known' ID format to dais/nameID field:
                             self._fieldslist.append(( nidFieldname, nameId.get_id() ))
                             self._fieldslist.append(( 'nids', nameId.get_id() ))
-                            if self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id()
-                            if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
+                            if not self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id()
+                            if not self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
                             #  Add all ID formats to general field:
                             for variant in nameId.getTypedVariants():
                                 self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
-                                if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+                                if not self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
 
         # NOD_PRS:
         elif wcpcollection == 'person':

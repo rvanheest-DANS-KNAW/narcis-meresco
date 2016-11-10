@@ -59,6 +59,21 @@ class ApiTest(IntegrationTestCase):
         # print "dd_year:", etree.tostring(response)
         self.assertEqual('3', xpathFirst(response, '//srw:numberOfRecords/text()'))
 
+
+    def testSruIndex(self):
+        self.assertSruQuery(2, '__all__ = "Seecr"')
+        self.assertSruQuery(2, 'title = program')
+        self.assertSruQuery(3, 'untokenized.oai:id exact "record:1"')
+        self.assertSruQuery(3, 'untokenized.dd_year exact "2016"')
+        self.assertSruQuery(1, 'untokenized.nids exact "info:eu-repo/dai/nl/29806278"', False)
+        # self.assertSruQuery(1, 'coverage = Europe')
+        # self.assertSruQuery(1, 'format = "text/xml"')
+        # self.assertSruQuery(2, 'untokenized.nids exact "PRS1242583"')
+        # self.assertSruQuery(2, 'untokenized.nids exact "http://orcid.org/0000-0002-4703-3788"')
+        # self.assertSruQuery(3, 'untokenized.nids exact "http://isni.org/isni/0000000081508690"')
+        # self.assertSruQuery(2, 'untokenized.nids exact "info:eu-repo/dai/nl/071792279"')
+
+
     def testSruQueryWithDrilldown(self):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
         response = self.doSruQuery(**{"query": '*', 'maximumRecords': '1', "x-term-drilldown": "dd_cat:0"})
@@ -124,6 +139,11 @@ class ApiTest(IntegrationTestCase):
     def testLog(self):
         header, body = getRequest(self.apiPort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
         self.assertEqual('"Example Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
+
+    def assertSruQuery(self, numberOfRecords, query, printout=False):
+        response = self.doSruQuery(**{'query':query, "recordSchema": "short", 'maximumRecords': '1'})
+        if printout: print "SruQuery response:", etree.tostring(response)
+        self.assertEquals(numberOfRecords, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
 
     def doSruQuery(self, **arguments):
         queryArguments = {'version': '1.2', 'operation': 'searchRetrieve'}

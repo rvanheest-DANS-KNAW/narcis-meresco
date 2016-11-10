@@ -55,6 +55,10 @@ ISO639 = ["aar", "abk", "ace", "ach", "ada", "ady", "afa", "afh", "afr", "ain", 
 
 BINDING_DELIMITER = '; '
 
+# mods:nameIdentifiers that will be processed to long. Other types will be ignored!
+# ORDER does matter!
+supportedNids = ['dai-nl', 'orcid', 'isni', 'nod-prs']
+
 class NormaliseOaiRecord(UiaConverter):
 
     ACCESS_LEVELS = ['openAccess', 'restrictedAccess', 'closedAccess', 'embargoedAccess']
@@ -554,33 +558,66 @@ class NormaliseOaiRecord(UiaConverter):
                         etree.SubElement(e_name_type, "mcRoleTerm").text = roleTerm[0].strip()
                     # Get all mods name/nameIdentifier:
                     # Known (NOD person) nameIdentifiers to look for:
-                    bln_hasDAI_NID = False
-                    supportedNids = ['dai-nl', 'orcid', 'isni']
-                    for nid_type in supportedNids:
-                        nameidentifiers = name.xpath('self::mods:name/mods:nameIdentifier[@type="'+nid_type+'"]/text()', namespaces=namespacesmap)
+                    # bln_hasDAI_NID = False
+                    # supportedNids = ['dai-nl', 'orcid', 'isni']
+                    # for nid_type in supportedNids:
+                    #     nameidentifiers = name.xpath('self::mods:name/mods:nameIdentifier[@type="'+nid_type+'"]/text()', namespaces=namespacesmap)
                         
-                        for nid in nameidentifiers:
-                            nameId = NameIdentifierFactory.factory(nid_type, nid)
-                            if nameId.is_valid():
-                                e_nid = etree.SubElement(e_name_type, "nameIdentifier")
-                                e_nid.attrib['type'] = nameId.get_name()
-                                e_nid.text = nameId.get_id()
-                                if nameId.get_name() == 'dai-nl': bln_hasDAI_NID = True
+                    #     for nid in nameidentifiers:
+                    #         nameId = NameIdentifierFactory.factory(nid_type, nid)
+                    #         if nameId.is_valid():
+                    #             e_nid = etree.SubElement(e_name_type, "nameIdentifier")
+                    #             e_nid.attrib['type'] = nameId.get_name()
+                    #             e_nid.text = nameId.get_id()
+                    #             if nameId.get_name() == 'dai-nl': bln_hasDAI_NID = True
 
-                    # Get DAI from DaiList-extension:
-                    if not bln_hasDAI_NID: # Only look for DAI-extension if no valid dai has been found in (mods 3.6) nameIdentifier tag.
-                        extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
-                        if extensionid:
-                            # Select dai and mandatory 'some' authority:
-                            dai = lxmlNode.xpath(root+'mods:extension/dai:daiList/dai:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
-                            # Hack, since MODS doc example is in wrong (mods) namespace!
-                            if not dai: dai = lxmlNode.xpath(root+'mods:extension/mods:daiList/mods:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
-                            if dai:
-                                nameId = NameIdentifierFactory.factory('dai-nl', dai[0].strip())
-                                if nameId.is_valid():
+                    # # Get DAI from DaiList-extension:
+                    # if not bln_hasDAI_NID: # Only look for DAI-extension if no valid dai has been found in (mods 3.6) nameIdentifier tag.
+                    #     extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
+                    #     if extensionid:
+                    #         # Select dai and mandatory 'some' authority:
+                    #         dai = lxmlNode.xpath(root+'mods:extension/dai:daiList/dai:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                    #         # Hack, since MODS doc example is in wrong (mods) namespace!
+                    #         if not dai: dai = lxmlNode.xpath(root+'mods:extension/mods:daiList/mods:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                    #         if dai:
+                    #             nameId = NameIdentifierFactory.factory('dai-nl', dai[0].strip())
+                    #             if nameId.is_valid():
+                    #                 e_nid = etree.SubElement(e_name_type, "nameIdentifier")
+                    #                 e_nid.attrib['type'] = nameId.get_name()
+                    #                 e_nid.text = nameId.get_id()
+
+                    # Transfer valid & known nameIdentifiers from MODS name:
+                    daiset = set() # Unique dai-container.
+                    nameidentifiers = name.xpath('self::mods:name/mods:nameIdentifier', namespaces=namespacesmap)
+                    for nid in nameidentifiers:
+                        nid_type = nid.get("type")
+                        if nid_type in supportedNids:
+                            nameId = NameIdentifierFactory.factory(nid_type, nid.text)
+                            if nameId.is_valid():
+                                if nameId.get_name() == supportedNids[0]:
+                                    daiset.add(nameId.get_id()) # Add valid dai to dai-container.
+                                else: # Add valid non-dai nameIdentifiers directly 
                                     e_nid = etree.SubElement(e_name_type, "nameIdentifier")
                                     e_nid.attrib['type'] = nameId.get_name()
                                     e_nid.text = nameId.get_id()
+                                
+                    # Transfer valid DAI's from old style daiList-mods-extension: 
+                    extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
+                    if extensionid:
+                        # Select dai and mandatory 'some' authority:
+                        daais = lxmlNode.xpath(root+'mods:extension/dai:daiList/dai:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                        # Hack, since MODS doc example is in wrong (mods) namespace!
+                        if not daais: daais = lxmlNode.xpath(root+'mods:extension/mods:daiList/mods:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                        for dai in daais:
+                            nameId = NameIdentifierFactory.factory(supportedNids[0], dai.strip())
+                            if nameId.is_valid():
+                                daiset.add(nameId.get_id())
+                            
+                    for dai in sorted(daiset): # Add all (sorted, to ease unittesting) unique dai's found from old dailist and nameIdentifiers:
+                        e_nid = etree.SubElement(e_name_type, "nameIdentifier")
+                        e_nid.attrib['type'] = supportedNids[0]
+                        e_nid.text = dai
+
 
         # Get creators and contributors from DC if NO FULLMODS available, or if MMODS did not yield any authors:
         if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):

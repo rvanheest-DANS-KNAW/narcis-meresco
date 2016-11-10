@@ -59,13 +59,6 @@
                                 &lt;/mods:titleInfo&gt;
                                 &lt;mods:abstract xml:lang=&quot;nl&quot;&gt;FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang&lt;/mods:abstract&gt;
                                 &lt;mods:abstract xml:lang=&quot;en&quot;&gt;EngelsDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD&lt;/mods:abstract&gt;
-                                &lt;mods:name type=&quot;corporate&quot; ID=&quot;n565-aut2&quot;&gt;
-                                    &lt;mods:namePart type=&quot;given&quot;&gt;Uni&lt;/mods:namePart&gt;
-                                    &lt;mods:namePart type=&quot;family&quot;&gt;Versiteit&lt;/mods:namePart&gt;
-                                    &lt;mods:role&gt;
-                                        &lt;mods:roleTerm type=&quot;code&quot; authority=&quot;marcrelator&quot;&gt;dgg&lt;/mods:roleTerm&gt;
-                                    &lt;/mods:role&gt;
-                                &lt;/mods:name&gt;
                                 &lt;mods:name type=&quot;personal&quot; ID=&quot;n565-aut0&quot;&gt;
                                     &lt;mods:namePart type=&quot;given&quot;&gt;prof.dr. H.J.&lt;/mods:namePart&gt;
                                     &lt;mods:namePart type=&quot;family&quot;&gt;Bennis&amp;amp;Bennis&lt;/mods:namePart&gt;
@@ -77,9 +70,7 @@
                                     &lt;mods:nameIdentifier type=&quot;dai-nl&quot; typeURI=&quot;info:eu-repo/dai/nl&quot;&gt;071792279&lt;/mods:nameIdentifier&gt;
                                     &lt;!--ISNI--&gt;
                                     &lt;mods:nameIdentifier type=&quot;isni&quot; typeURI=&quot;http://id.loc.gov/vocabulary/identifiers/isni&quot;&gt;http://isni.org/isni/0000 0000 8150 8690&lt;/mods:nameIdentifier&gt;
-                                    &lt;!--ORCID (FAKE)--&gt;
                                     &lt;mods:nameIdentifier type=&quot;orcid&quot; typeURI=&quot;http://id.loc.gov/vocabulary/identifiers/orcid&quot;&gt;http://orcid.org/0000-0002-1825-0097&lt;/mods:nameIdentifier&gt;
-                                    
                                 &lt;/mods:name&gt;
                                 &lt;mods:name type=&quot;personal&quot; ID=&quot;n565-aut1&quot;&gt;
                                     &lt;mods:namePart type=&quot;given&quot;&gt;Lorum&lt;/mods:namePart&gt;
@@ -89,12 +80,41 @@
                                         &lt;mods:roleTerm type=&quot;code&quot; authority=&quot;marcrelator&quot;&gt;rev&lt;/mods:roleTerm&gt;
                                     &lt;/mods:role&gt;
                                 &lt;/mods:name&gt;
+                                &lt;mods:name type=&quot;corporate&quot; ID=&quot;n565-aut2&quot;&gt;
+                                    &lt;mods:namePart type=&quot;given&quot;&gt;Uni&lt;/mods:namePart&gt;
+                                    &lt;mods:namePart type=&quot;family&quot;&gt;Versiteit&lt;/mods:namePart&gt;
+                                    &lt;mods:role&gt;
+                                        &lt;mods:roleTerm type=&quot;code&quot; authority=&quot;marcrelator&quot;&gt;dgg&lt;/mods:roleTerm&gt;
+                                    &lt;/mods:role&gt;
+                                &lt;/mods:name&gt;    
                                 &lt;mods:extension&gt;
-                                    &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot;
-                                        xsi:schemaLocation=&quot;info:eu-repo/dai https://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;
+                                    &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot; xsi:schemaLocation=&quot;info:eu-repo/dai https://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;
                                         &lt;dai:identifier IDref=&quot;n565-aut0&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;071792279&lt;/dai:identifier&gt;
+                                        &lt;dai:identifier IDref=&quot;n565-aut0&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;068519397&lt;/dai:identifier&gt;
                                         &lt;dai:identifier IDref=&quot;n565-aut2&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;07193555X&lt;/dai:identifier&gt;
                                     &lt;/dai:daiList&gt;
+                                &lt;/mods:extension&gt;
+                                &lt;mods:extension&gt;
+                                    &lt;grantAgreementList xmlns=&quot;info:eu-repo/grantAgreement&quot; xsi:schemaLocation=&quot;info:eu-repo/grantAgreement http://purl.org/REP/standards/gal-extension.xsd&quot;&gt;
+                                        &lt;grantAgreement code=&quot;info:eu-repo/grantAgreement/EC/FP5/654321&quot;&gt;
+                                            &lt;funder IDref=&quot;n565-aut2&quot;/&gt;
+                                            &lt;title&gt;EERA Design Tools for Offshore Wind Farm Cluster (EERA-DTOC)&lt;/title&gt;
+                                            &lt;description&gt;The European Energy Research Alliance (EERA) together with some
+                                                high-impact industry partners addresses the call proposing an integrated and
+                                                validated design tool combining the state-of-the-art wake, yield and electrical
+                                                models available in the consortium, as a plug-in architecture with possibility for
+                                                third party models.&lt;/description&gt;
+                                        &lt;/grantAgreement&gt;
+                                        &lt;grantAgreement code=&quot;info:eu-repo/grantAgreement/EC/FP7/282797&quot;/&gt;
+                                    &lt;/grantAgreementList&gt;
+                                &lt;/mods:extension&gt;
+                                &lt;mods:extension&gt;
+                                    &lt;wmp:rights xmlns:wmp=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus&quot; xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;&gt;
+                                        &lt;dc:description&gt;© 2008 Royal Tropical Institute. This work is licensed under a
+                                            Creative Commons Attribution-Noncommercial-No Derivative Works 3.0 Unported
+                                            License.&lt;/dc:description&gt;
+                                        &lt;dc:rights&gt;http://creativecommons.org/licenses/by-nc-nd/3.0/&lt;/dc:rights&gt;
+                                    &lt;/wmp:rights&gt;
                                 &lt;/mods:extension&gt;
                                 &lt;mods:typeOfResource&gt;text&lt;/mods:typeOfResource&gt;
                                 &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00282162:root_id&lt;/mods:identifier&gt;
