@@ -72,9 +72,16 @@ class NormaliseOaiRecord(UiaConverter):
         self._openAccess = True #Reset AccesRights to openAcces
 
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=namespacesmap)
+        metapart = lxmlNode.xpath("//document:document/document:part[@name='meta']/text()", namespaces=namespacesmap)
+        wcpcollection = None
+        if len(metapart) == 1:
+            meta_lxml = etree.fromstring(metapart[0])
+            collection = meta_lxml.xpath('//meta:repository/meta:collection/text()', namespaces=namespacesmap)
+            if len(collection) == 1: wcpcollection = collection[0]
+
         record_lxml = etree.fromstring(record_part[0]) # Geen xml.sax.saxutils.unescape() hier: Dat doet lxml reeds voor ons.
         self._metadataformat = MetadataFormat.getFormat(record_lxml, self._uploadid) #TODO: pass it somehow from DNA, so we need to look this up only once per record.
-        converted_record_lxml = self._convertRecordMetadataToLong(record_lxml)# Check en insert normalised mods into record part.
+        converted_record_lxml = self._convertRecordMetadataToLong(record_lxml, wcpcollection)# Check en insert normalised mods into record part.
         record_txt = etree.tostring(converted_record_lxml, encoding="UTF-8") # convert from lxml to text.
         record_txt = record_txt.decode('utf-8') # Soms worden er chars opgestuurd die geen unicode zijn. Deze converteren we 'brute force'.
         lxmlNode.find('document:part[@name="record"]', namespaces=namespacesmap).text = record_txt # Set as text value.
@@ -83,9 +90,9 @@ class NormaliseOaiRecord(UiaConverter):
 
 
 
-    def _convertRecordMetadataToLong(self, lxmlNode):
+    def _convertRecordMetadataToLong(self, lxmlNode, wcpCollection):
         
-    # lxmlNode example:
+    # lxmlNode record example:
     # 
     # <record xmlns="http://www.openarchives.org/OAI/2.0/"
     #     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -122,6 +129,9 @@ class NormaliseOaiRecord(UiaConverter):
             e_longroot = etree.SubElement(e_norm_root, namespacesmap.curieToTag('long:long'), nsmap={None:namespacesmap['long']})
             # e_longroot = etree.Element(namespacesmap.curieToTag('long:long'), nsmap={None:namespacesmap['long']})
             e_longroot.set("version", LONG_VERSION)
+            # Add WCP Collection to long format:
+            etree.SubElement(e_longroot, "wcpcollection").text = wcpCollection
+
             e_longmetadata = etree.Element("metadata")
 
             if self._metadataformat in (MetadataFormat.MD_FORMAT[5], MetadataFormat.MD_FORMAT[6], MetadataFormat.MD_FORMAT[7]): # NOD records
