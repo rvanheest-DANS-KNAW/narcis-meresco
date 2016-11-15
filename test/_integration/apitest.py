@@ -145,12 +145,13 @@ class ApiTest(IntegrationTestCase):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
         # print "OAI body:", etree.tostring(body) #
         records = xpath(body, '//oai:record/oai:metadata')
-        self.assertEqual(10, len(records))
-
-    def testOaiPovenance(self):
-        header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
-        # print "OAI body:", etree.tostring(body)
+        self.assertEqual(7, len(records))
         self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
+
+    # def testOaiPovenance(self):
+    #     header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
+    #     # print "OAI body:", etree.tostring(body)
+    #     self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
     def testOaiIdentify(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="Identify"))
@@ -161,7 +162,7 @@ class ApiTest(IntegrationTestCase):
     def testOaiListSets(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))
         # print "ListSets", etree.tostring(body)
-        self.assertEqual(set(['publication' ]), set(xpath(body, '//oai:setSpec/text()')))
+        self.assertEqual(set(['publication','openaire','oa_publication','ec_fundedresources','thesis','dataset']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
         header, body = getRequest(self.apiPort, '/rss', dict(query="title=en"))

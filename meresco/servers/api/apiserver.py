@@ -57,6 +57,8 @@ from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
 from meresco.dans.shortconverter import ShortConverter
 from meresco.dans.oai_dcconverter import DcConverter
+from meresco.dans.filterwcpcollection import FilterWcpCollection
+
 # from meresco.dans.oaiprovenance import OaiProvenance
 from meresco.xml import namespaces
 
@@ -64,6 +66,7 @@ from storage.storageadapter import StorageAdapter
 
 from meresco.servers.index.indexserver import untokenizedFieldname, untokenizedFieldnames, DEFAULT_CORE
 from meresco.servers.gateway.gatewayserver import NORMALISED_DOC_NAME
+
 
 DEFAULT_PARTNAME = 'oai_dc'
 
@@ -94,26 +97,25 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                             (storageComponent,),
                         )
                     ),
-                    (FilterMessages(['add']),
+                    (FilterMessages(allowed=['add']),
                         # TODO: onderstaande toKwarg='data' kan eruit. Dan de volgende regel ook:-)
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
                             (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
-                                (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                     (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
                                             (storageComponent,) # Schrijft oai:metadata (=origineel) naar storage.
                                         )
                                     )
-                                    # (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publications'], name='NARCISPORTAL'),
-                                    #     (oaiJazz,),
-                                    # )
                                 ),
-                                (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
+                                (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
                                     (RewritePartname("long"), # Hernoemt partname van 'record' naar "long".
-                                        (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                            (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
+                                        (FilterWcpCollection(disallowed=['person', 'project', "organisation"]),
+                                            (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
+                                                (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
+                                            )
                                         ),
-                                        (ShortConverter(fromKwarg='lxmlNode'),
+                                        (ShortConverter(fromKwarg='lxmlNode'), # creeer 'short' subset formaat.
                                             (RewritePartname("short"),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                     (storageComponent,) # Schrijft 'short' naar storage.
@@ -125,32 +127,57 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                             (RewritePartname("oai_dc"),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                     (storageComponent,) # Schrijft 'oai_dc' naar storage.
-                                                ),
-                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc", "long"], setSpecs=['publication'], name='NARCISPORTAL'),
-                                                    (oaiJazz,), # Stop alles wat geconverteerd is naar DC ook in OAI-PMH repo.
                                                 )
                                             )
                                         )
                                     )
                                 ),
                                 # TODO: Check indien conversies misgaan, dat ook de meta en header part niet naar storage gaan: geen 1 part als het even kan...
-                                # Schrijf headerPart naar storage:
+                                # Schrijf 'header' partname naar storage:
                                 (XmlXPath(['/oai:record/oai:header'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
                                     (RewritePartname("header"),
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
                                             (storageComponent,) # Schrijft OAI-header naar storage.
                                         )
                                     )
+                                ),
+                                (FilterWcpCollection(allowed=['publication']),
+                                    # (LogComponent("PUBLICATION"),),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publication'], name='NARCISPORTAL'), #TODO: Skip name='NARCISPORTAL'
+                                        (oaiJazz,),
+                                    ),
+                                    (XmlXPath(["//long:long[long:accessRights ='openAccess']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                        # (LogComponent("OPENACCESS"),),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire'], name='NARCISPORTAL'),
+                                            (oaiJazz,),
+                                        )
+                                    ),
+                                    (XmlXPath(["//long:long/long:metadata[long:genre ='doctoralthesis']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['thesis'], name='NARCISPORTAL'),
+                                            (oaiJazz,),
+                                        )
+                                    ),
+                                    (XmlXPath(['//long:long/long:metadata/long:grantAgreements/long:grantAgreement[long:code[contains(.,"greement/EC/") or contains(.,"greement/ec/")]][1]'], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire'], name='NARCISPORTAL'),
+                                            (oaiJazz,),
+                                        )
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['dataset']),
+                                    # (LogComponent("DATASET"),),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset'], name='NARCISPORTAL'),
+                                        (oaiJazz,),
+                                    )
                                 )
                             )
-                        ), # Schrijf metaPart naar storage:
+                        ), # Schrijf 'meta' partname naar storage:
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="meta"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
                             (RewritePartname("meta"),
                                 (storageComponent,) # Schrijft harvester 'meta' data naar storage.
                             )
                         )
                     ),
-                    (FilterMessages(allowed=['add']),
+                    (FilterMessages(allowed=['add']), # TODO: Remove this line.
                         # (LogComponent("UnDelete"),),
                         (ResurrectTombstone(),
                             (storageComponent,),
