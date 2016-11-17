@@ -328,7 +328,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                             (PathFilter(['/sru']),
                                 (LogCollectorScope('sru-scope'),
                                     (SruParser(
-                                            host='www.narcis.nl',
+                                            host='sru.narcis.nl',
                                             port=80,
                                             defaultRecordSchema='short',
                                             defaultRecordPacking='xml'),
@@ -363,9 +363,6 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                             wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
                                             oai_identifier = ('meta', '//meta:record/meta:id/text()'),
                                             language = ('Dummy: Language is auto provided by the calling RSS component, but needs to be present to serve the linkTemplate.')
-                                        ),
-                                        (StorageAdapter(),
-                                            (storage,)
                                         ),
                                         (StorageAdapter(),
                                             (storage,)
