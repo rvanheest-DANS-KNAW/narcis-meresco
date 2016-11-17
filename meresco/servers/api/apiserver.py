@@ -37,7 +37,7 @@ from meresco.core import Observable
 from meresco.core.alltodo import AllToDo
 from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
 
-from meresco.components import RenameFieldForExact, PeriodicDownload, XmlPrintLxml, XmlXPath, FilterMessages, RewritePartname, XmlParseLxml, CqlMultiSearchClauseConversion, PeriodicCall, Schedule, Rss, RssItem, XsltCrosswalk
+from meresco.components import RenameFieldForExact, PeriodicDownload, XmlPrintLxml, XmlXPath, FilterMessages, RewritePartname, XmlParseLxml, CqlMultiSearchClauseConversion, PeriodicCall, Schedule, XsltCrosswalk #, Rss, RssItem
 from meresco.components.cql import SearchTermFilterAndModifier
 from meresco.components.http import ObservableHttpServer, BasicHttpHandler, PathFilter, Deproxy
 from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog, LogCollectorScope, QueryLogWriter, DirectoryLog, LogFileServer, LogComponent
@@ -50,6 +50,8 @@ from meresco.lucene.remote import LuceneRemote
 from meresco.lucene.converttocomposedquery import ConvertToComposedQuery
 
 from seecr.utils import DebugPrompt
+
+from meresco.dans.merescocomponents import Rss, RssItem
 
 from meresco.components.drilldownqueries import DrilldownQueries
 from storage import StorageComponent
@@ -122,11 +124,12 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                                 )
                                             )
                                         ),
-                                        # Hernoem partname van 'record' naar "oai_dc".
-                                        (DcConverter(fromKwarg='lxmlNode'),
-                                            (RewritePartname("oai_dc"),
-                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                                    (storageComponent,) # Schrijft 'oai_dc' naar storage.
+                                        (FilterWcpCollection(disallowed=['person', 'project', "organisation"]),
+                                            (DcConverter(fromKwarg='lxmlNode'), # Hernoem partname van 'record' naar "oai_dc".
+                                                (RewritePartname("oai_dc"),
+                                                    (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
+                                                        (storageComponent,) # Schrijft 'oai_dc' naar storage.
+                                                    )
                                                 )
                                             )
                                         )
@@ -327,7 +330,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (SruParser(
                                             host='example.org',
                                             port=80,
-                                            defaultRecordSchema='oai_dc',
+                                            defaultRecordSchema='short',
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(
@@ -345,28 +348,61 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                 )
                             ),
                             (PathFilter('/rss'),
-                                (Rss(   title = 'Meresco',
-                                        description = 'RSS feed for Meresco',
-                                        link = 'http://meresco.org',
-                                        maximumRecords = 20),
+                                (Rss(   supportedLanguages = ['nl','en'], # defaults to first, if requested language is not available or supplied.
+                                        title = {'nl':'NARCIS', 'en':'NARCIS'},
+                                        description = {'nl':'NARCIS: De toegang tot de Nederlandse wetenschapsinformatie', 'en':'NARCIS: The gateway to Dutch scientific information'},
+                                        link = {'nl':'http://www.narcis.nl/?Language=nl', 'en':'http://www.narcis.nl/?Language=en'},
+                                        maximumRecords = 3),
                                     executeQueryHelix,
                                     (RssItem(
-                                            nsMap={
-                                                'dc': "http://purl.org/dc/elements/1.1/",
-                                                'oai_dc': "http://www.openarchives.org/OAI/2.0/oai_dc/",
-                                                'norm' : "http://dans.knaw.nl/narcis/normalized",
-                                                'long'  : 'http://www.knaw.nl/narcis/1.0/long/',
-                                            },
-                                            title = ("oai_dc", '/oai_dc:dc/dc:title/text()'),
-                                            description = ("oai_dc", '/oai_dc:dc/dc:description/text()'),
-                                            linkTemplate = 'http://localhost/sru?operation=searchRetrieve&version=1.2&query=dc:identifier%%3D%(identifier)s',
-                                            identifier = ("long", '/long:long/long:humanStartPage/text()')),
+                                            nsMap=NAMESPACEMAP,
+                                            # supportedLanguages=['nl','en'], # defaults to first, if requested language is not supported.
+                                            # title = ('short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
+                                            # description = ('short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
+                                            title = ('short', '//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()'),
+                                            description = ('short', '//short:abstract[not (@xml:lang)]/text()'),
+                                            # linkTemplate = 'http://www.steiny.nl/sru?operation=searchRetrieve&version=1.2&query=dc:identifier%%3D%(identifier)s',
+                                            linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',                                
+                                            # wcpcollection = ('meta', {'nl':'//*[local-name() = "collection"]/text()'}),
+                                            # oai_identifier = ('meta', {'nl':'//*[local-name() = "collection"]/text()'}),
+                                            wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
+                                            oai_identifier = ('meta', '//meta:record/meta:id/text()'),
+                                            language = ('meta', '//meta:repository/meta:repositoryGroupId/text()')
+                                        ),
                                         (StorageAdapter(),
                                             (storage,)
                                         )
                                     )
                                 )
                             ),
+
+
+                            # nsMap, title, description, linkTemplate, supportedLanguages, **linkFields
+                            # (PathFilter('/rss'), # Filter all requests starting with /rrs
+                            #     (Rss(
+                            #         supportedLanguages = ['nl','en'], # defaults to first, if requested language is not available or supplied.
+                            #         title = {'nl':'NARCIS', 'en':'NARCIS'},
+                            #         description = {'nl':'NARCIS: De toegang tot de Nederlandse wetenschapsinformatie', 'en':'NARCIS: The gateway to Dutch scientific information'},
+                            #         link = {'nl':'http://www.narcis.nl/?Language=nl', 'en':'http://www.narcis.nl/?Language=en'},
+                            #         maximumRecords = 20
+                            #         ),
+                            #         executeQueryHelix,
+                            #         (RssItem(
+                            #             nsMap = NAMESPACEMAP,
+                            #             supportedLanguages = ['nl','en'], # defaults to first, if requested language is not supported.
+                            #             title = ('knaw_short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
+                            #             description = ('knaw_short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
+                            #             pubdate = ('knaw_short', {'nl':'//short:dateIssued/short:parsed/text()'}),
+                            #             collection = ('meta', {'nl':'//*[local-name() = "collection"]/text()'}),                                
+                            #             #collection = ('meta', {'nl':'//meta:repository/meta:collection/text()'})
+                            #             ),
+                            #             (StorageAdapter(),
+                            #                 (storage,)
+                            #             )
+                            #         ),
+                            #     )
+                            # ),
+
                             (PathFilter('/log'),
                                 (LogFileServer(name="Example Queries", log=directoryLog, basepath='/log'),)
                             )

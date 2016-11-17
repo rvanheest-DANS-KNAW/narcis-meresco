@@ -45,20 +45,21 @@ testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/
 class ApiTest(IntegrationTestCase):
 
     def testSruQuery(self):
-        response = self.doSruQuery(query='*')
+        response = self.doSruQuery(query='*', recordSchema='short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
         self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
-        self.assertEqual(set(['Example Program 1',
-            'Example Program 2', 
+        self.assertEqual(set([
+            'Example Program 1',
+            'Example Program 2',
+            'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate',
+            'Appositie en de interne struktuur van de NP',
             'Paden en stromingen---a historical survey',
+            'Late-type Giants in the Inner Galaxy',
             'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)',
             'Conditiebepaling PVC',
-            'Appositie en de interne struktuur van de NP',
             'Wetenschapswinkel',
-            'Late-type Giants in the Inner Galaxy',
-            'H.J. Bennis',
-            'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate']
-            ), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title[1]/text()')))
+            'H.J. Bennis']
+            ), set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
 
     def testSruQueryWithUntokenized(self):
         response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "long"})        
@@ -165,12 +166,17 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(set(['publication','openaire','oa_publication','ec_fundedresources','thesis','dataset']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
-        header, body = getRequest(self.apiPort, '/rss', dict(query="title=en"))
+
+        # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
+
+        header, body = getRequest(self.apiPort, '/rss', dict(query="*", preflang='en', querylabel='MyLabel', sortKeys='untokenized.oai:id,,0', startRecord='4'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
-        self.assertEquals(2, len(items))
-        self.assertEqual(set(["Paden en stromingen---a historical survey", "Appositie en de interne struktuur van de NP"]), set(xpath(body, "//item/title/text()")))
-        self.assertEqual(set(["Samenvatting", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
+        self.assertEquals(3, len(items))
+        # self.assertEqual(set(["Paden en stromingen---a historical survey", "Appositie en de interne struktuur van de NP"]), set(xpath(body, "//item/title/text()")))
+        # self.assertEqual(set(["Samenvatting", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
+        self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
+
 
     def testLog(self):
         header, body = getRequest(self.apiPort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
