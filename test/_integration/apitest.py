@@ -30,6 +30,9 @@ from meresco.xml import xpathFirst, xpath, namespaces
 from lxml import etree
 
 # TODO: create UnitTestCase for o.a. writeDelete / unDelete
+# TODO: SRU-throttle mogelijkheden uitzoeken.
+# TODO: RSS module will create link to www.narcis.nl/project/RecordID/ instead of: www.narcis.nl/research/RecordID/
+#       - perhaps wcpcollection name should be changed back to 'research' instead of 'project'.
 
 testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/OAI/2.0/branding/',
     'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
@@ -138,6 +141,7 @@ class ApiTest(IntegrationTestCase):
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1')], drilldown)
 
+        # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):
         response = self.doSruQuery(**{'maximumRecords': '1', 'startRecord': '4002', 'query':'*'})
         self.assertEqual("Argument 'startRecord' too high, maximum: 4000", xpathFirst(response, '//diag:diagnostic/diag:details/text()'))
@@ -166,15 +170,15 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(set(['publication','openaire','oa_publication','ec_fundedresources','thesis','dataset']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
-
+        #TODO: sortering testen.
         # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
-
-        header, body = getRequest(self.apiPort, '/rss', dict(query="*", preflang='en', querylabel='MyLabel', sortKeys='untokenized.oai:id,,0', startRecord='4'))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai:id,,0', startRecord='4'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(3, len(items))
-        # self.assertEqual(set(["Paden en stromingen---a historical survey", "Appositie en de interne struktuur van de NP"]), set(xpath(body, "//item/title/text()")))
-        # self.assertEqual(set(["Samenvatting", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
+        self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
+        self.assertEqual(set(['Appositie en de interne struktuur van de NP', 'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate','Example Program 1']), set(xpath(body, "//item/title/text()")))
+        self.assertEqual(set(['This collection contains results  of Work Package 2 "Hazard Identification" of project RAIN (" Risk Analysis of Infrastructure Networks in response to extreme weather"). Pan-European gridded data sets of the probability of occurrence of river floods, coastal floods, heavy precipitation, windstorms,', "This is an example program about Search with Meresco", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
         self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
 
 

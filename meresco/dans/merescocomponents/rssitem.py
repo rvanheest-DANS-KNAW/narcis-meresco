@@ -51,16 +51,15 @@ RSS_TEMPLATE = """<item>
 #     }
 
 class RssItem(XmlCompose):
-    def __init__(self, nsMap, title, description, linkTemplate, **linkFields): #, supportedLanguages
+    def __init__(self, nsMap, title, description, pubdate, linkTemplate, **linkFields):
         XmlCompose.__init__(self,
             template="ignored",
             nsMap=nsMap,
-            # supportedLanguages=supportedLanguages,
             title=title,
             description=description,
+            pubdate=pubdate,
             **linkFields)
 
-        # self._supportedLanguages = supportedLanguages
         self._linkTemplate = linkTemplate
         assertLinkTemplate(linkTemplate, linkFields)
 
@@ -73,9 +72,39 @@ class RssItem(XmlCompose):
             'link': xmlEscape(link),
             'description': xmlEscape(dataDictionary.get('description', '')),
             'title': xmlEscape(dataDictionary.get('title', '')),
-            'pubdate': xmlEscape(dataDictionary.get('pubdate', '2016-01-01'))
+            'pubdate': xmlEscape(dataDictionary.get('pubdate', ''))
         }
         return str(RSS_TEMPLATE % rssData)
+
+    # Add method from xmlCompose:
+    def getRecord(self, identifier, preflang, defaultlang):
+        data = {}
+        data['language'] = preflang # By default, put language to the data map. This might be overridden by xpath
+        cachedRecord = {}
+        for tagName, values in self._fieldMapping.items():
+
+            if isinstance(values, str): # Skip if string only... (No key, value pairs available)
+                continue
+            partname, xPathDict = values
+
+            if not partname in cachedRecord:
+                cachedRecord[partname] = self._getPart(identifier, partname)
+            xml = cachedRecord[partname]
+
+            if isinstance(xPathDict, str):
+                results = xml.xpath(xPathDict, namespaces=self._nsMap)
+            elif isinstance(xPathDict, dict):
+                xmllang = preflang if preflang in xPathDict else defaultlang
+                results = xml.xpath(xPathDict.get(xmllang), namespaces=self._nsMap)
+                if len(results) == 0 and xmllang != defaultlang: # No results, try again for default language if not already done.
+                    results = xml.xpath(xPathDict.get(defaultlang), namespaces=self._nsMap)
+            else:
+                pass
+
+            if results:
+                data[tagName] = str(results[0])
+        return self.createRecord(data)
+
 
 def assertLinkTemplate(linkTemplate, linkFields):
     try:
