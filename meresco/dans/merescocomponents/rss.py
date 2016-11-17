@@ -86,8 +86,7 @@ class Rss(Observable):
             # Set Language:
             prefLanguage = arguments.get('preflang', [self._supportedLanguages[0]])[0]
             # This might be German:-(  Not anymore :-)
-            prefLanguage = prefLanguage if prefLanguage.lower() in self._supportedLanguages else self._supportedLanguages[0]            
-
+            prefLanguage = prefLanguage if prefLanguage.lower() in self._supportedLanguages else self._supportedLanguages[0]
 
             # Get max records, from request or get default
             maximumRecords = int(arguments.get('maximumRecords', [self._maximumRecords])[0])
@@ -124,10 +123,6 @@ class Rss(Observable):
             yield """</channel></rss>"""
             raise StopIteration()
 
-        # yield '<title>%s</title>' % xmlEscape(self._title)
-        # yield '<description>%s</description>' % xmlEscape(self._description)
-        # yield '<link>%s</link>' % xmlEscape(self._link)
-
         yield '<title>%s</title>' % xmlEscape(querylabel)
         yield '<description>%s</description>' % xmlEscape(self._description.get(prefLanguage))
         yield '<link>%s</link>' % xmlEscape(self._link.get(prefLanguage))
@@ -154,9 +149,9 @@ class Rss(Observable):
         )
         total, hits = response.total, response.hits
         self._totalhits = int(total)
-        print "totalhits", total, "hits", hits # totalhits 2 hits [Hit(score=1.454383373260498, id='knaw:record:2')]
+        # print "totalhits", total, "hits", hits # totalhits 2 hits [Hit(score=1.454383373260498, id='knaw:record:2')]
         for hit in hits:
-            yield self.call.getRecord(identifier=hit.id)
+            yield self.call.getRecord(identifier=hit.id, preflang=prefLang, defaultlang=self._supportedLanguages[0])
 
     def _createPaging(self, query, maximumRecords):
         # print "In create pagingl; maxrec; query:", maximumRecords, xmlEscape(query)

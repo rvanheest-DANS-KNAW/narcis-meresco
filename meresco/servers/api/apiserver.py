@@ -328,7 +328,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                             (PathFilter(['/sru']),
                                 (LogCollectorScope('sru-scope'),
                                     (SruParser(
-                                            host='example.org',
+                                            host='www.narcis.nl',
                                             port=80,
                                             defaultRecordSchema='short',
                                             defaultRecordPacking='xml'),
@@ -355,19 +355,14 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                         maximumRecords = 3),
                                     executeQueryHelix,
                                     (RssItem(
-                                            nsMap=NAMESPACEMAP,
-                                            # supportedLanguages=['nl','en'], # defaults to first, if requested language is not supported.
-                                            # title = ('short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
-                                            # description = ('short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
-                                            title = ('short', '//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()'),
-                                            description = ('short', '//short:abstract[not (@xml:lang)]/text()'),
-                                            # linkTemplate = 'http://www.steiny.nl/sru?operation=searchRetrieve&version=1.2&query=dc:identifier%%3D%(identifier)s',
+                                            nsMap=NAMESPACEMAP,                                            
+                                            title = ('short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
+                                            description = ('short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
+                                            pubdate = ('short', '//short:dateIssued/short:parsed/text()'),
                                             linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',                                
-                                            # wcpcollection = ('meta', {'nl':'//*[local-name() = "collection"]/text()'}),
-                                            # oai_identifier = ('meta', {'nl':'//*[local-name() = "collection"]/text()'}),
                                             wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
                                             oai_identifier = ('meta', '//meta:record/meta:id/text()'),
-                                            language = ('meta', '//meta:repository/meta:repositoryGroupId/text()')
+                                            language = ('Dummy: Language is auto provided by the calling RSS component, but needs to be present to serve the linkTemplate.')
                                         ),
                                         (StorageAdapter(),
                                             (storage,)
@@ -375,34 +370,6 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     )
                                 )
                             ),
-
-
-                            # nsMap, title, description, linkTemplate, supportedLanguages, **linkFields
-                            # (PathFilter('/rss'), # Filter all requests starting with /rrs
-                            #     (Rss(
-                            #         supportedLanguages = ['nl','en'], # defaults to first, if requested language is not available or supplied.
-                            #         title = {'nl':'NARCIS', 'en':'NARCIS'},
-                            #         description = {'nl':'NARCIS: De toegang tot de Nederlandse wetenschapsinformatie', 'en':'NARCIS: The gateway to Dutch scientific information'},
-                            #         link = {'nl':'http://www.narcis.nl/?Language=nl', 'en':'http://www.narcis.nl/?Language=en'},
-                            #         maximumRecords = 20
-                            #         ),
-                            #         executeQueryHelix,
-                            #         (RssItem(
-                            #             nsMap = NAMESPACEMAP,
-                            #             supportedLanguages = ['nl','en'], # defaults to first, if requested language is not supported.
-                            #             title = ('knaw_short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
-                            #             description = ('knaw_short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
-                            #             pubdate = ('knaw_short', {'nl':'//short:dateIssued/short:parsed/text()'}),
-                            #             collection = ('meta', {'nl':'//*[local-name() = "collection"]/text()'}),                                
-                            #             #collection = ('meta', {'nl':'//meta:repository/meta:collection/text()'})
-                            #             ),
-                            #             (StorageAdapter(),
-                            #                 (storage,)
-                            #             )
-                            #         ),
-                            #     )
-                            # ),
-
                             (PathFilter('/log'),
                                 (LogFileServer(name="Example Queries", log=directoryLog, basepath='/log'),)
                             )
