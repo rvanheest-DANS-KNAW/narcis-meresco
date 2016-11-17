@@ -366,6 +366,9 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                         ),
                                         (StorageAdapter(),
                                             (storage,)
+                                        ),
+                                        (StorageAdapter(),
+                                            (storage,)
                                         )
                                     )
                                 )
