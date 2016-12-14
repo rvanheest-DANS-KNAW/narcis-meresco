@@ -1,7 +1,7 @@
 <updateRequest>
     <srw:version xmlns:srw="http://www.loc.gov/zing/srw/">1.0</srw:version>
     <ucp:action xmlns:ucp="info:lc/xmlns/update-v1">info:srw/action/1/replace</ucp:action>
-    <ucp:recordIdentifier xmlns:ucp="info:lc/xmlns/update-v1">easy:oai:easy.dans.knaw.nl:easy-dataset:66405</ucp:recordIdentifier>
+    <ucp:recordIdentifier xmlns:ucp="info:lc/xmlns/update-v1">easy:oai:easy.dans.knaw.nl:easy-dataset:44292</ucp:recordIdentifier>
     <srw:record xmlns:srw="http://www.loc.gov/zing/srw/">
         <srw:recordPacking>xml</srw:recordPacking>
         <srw:recordSchema>metadata</srw:recordSchema>
@@ -88,10 +88,10 @@
 &lt;/record&gt;</part>
             <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;
     &lt;upload&gt;
-        &lt;id&gt;easy:oai:easy.dans.knaw.nl:easy-dataset:66405&lt;/id&gt;
+        &lt;id&gt;easy:oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
     &lt;/upload&gt;
     &lt;record&gt;
-        &lt;id&gt;oai:easy.dans.knaw.nl:easy-dataset:66405&lt;/id&gt;
+        &lt;id&gt;oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
     &lt;/record&gt;
     &lt;repository&gt;
         &lt;id&gt;easy&lt;/id&gt;
