@@ -34,8 +34,8 @@
                                 &lt;/nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Component&gt;
                                     &lt;nl_didl:Resource mimeType=&quot;application/xml&quot;&gt;
-                                        &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; version=&quot;3.6&quot; xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-6.xsd&quot;&gt;
-                                            
+                                        &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; version=&quot;3.6&quot;
+    xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-6.xsd&quot;&gt;
                                             &lt;mods:location&gt;
                                                 &lt;mods:url&gt;http://repository.cwi.nl/search/fullrecord.php?publnr=2271&lt;/mods:url&gt;
                                             &lt;/mods:location&gt;
@@ -56,6 +56,18 @@
                                                 &lt;/mods:role&gt;
                                             &lt;/mods:name&gt;
 
+                                            &lt;mods:name type=&quot;personal&quot; ID=&quot;_2271_11&quot;&gt;
+                                                &lt;mods:displayForm&gt;prof.dr. Bennis, H. (Hans)&lt;/mods:displayForm&gt;
+                                                &lt;mods:namePart type=&quot;given&quot;&gt;prof.dr. H.J. (Hans)&lt;/mods:namePart&gt;
+                                                &lt;mods:namePart type=&quot;family&quot;&gt;Bennis&lt;/mods:namePart&gt;
+                                                &lt;mods:role&gt;
+                                                    &lt;mods:roleTerm type=&quot;code&quot; authority=&quot;marcrelator&quot;&gt;dgg&lt;/mods:roleTerm&gt;
+                                                &lt;/mods:role&gt;
+                                                &lt;mods:nameIdentifier type=&quot;orcid&quot; typeURI=&quot;http://id.loc.gov/vocabulary/identifiers/orcid&quot;&gt;http://orcid.org/0000-0002-1825-0097&lt;/mods:nameIdentifier&gt;
+                                            &lt;/mods:name&gt;
+
+                                            &lt;mods:abstract&gt; Samenvatting &lt;/mods:abstract&gt;
+
                                             &lt;mods:name ID=&quot;FND_1&quot; type=&quot;corporate&quot;&gt;
                                                 &lt;mods:namePart&gt;European Commission CORDIS&lt;/mods:namePart&gt;
                                                 &lt;mods:role&gt;
@@ -67,9 +79,10 @@
                                                 &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot;
                                                     xsi:schemalocation=&quot;info:eu-repo/dai http://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;
                                                     &lt;dai:identifier IDref=&quot;_2271_10&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;29806278&lt;/dai:identifier&gt;
+                                                    &lt;dai:identifier IDref=&quot;_2271_11&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;071792279&lt;/dai:identifier&gt;
                                                 &lt;/dai:daiList&gt;
                                             &lt;/mods:extension&gt;
-                                            
+
                                             &lt;mods:extension&gt;
                                                 &lt;wmp:rights xmlns:wmp=&quot;http://www.surfgroepen.nl/werkgroepmetadataplus&quot;
                                                     xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;
@@ -92,7 +105,7 @@
                                                     &lt;dc:description&gt;Copyright (c) Muntean, A (Adrian)&lt;/dc:description&gt;
                                                 &lt;/wmp:rights&gt;
                                             &lt;/mods:extension&gt;
-                                            
+
                                             &lt;mods:extension&gt;
                                                 &lt;gal:grantAgreementList xmlns:gal=&quot;info:eu-repo/grantAgreement&quot;
                                                     xsi:schemaLocation=&quot;info:eu-repo/grantAgreement http://purl.org/REP/standards/gal-extension.xsd&quot;&gt;
@@ -119,7 +132,7 @@
                                                 &lt;mods:publisher&gt;cwi&lt;/mods:publisher&gt;
                                                 &lt;mods:dateIssued encoding=&quot;iso8601&quot;&gt;1993-1-01&lt;/mods:dateIssued&gt;
                                             &lt;/mods:originInfo&gt;
-                                            
+
                                             &lt;mods:physicalDescription&gt;
                                                 &lt;mods:extent&gt;144&lt;/mods:extent&gt;
                                             &lt;/mods:physicalDescription&gt;
@@ -145,7 +158,7 @@
                                             &lt;mods:classification authority=&quot;msc&quot;&gt;90C35&lt;/mods:classification&gt;
                                             &lt;mods:identifier type=&quot;uri&quot;&gt;URN:ISSN:0010-440MODS&lt;/mods:identifier&gt;
                                             &lt;mods:identifier type=&quot;uri&quot;&gt;urn:isbn:90022333&lt;/mods:identifier&gt;
-                                            
+
                                         &lt;/mods:mods&gt;
                                     &lt;/nl_didl:Resource&gt;
                                 &lt;/nl_didl:Component&gt;

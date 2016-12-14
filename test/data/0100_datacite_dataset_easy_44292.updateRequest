@@ -1,0 +1,107 @@
+<updateRequest>
+    <srw:version xmlns:srw="http://www.loc.gov/zing/srw/">1.0</srw:version>
+    <ucp:action xmlns:ucp="info:lc/xmlns/update-v1">info:srw/action/1/replace</ucp:action>
+    <ucp:recordIdentifier xmlns:ucp="info:lc/xmlns/update-v1">easy:oai:easy.dans.knaw.nl:easy-dataset:44292</ucp:recordIdentifier>
+    <srw:record xmlns:srw="http://www.loc.gov/zing/srw/">
+        <srw:recordPacking>xml</srw:recordPacking>
+        <srw:recordSchema>metadata</srw:recordSchema>
+        <srw:recordData><document xmlns="http://meresco.org/namespace/harvester/document"><part name="record">&lt;record xmlns=&quot;http://www.openarchives.org/OAI/2.0/&quot;
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;
+    &lt;header xmlns=&quot;http://www.openarchives.org/OAI/2.0/&quot;&gt;
+        &lt;identifier&gt;oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/identifier&gt;
+        &lt;datestamp&gt;2016-12-06T20:30:09Z&lt;/datestamp&gt;
+        &lt;setSpec&gt;D30000:D37000&lt;/setSpec&gt;
+        &lt;setSpec&gt;driver&lt;/setSpec&gt;
+        &lt;setSpec&gt;easy-collection:4&lt;/setSpec&gt;
+    &lt;/header&gt;
+    &lt;metadata xmlns=&quot;http://www.openarchives.org/OAI/2.0/&quot;&gt;
+        &lt;resource xmlns=&quot;http://datacite.org/schema/kernel-3&quot;
+            xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;
+            xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+            xsi:schemaLocation=&quot;http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd&quot;&gt;
+            &lt;identifier identifierType=&quot;DOI&quot;&gt;10.17026/dans-zqm-htb9&lt;/identifier&gt;
+            &lt;creators&gt;
+                &lt;creator&gt;
+                    &lt;creatorName&gt;Jacobs, E.&lt;/creatorName&gt;
+                &lt;/creator&gt;
+                &lt;creator&gt;
+                    &lt;creatorName&gt;Burnier, C.Y.&lt;/creatorName&gt;
+                &lt;/creator&gt;
+            &lt;/creators&gt;
+            &lt;titles&gt;
+                &lt;title&gt;Locatie &apos;Matthijs Tinxgracht 16&apos; te Edam, gemeente Edam-Volendam. Een archeologische opgraving.&lt;/title&gt;
+                &lt;title titleType=&quot;AlternativeTitle&quot;&gt;STAR 147&lt;/title&gt;
+            &lt;/titles&gt;
+            &lt;publisher&gt;Jacobs en Burnier, archeologisch projectbureau&lt;/publisher&gt;
+            &lt;publicationYear&gt;2009&lt;/publicationYear&gt;
+            &lt;subjects&gt;
+                &lt;subject&gt;Archaeology&lt;/subject&gt;
+                &lt;subject&gt;OPGRAVING&lt;/subject&gt;
+                &lt;subject subjectScheme=&quot;ABR-periode&quot;&gt;LME&lt;/subject&gt;
+                &lt;subject subjectScheme=&quot;ABR-periode-label&quot;&gt;Periode: Middeleeuwen laat: 1050 - 1500 nC&lt;/subject&gt;
+                &lt;subject subjectScheme=&quot;ABR-periode&quot;&gt;NT&lt;/subject&gt;
+                &lt;subject subjectScheme=&quot;ABR-periode-label&quot;&gt;Periode: Nieuwe tijd: 1500 - heden&lt;/subject&gt;
+            &lt;/subjects&gt;
+            &lt;contributors&gt;
+                &lt;contributor contributorType=&quot;RightsHolder&quot;&gt;
+                    &lt;contributorName&gt;Jacobs en Burnier&lt;/contributorName&gt;
+                &lt;/contributor&gt;
+            &lt;/contributors&gt;
+            &lt;dates&gt;
+                &lt;date dateType=&quot;Submitted&quot;&gt;2009-11-24&lt;/date&gt;
+                &lt;date dateType=&quot;Created&quot;&gt;2008&lt;/date&gt;
+                &lt;date dateType=&quot;Available&quot;&gt;2009-11-24&lt;/date&gt;
+            &lt;/dates&gt;
+            &lt;language&gt;nl&lt;/language&gt;
+            &lt;resourceType resourceTypeGeneral=&quot;Dataset&quot;&gt;Dataset&lt;/resourceType&gt;
+            &lt;alternateIdentifiers&gt;
+                &lt;alternateIdentifier alternateIdentifierType=&quot;URN&quot;&gt;urn:nbn:nl:ui:13-jsk-7ek&lt;/alternateIdentifier&gt;
+                &lt;alternateIdentifier alternateIdentifierType=&quot;DMO_ID&quot;&gt;easy-dataset:44292&lt;/alternateIdentifier&gt;
+                &lt;alternateIdentifier alternateIdentifierType=&quot;AIP_ID&quot;&gt;twips.dans.knaw.nl-3845717962744876469-1259060823534&lt;/alternateIdentifier&gt;
+            &lt;/alternateIdentifiers&gt;
+            &lt;relatedIdentifiers/&gt;
+            &lt;formats&gt;
+                &lt;format&gt;19 p.&lt;/format&gt;
+            &lt;/formats&gt;
+            &lt;rightsList&gt;
+                &lt;rights&gt;info:eu-repo/semantics/openAccess&lt;/rights&gt;
+            &lt;/rightsList&gt;
+            &lt;descriptions&gt;
+                &lt;description descriptionType=&quot;Other&quot;&gt;onderzoeksrapport&lt;/description&gt;
+            &lt;/descriptions&gt;
+            &lt;geoLocations&gt;
+                &lt;geoLocation&gt;
+                    &lt;geoLocationPlace&gt;Edam - Volendam&lt;/geoLocationPlace&gt;
+                &lt;/geoLocation&gt;
+                &lt;geoLocation&gt;
+                    &lt;geoLocationPlace&gt;Edam&lt;/geoLocationPlace&gt;
+                &lt;/geoLocation&gt;
+                &lt;geoLocation&gt;
+                    &lt;geoLocationPlace&gt;Matthijs Tinxgracht 16&lt;/geoLocationPlace&gt;
+                &lt;/geoLocation&gt;
+                &lt;geoLocation&gt;
+                    &lt;geoLocationPoint&gt;52.51483176 5.04757305&lt;/geoLocationPoint&gt;
+                &lt;/geoLocation&gt;
+            &lt;/geoLocations&gt;
+        &lt;/resource&gt;        
+    &lt;/metadata&gt;
+&lt;/record&gt;</part>
+            <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;
+    &lt;upload&gt;
+        &lt;id&gt;easy:oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
+    &lt;/upload&gt;
+    &lt;record&gt;
+        &lt;id&gt;oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
+    &lt;/record&gt;
+    &lt;repository&gt;
+        &lt;id&gt;easy&lt;/id&gt;
+        &lt;baseurl&gt;https://easy.dans.knaw.nl/oai/&lt;/baseurl&gt;
+        &lt;repositoryGroupId&gt;easy&lt;/repositoryGroupId&gt;
+        &lt;metadataPrefix&gt;oai_datacite&lt;/metadataPrefix&gt;
+        &lt;collection&gt;dataset&lt;/collection&gt;
+    &lt;/repository&gt;
+&lt;/meta&gt;</part>
+        </document>
+        </srw:recordData>
+    </srw:record>
+</updateRequest>

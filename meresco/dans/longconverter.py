@@ -11,10 +11,10 @@ from lxml.etree import parse, _ElementTree, tostring
 from StringIO import StringIO
 from xml.sax.saxutils import escape as escapeXml
 
-from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
-from meresco.components import lxmltostring, Converter
+from meresco.components import lxmltostring
 from meresco.dans.metadataformats import MetadataFormat
+from meresco.dans.uiaconverter import UiaConverter
 from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
 from meresco.xml import namespaces
 
@@ -43,23 +43,7 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
 })
 
 
-# HVSTR_NS = '{%s}' % namespacesmap['meta'] # '{http://meresco.org/namespace/harvester/meta}' 
-# DOCUMENT_NS = '{%s}' % namespacesmap['document'] # '{http://meresco.org/namespace/harvester/document}' 
-
-# MODS_VERSION = '3.6'
-
 LONG_VERSION = '1.0'
-
-# MODS_NAMESPACE = namespacesmap['mods']
-# MODS = "{%s}" % MODS_NAMESPACE
-
-# NSMAP = {
-#     None : MODS_NAMESPACE,
-#     'xlink': 'http://www.w3.org/1999/xlink',
-#     'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-# }
-
-# NORM_NS = '{%s}' % namespacesmap['norm'] 
 
 marcRelatorRoleTerms=['abr','acp','act','adi','adp','aft','anl','anm','ann','ant','ape','apl','app','aqt','arc','ard','arr','art','asg','asn','ato','att','auc','aud','aui','aus','aut','bdd','bjd','bkd','bkp','blw','bnd','bpd','brd','brl','bsl','cas','ccp','chr','clb','cli','cll','clr','clt','cmm','cmp','cmt','cnd','cng','cns','coe','col','com','con','cor','cos','cot','cou','cov','cpc','cpe','cph','cpl','cpt','cre','crp','crr','crt','csl','csp','cst','ctb','cte','ctg','ctr','cts','ctt','cur','cwt','dbp','dfd','dfe','dft','dgg','dgs','dis','dln','dnc','dnr','dpc','dpt','drm','drt','dsr','dst','dtc','dte','dtm','dto','dub','edc','edm','edt','egr','elg','elt','eng','enj','etr','evp','exp','fac','fds','fld','flm','fmd','fmk','fmo','fmp','fnd','fpy','frg','gis','grt','his','hnr','hst','ill','ilu','ins','inv','isb','itr','ive','ivr','jud','jug','lbr','lbt','ldr','led','lee','lel','len','let','lgd','lie','lil','lit','lsa','lse','lso','ltg','lyr','mcp','mdc','med','mfp','mfr','mod','mon','mrb','mrk','msd','mte','mtk','mus','nrt','opn','org','orm','osp','oth','own','pan','pat','pbd','pbl','pdr','pfr','pht','plt','pma','pmn','pop','ppm','ppt','pra','prc','prd','pre','prf','prg','prm','prn','pro','prp','prs','prt','prv','pta','pte','ptf','pth','ptt','pup','rbr','rcd','rce','rcp','rdd','red','ren','res','rev','rpc','rps','rpt','rpy','rse','rsg','rsp','rsr','rst','rth','rtm','sad','sce','scl','scr','sds','sec','sgd','sgn','sht','sll','sng','spk','spn','spy','srv','std','stg','stl','stm','stn','str','tcd','tch','ths','tld','tlp','trc','trl','tyd','tyg','uvp','vac','vdg','voc','wac','wal','wam','wat','wdc','wde','win','wit','wpr','wst']
 
@@ -71,33 +55,44 @@ ISO639 = ["aar", "abk", "ace", "ach", "ada", "ady", "afa", "afh", "afr", "ain", 
 
 BINDING_DELIMITER = '; '
 
-class NormaliseOaiRecord(Converter):
+# mods:nameIdentifiers that will be processed to long. Other types will be ignored!
+# ORDER does matter!
+supportedNids = ['dai-nl', 'orcid', 'isni', 'nod-prs']
+
+class NormaliseOaiRecord(UiaConverter):
 
     ACCESS_LEVELS = ['openAccess', 'restrictedAccess', 'closedAccess', 'embargoedAccess']
 
     def __init__(self, fromKwarg, toKwarg=None, name=None):
-        Converter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
-        self._truncate_chars = 300
+        UiaConverter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
         self._metadataformat = None
         self._openAccess = True
-        
 
     def _convert(self, lxmlNode):
         self._openAccess = True #Reset AccesRights to openAcces
 
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=namespacesmap)
+        metapart = lxmlNode.xpath("//document:document/document:part[@name='meta']/text()", namespaces=namespacesmap)
+        wcpcollection = None
+        if len(metapart) == 1:
+            meta_lxml = etree.fromstring(metapart[0])
+            collection = meta_lxml.xpath('//meta:repository/meta:collection/text()', namespaces=namespacesmap)
+            if len(collection) == 1: wcpcollection = collection[0]
+
         record_lxml = etree.fromstring(record_part[0]) # Geen xml.sax.saxutils.unescape() hier: Dat doet lxml reeds voor ons.
-        self._metadataformat = MetadataFormat.getFormat(record_lxml) #TODO: pass it somehow from DNA, so we need to look this up only once per record.
-        converted_record_lxml = self._convertRecordMetadataToLong(record_lxml)# Check en insert normalised mods into record part.
+        self._metadataformat = MetadataFormat.getFormat(record_lxml, self._uploadid) #TODO: pass it somehow from DNA, so we need to look this up only once per record.
+        converted_record_lxml = self._convertRecordMetadataToLong(record_lxml, wcpcollection)# Check en insert normalised mods into record part.
         record_txt = etree.tostring(converted_record_lxml, encoding="UTF-8") # convert from lxml to text.
         record_txt = record_txt.decode('utf-8') # Soms worden er chars opgestuurd die geen unicode zijn. Deze converteren we 'brute force'.
         lxmlNode.find('document:part[@name="record"]', namespaces=namespacesmap).text = record_txt # Set as text value.
         # etree.cleanup_namespaces(lxmlNode)
         return lxmlNode
 
-    def _convertRecordMetadataToLong(self, lxmlNode):
+
+
+    def _convertRecordMetadataToLong(self, lxmlNode, wcpCollection):
         
-    # lxmlNode example:
+    # lxmlNode record example:
     # 
     # <record xmlns="http://www.openarchives.org/OAI/2.0/"
     #     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -134,6 +129,9 @@ class NormaliseOaiRecord(Converter):
             e_longroot = etree.SubElement(e_norm_root, namespacesmap.curieToTag('long:long'), nsmap={None:namespacesmap['long']})
             # e_longroot = etree.Element(namespacesmap.curieToTag('long:long'), nsmap={None:namespacesmap['long']})
             e_longroot.set("version", LONG_VERSION)
+            # Add WCP Collection to long format:
+            etree.SubElement(e_longroot, "wcpcollection").text = wcpCollection
+
             e_longmetadata = etree.Element("metadata")
 
             if self._metadataformat in (MetadataFormat.MD_FORMAT[5], MetadataFormat.MD_FORMAT[6], MetadataFormat.MD_FORMAT[7]): # NOD records
@@ -178,53 +176,15 @@ class NormaliseOaiRecord(Converter):
                 # print "CONVERTED:", type(savedxml)
                 # We need to parse the _Element type first to be able to use proper xpath with namespaces on the nodes? WHY? Conversion to _ElementTree does NOT work??
                 # tree_long = None
-                try: # try this: .getroot().getroottree()
+                try: # TODO: try this: .getroot().getroottree()
                     e_longroot = parse(StringIO(tostring(e_longroot)))
                 except:
                     print 'Error while parsing', tostring(e_longroot)
                     raise
                 self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'long' node.
 
-            print 'Long:', tostring(e_norm_root)
+            print 'Long convertion succeeded...' # , tostring(e_norm_root)
 
-
-            # e_modsroot = etree.SubElement(e_norm_root, namespacesmap.curieToTag('mods:mods'), nsmap=NSMAP)
-            # e_modsroot.set("version", MODS_VERSION)
-            # e_modsroot.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-"+ MODS_VERSION.replace(".", "-") +".xsd")
-            # # e_modsroot.set("xmlns:xsi" , "http://www.w3.org/2001/XMLSchema-instance")
-
-            # if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
-
-            #     strTitle = lxmlNode.xpath("//dc:title/text()", namespaces=namespacesmap)
-            #     e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
-            #     e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
-            #     strAbstract = lxmlNode.xpath("//dc:description/text()", namespaces=namespacesmap)
-            #     if len(strAbstract) > 0:
-            #         e_abstract = etree.SubElement(e_modsroot, "abstract").text = strAbstract[0]
-
-            #     strGenre = lxmlNode.xpath("//dc:type/text()", namespaces=namespacesmap)
-            #     if len(strGenre) > 0:
-            #         e_genre = etree.SubElement(e_modsroot, "genre").text = strGenre[0]        
-
-            # elif self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3]):
-                
-            #     strTitle = lxmlNode.xpath("//mods:titleInfo/mods:title/text()", namespaces=namespacesmap)
-            #     if len(strTitle) > 0:
-            #         e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
-            #         e_title = etree.SubElement(e_titleInfo, "title").text = strTitle[0]
-
-            #     strAbstract = lxmlNode.xpath("//mods:abstract/text()", namespaces=namespacesmap)
-            #     if len(strAbstract) > 0:
-            #         e_abstract = etree.SubElement(e_modsroot, "abstract").text = strAbstract[0]
-
-            #     strGenre = lxmlNode.xpath("//mods:genre/text()", namespaces=namespacesmap)
-            #     if len(strGenre) > 0:
-            #         e_genre = etree.SubElement(e_modsroot, "genre").text = strGenre[0]
-
-            # elif self._metadataformat in (MetadataFormat.MD_FORMAT[5], MetadataFormat.MD_FORMAT[6], MetadataFormat.MD_FORMAT[7]): #NOD records
-            #     NODLxml = self._convertNODRecord2long(lxmlNode, )
-            #     if NODLxml is not None:
-            #         e_norm_root.append(NODLxml.getroot())
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespacesmap)
 
@@ -608,33 +568,66 @@ class NormaliseOaiRecord(Converter):
                         etree.SubElement(e_name_type, "mcRoleTerm").text = roleTerm[0].strip()
                     # Get all mods name/nameIdentifier:
                     # Known (NOD person) nameIdentifiers to look for:
-                    bln_hasDAI_NID = False
-                    supportedNids = ['dai-nl', 'orcid', 'isni']
-                    for nid_type in supportedNids:
-                        nameidentifiers = name.xpath('self::mods:name/mods:nameIdentifier[@type="'+nid_type+'"]/text()', namespaces=namespacesmap)
+                    # bln_hasDAI_NID = False
+                    # supportedNids = ['dai-nl', 'orcid', 'isni']
+                    # for nid_type in supportedNids:
+                    #     nameidentifiers = name.xpath('self::mods:name/mods:nameIdentifier[@type="'+nid_type+'"]/text()', namespaces=namespacesmap)
                         
-                        for nid in nameidentifiers:
-                            nameId = NameIdentifierFactory.factory(nid_type, nid)
-                            if nameId.is_valid():
-                                e_nid = etree.SubElement(e_name_type, "nameIdentifier")
-                                e_nid.attrib['type'] = nameId.get_name()
-                                e_nid.text = nameId.get_id()
-                                if nameId.get_name() == 'dai-nl': bln_hasDAI_NID = True
+                    #     for nid in nameidentifiers:
+                    #         nameId = NameIdentifierFactory.factory(nid_type, nid)
+                    #         if nameId.is_valid():
+                    #             e_nid = etree.SubElement(e_name_type, "nameIdentifier")
+                    #             e_nid.attrib['type'] = nameId.get_name()
+                    #             e_nid.text = nameId.get_id()
+                    #             if nameId.get_name() == 'dai-nl': bln_hasDAI_NID = True
 
-                    # Get DAI from DaiList-extension:
-                    if not bln_hasDAI_NID: # Only look for DAI-extension if no valid dai has been found in (mods 3.6) nameIdentifier tag.
-                        extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
-                        if extensionid:
-                            # Select dai and mandatory 'some' authority:
-                            dai = lxmlNode.xpath(root+'mods:extension/dai:daiList/dai:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
-                            # Hack, since MODS doc example is in wrong (mods) namespace!
-                            if not dai: dai = lxmlNode.xpath(root+'mods:extension/mods:daiList/mods:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
-                            if dai:
-                                nameId = NameIdentifierFactory.factory('dai-nl', dai[0].strip())
-                                if nameId.is_valid():
+                    # # Get DAI from DaiList-extension:
+                    # if not bln_hasDAI_NID: # Only look for DAI-extension if no valid dai has been found in (mods 3.6) nameIdentifier tag.
+                    #     extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
+                    #     if extensionid:
+                    #         # Select dai and mandatory 'some' authority:
+                    #         dai = lxmlNode.xpath(root+'mods:extension/dai:daiList/dai:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                    #         # Hack, since MODS doc example is in wrong (mods) namespace!
+                    #         if not dai: dai = lxmlNode.xpath(root+'mods:extension/mods:daiList/mods:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                    #         if dai:
+                    #             nameId = NameIdentifierFactory.factory('dai-nl', dai[0].strip())
+                    #             if nameId.is_valid():
+                    #                 e_nid = etree.SubElement(e_name_type, "nameIdentifier")
+                    #                 e_nid.attrib['type'] = nameId.get_name()
+                    #                 e_nid.text = nameId.get_id()
+
+                    # Transfer valid & known nameIdentifiers from MODS name:
+                    daiset = set() # Unique dai-container.
+                    nameidentifiers = name.xpath('self::mods:name/mods:nameIdentifier', namespaces=namespacesmap)
+                    for nid in nameidentifiers:
+                        nid_type = nid.get("type")
+                        if nid_type in supportedNids:
+                            nameId = NameIdentifierFactory.factory(nid_type, nid.text)
+                            if nameId.is_valid():
+                                if nameId.get_name() == supportedNids[0]:
+                                    daiset.add(nameId.get_id()) # Add valid dai to dai-container.
+                                else: # Add valid non-dai nameIdentifiers directly 
                                     e_nid = etree.SubElement(e_name_type, "nameIdentifier")
                                     e_nid.attrib['type'] = nameId.get_name()
                                     e_nid.text = nameId.get_id()
+                                
+                    # Transfer valid DAI's from old style daiList-mods-extension: 
+                    extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
+                    if extensionid:
+                        # Select dai and mandatory 'some' authority:
+                        daais = lxmlNode.xpath(root+'mods:extension/dai:daiList/dai:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                        # Hack, since MODS doc example is in wrong (mods) namespace!
+                        if not daais: daais = lxmlNode.xpath(root+'mods:extension/mods:daiList/mods:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
+                        for dai in daais:
+                            nameId = NameIdentifierFactory.factory(supportedNids[0], dai.strip())
+                            if nameId.is_valid():
+                                daiset.add(nameId.get_id())
+                            
+                    for dai in sorted(daiset): # Add all (sorted, to ease unittesting) unique dai's found from old dailist and nameIdentifiers:
+                        e_nid = etree.SubElement(e_name_type, "nameIdentifier")
+                        e_nid.attrib['type'] = supportedNids[0]
+                        e_nid.text = dai
+
 
         # Get creators and contributors from DC if NO FULLMODS available, or if MMODS did not yield any authors:
         if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
@@ -1029,14 +1022,6 @@ class NormaliseOaiRecord(Converter):
         elif(dctype.find('book')>=0 ): return pubTypes[3]
         return ''
 
-    # TODO: uitfaseren, niet meer met text templates werken; of omzetten naar lxml element(s).
-    def _findAndBind(self, node, template, *xpaths):
-        items = []
-        for p in xpaths:
-            items += node.xpath(p, namespaces=namespacesmap)
-        return '\n'.join(template % escapeXml(item) for item in items)
-
-
     def _findFirstXpath(self, node, *xpaths):
         # Will return the first non-empty list that matches an xpath.
         for x in xpaths:
@@ -1044,13 +1029,6 @@ class NormaliseOaiRecord(Converter):
             if len(items) > 0:
                 return items
         return []
-
-
-    def smart_truncate(self, content, suffix=''):
-        if len(content) <= self._truncate_chars:
-            return content
-        else:
-            return ' '.join(content[:self._truncate_chars+1].split(' ')[0:-1]) + suffix
 
     def _isValidAccessLevel(self, description):
         for al in NormaliseOaiRecord.ACCESS_LEVELS:

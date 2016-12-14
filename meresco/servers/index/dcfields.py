@@ -46,8 +46,9 @@ class DcFields(object):
 
     def _fieldsFor(self, fieldname, value):
         yield '__all__', value
-        yield fieldname, value
-        yield self._untokenizedField(fieldname, value)
+        if fieldname and fieldname != '__all__': # WST: Empty ('') and '__all__' fieldsnames will only be added to '__all__'.
+            yield fieldname, value
+            yield self._untokenizedField(fieldname, value)
 
     def _untokenizedField(self, fieldname, value):
         name = untokenizedFieldname(fieldname)

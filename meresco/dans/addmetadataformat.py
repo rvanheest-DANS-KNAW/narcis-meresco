@@ -76,7 +76,7 @@ class AddMetadataFormat(Observable):
         lxmlnode = kwargs[self._fromKwarg]
         # TODO: Get metadata format from this node...
         # print 'FOUND LXML NODE'
-        # Add found metadataFormat as new kwarg:
+        # Add found metadataFormat as new kwarg: TODO: Check if key already exists...
         kwargs[self._name] = 'simple_mods'
         return kwargs
 

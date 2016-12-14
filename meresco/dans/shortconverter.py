@@ -64,7 +64,7 @@ class ShortConverter(Converter):
                                              and metadatakind.tag != namespacesmap.curieToTag('long:hostCitation'):
                             child.remove(metadatakind)
                         if metadatakind.tag == namespacesmap.curieToTag('long:abstract'):
-                            if metadatakind.text != None: metadatakind.text = metadatakind.text[:self._truncate_chars]
+                            if metadatakind.text != None: metadatakind.text = self._smarttruncate(metadatakind.text) # , ' (...)' [:self._truncate_chars]
             try:
                 returnxml = etree.tostring(e_root, pretty_print=True, encoding='utf-8').replace(namespacesmap['long'], namespacesmap['short'])
                 returnxml = returnxml.replace('<long ', '<short ').replace('</long>', '</short>')
@@ -76,3 +76,13 @@ class ShortConverter(Converter):
                 raise
         else:
             return None
+
+
+    def _smarttruncate(self, content, suffix=''):
+        if len(content) <= self._truncate_chars:
+            return content
+        else:
+            return ' '.join(content[:self._truncate_chars+1].split(' ')[0:-1]) + suffix
+
+
+
