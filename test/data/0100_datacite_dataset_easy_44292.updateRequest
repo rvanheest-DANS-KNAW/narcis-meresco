@@ -92,7 +92,10 @@
     &lt;/upload&gt;
     &lt;record&gt;
         &lt;id&gt;oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
+<<<<<<< HEAD
         &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+=======
+>>>>>>> fdf2b26102bc4f2e59a4404332b3603e41b0afbf
     &lt;/record&gt;
     &lt;repository&gt;
         &lt;id&gt;easy&lt;/id&gt;
