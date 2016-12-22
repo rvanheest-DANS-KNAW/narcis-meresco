@@ -315,7 +315,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                         (OaiProvenance(
                                             nsMap=NAMESPACEMAP,
                                             baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 
-                                            harvestDate=('meta', '//meta:record/meta:harvestDate/text()'),
+                                            harvestDate=('meta', '//meta:record/meta:harvestdate/text()'),
                                             metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
                                             identifier=('header','//oai:identifier/text()'),
                                             datestamp=('header', '//oai:datestamp/text()')

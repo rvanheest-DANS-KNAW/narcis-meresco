@@ -1,7 +1,7 @@
-<updateRequest>
-    <srw:version xmlns:srw="http://www.loc.gov/zing/srw/">1.0</srw:version>
-    <ucp:action xmlns:ucp="info:lc/xmlns/update-v1">info:srw/action/1/replace</ucp:action>
-    <ucp:recordIdentifier xmlns:ucp="info:lc/xmlns/update-v1">knaw:record:2</ucp:recordIdentifier>
+<ucp:updateRequest xmlns:srw="http://www.loc.gov/zing/srw/" xmlns:ucp="info:lc/xmlns/update-v1">
+    <srw:version>1.0</srw:version>
+    <ucp:action>info:srw/action/1/replace</ucp:action>
+    <ucp:recordIdentifier>knaw:record:2</ucp:recordIdentifier>
     <srw:record xmlns:srw="http://www.loc.gov/zing/srw/">
         <srw:recordPacking>xml</srw:recordPacking>
         <srw:recordSchema>metadata</srw:recordSchema>
@@ -227,7 +227,7 @@
                 <part name="meta">&lt;meta
                     xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt; &lt;upload&gt;
                     &lt;id&gt;knaw:record:2&lt;/id&gt; &lt;/upload&gt; &lt;record&gt;
-                    &lt;id&gt;record:2&lt;/id&gt; &lt;/record&gt; &lt;repository&gt;
+                    &lt;id&gt;record:2&lt;/id&gt;&lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;&lt;/record&gt; &lt;repository&gt;
                     &lt;id&gt;knaw&lt;/id&gt; &lt;set&gt;oa_publications&lt;/set&gt;
                     &lt;baseurl&gt;http://depot.knaw.nl/cgi/oai2&lt;/baseurl&gt;
                     &lt;repositoryGroupId&gt;knaw&lt;/repositoryGroupId&gt;
@@ -237,4 +237,4 @@
             </document>
         </srw:recordData>
     </srw:record>
-</updateRequest>
+</ucp:updateRequest>

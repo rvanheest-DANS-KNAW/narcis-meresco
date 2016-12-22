@@ -1,5 +1,5 @@
-<updateRequest>
-    <srw:version xmlns:srw="http://www.loc.gov/zing/srw/">1.0</srw:version>
-    <ucp:action xmlns:ucp="info:lc/xmlns/update-v1">info:srw/action/1/delete</ucp:action>
-    <ucp:recordIdentifier xmlns:ucp="info:lc/xmlns/update-v1">meresco:record:3</ucp:recordIdentifier>
-</updateRequest>
+<ucp:updateRequest xmlns:srw="http://www.loc.gov/zing/srw/" xmlns:ucp="info:lc/xmlns/update-v1">
+    <srw:version>1.0</srw:version>
+    <ucp:action>info:srw/action/1/delete</ucp:action>
+    <ucp:recordIdentifier>meresco:record:3</ucp:recordIdentifier>
+</ucp:updateRequest>

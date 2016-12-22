@@ -30,7 +30,7 @@ from lxml.etree import XML, ElementTree
 from weightless.core import consume
 
 
-class MeatToFieldsListTest(SeecrTestCase):
+class MetapartToFieldsListTest(SeecrTestCase):
 
     def testOne(self):
         metaToFieldsList = MetaToFieldsList()
@@ -54,7 +54,7 @@ META_RECORD = """<meta xmlns="http://meresco.org/namespace/harvester/meta">
     </upload>
     <record>
         <id>record:4</id>
-        <harvestDate>2016-10-05T10:30:45Z</harvestDate>
+        <harvestdate>2016-10-05T10:30:45Z</harvestdate>
         <metadataNamespace>http://www.loc.gov/mods/v3</metadataNamespace>
     </record>
     <repository>

@@ -624,7 +624,7 @@ class NormdocToFieldsList(Observable):
 #     </upload>
 #     <record>
 #         <id>record:4</id>
-#         <harvestDate>2016-10-05T10:30:45Z</harvestDate>
+#         <harvestdate>2016-10-05T10:30:45Z</harvestdate>
 #         <metadataNamespace>http://www.loc.gov/mods/v3</metadataNamespace>
 #     </record>
 #     <repository>
