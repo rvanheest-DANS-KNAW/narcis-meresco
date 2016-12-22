@@ -1,7 +1,7 @@
-<updateRequest>
-    <srw:version xmlns:srw="http://www.loc.gov/zing/srw/">1.0</srw:version>
-    <ucp:action xmlns:ucp="info:lc/xmlns/update-v1">info:srw/action/1/replace</ucp:action>
-    <ucp:recordIdentifier xmlns:ucp="info:lc/xmlns/update-v1">meresco:record:5</ucp:recordIdentifier>
+<ucp:updateRequest xmlns:srw="http://www.loc.gov/zing/srw/" xmlns:ucp="info:lc/xmlns/update-v1">
+    <srw:version>1.0</srw:version>
+    <ucp:action>info:srw/action/1/replace</ucp:action>
+    <ucp:recordIdentifier>meresco:record:5</ucp:recordIdentifier>
     <srw:record xmlns:srw="http://www.loc.gov/zing/srw/">
         <srw:recordPacking>xml</srw:recordPacking>
         <srw:recordSchema>metadata</srw:recordSchema>
@@ -15,6 +15,7 @@
                 &lt;/upload&gt;
                 &lt;record&gt;
                 &lt;id&gt;record:5&lt;/id&gt;
+                &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
                 &lt;/record&gt;
                 &lt;repository&gt;
                 &lt;id&gt;meresco&lt;/id&gt;
@@ -28,4 +29,4 @@
         </document>
         </srw:recordData>
     </srw:record>
-</updateRequest>
+</ucp:updateRequest>

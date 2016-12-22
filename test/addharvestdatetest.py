@@ -48,7 +48,7 @@ class AddProvenanceToMetaPartTest(SeecrTestCase):
         
         self.assertEquals("id", arguments[0])
         self.assertEquals("metadata", arguments[1])
-        #Zoek harvestDate:
+        #Zoek harvestdate:
         harvest_date = result.xpath('/meta:meta/meta:record/meta:harvestdate/text()', namespaces=metaNS)
         hdstring = 'to be replaced'
         #print tostring(result)
@@ -62,7 +62,7 @@ class AddProvenanceToMetaPartTest(SeecrTestCase):
         list( compose(self.harvestdate.all_unknown('add', 'id', 'metadata', 'anotherone', lxmlNode=parse(open("data/anymetapart_harvestdate.xml")), identifier='oai:very:secret:09987' )))
         result = self.observer.calledMethods[0].kwargs.get('lxmlNode')
               
-        #Zoek harvestDate:
+        #Zoek harvestdate:
         harvest_date = result.xpath('/meta:meta/meta:record/meta:harvestdate/text()', namespaces=metaNS)
         #print "HDate:", harvest_date[0]
         self.assertTrue(len(harvest_date)==1)
