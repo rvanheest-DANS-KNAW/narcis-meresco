@@ -100,10 +100,11 @@ def main(reactor, port, statePath, **ignored):
                                 (PathFilter('/oaix', excluding=['/oaix/info']),
                                     (OaiPmh(repositoryName='Gateway',
                                             adminEmail='ab@narcis.nl',
-                                            supportXWait=True
+                                            supportXWait=True,
+                                            batchSize=2000 # Override default batch size of 200.
                                         ),
                                         (oaiJazz,),
-                                        (oaiSuspendRegister,), # Wat doet dit?
+                                        (oaiSuspendRegister,),
                                         (StorageAdapter(),
                                             (storeComponent,),
                                         ),
