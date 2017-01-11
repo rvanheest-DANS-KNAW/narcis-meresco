@@ -13,7 +13,7 @@ class MetadataFormat():
     
     """Determines EduStandaard metadata format from LxmlNode"""
     
-    # Current EduStandaard formats in use, chronologically:
+    # Current EduStandaard formats in use:
     # TODO: refactor to a dict, instead of a list:
     # So: MetadataFormat.format['org'], instead of MetadataFormat.MD_FORMAT[5]
     format = {
@@ -27,11 +27,8 @@ class MetadataFormat():
         'prs':'',
     }
 
+    MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs', 'datacite']
 
-
-
-    MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs']
-    
     NAMESPACEMAP = {
         'dc'        : 'http://purl.org/dc/elements/1.1/',
         'oai_dc'    : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
@@ -42,6 +39,7 @@ class MetadataFormat():
         'prs'       : 'http://www.onderzoekinformatie.nl/nod/prs',
         'proj'      : 'http://www.onderzoekinformatie.nl/nod/act',
         'org'       : 'http://www.onderzoekinformatie.nl/nod/org',
+        'datacite'  : 'http://datacite.org/schema/kernel-3'
     }
     
     NAMESPACEMAPPER = {
@@ -53,6 +51,7 @@ class MetadataFormat():
         MD_FORMAT[5] : NAMESPACEMAP.get('org'),
         MD_FORMAT[6] : NAMESPACEMAP.get('proj'),
         MD_FORMAT[7] : NAMESPACEMAP.get('prs'),
+        MD_FORMAT[8] : NAMESPACEMAP.get('datacite'),
     }
 
 
@@ -90,8 +89,8 @@ class MetadataFormat():
 
         if md_format == None:
             raise ValidateException("No known EduStandaard format was found in the metadata for uploadid: %s! This record cannot be processed." % (uploadId))
-        else:
-            print "Found EduStandaard format:", md_format
+#         else:
+#             print "Found EduStandaard format:", md_format
 
         return md_format
 

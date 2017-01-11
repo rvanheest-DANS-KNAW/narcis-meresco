@@ -183,7 +183,7 @@ class NormaliseOaiRecord(UiaConverter):
                     raise
                 self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'long' node.
 
-            print 'Long convertion succeeded...' # , tostring(e_norm_root)
+            # print 'Long convertion succeeded...' # , tostring(e_norm_root)
 
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespacesmap)
