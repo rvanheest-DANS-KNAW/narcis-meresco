@@ -18,8 +18,8 @@ HARVESTONLY=*meresco21*
 if [[ "$HOSTNAME" == ${HARVESTONLY} ]]
     then
         while /bin/true; do
-            meresco-harvester --domain=narcis --runOnce --set-process-timeout=7200 $REP
-            sleep 1800
+            meresco-harvester --domain=narcis --runOnce $REP
+            sleep 900
         done
     else echo "No harvest, host: "$HOSTNAME" is not: "${HARVESTONLY}
 fi
