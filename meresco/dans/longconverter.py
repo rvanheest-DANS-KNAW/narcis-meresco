@@ -430,7 +430,7 @@ class NormaliseOaiRecord(UiaConverter):
                 accesssRights = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Item[didl:Descriptor/didl:Statement/rdf:type/@rdf:resource="info:eu-repo/semantics/objectFile"]/didl:Descriptor/didl:Statement/dcterms:accessRights/text()', namespaces=namespacesmap)
                 if (len(objectfiles) > 0 and len(accesssRights) == len(objectfiles) and str(accesssRights).lower().find('openaccess') == -1 ) or (len(objectfiles)==0):
                     self._openAccess = False
-                    print "FOUND CLOSED ACCESS!"
+#                     print "FOUND CLOSED ACCESS!"
 
             for objectfile in objectfiles:
                 #create objectFile element:
