@@ -172,7 +172,7 @@ class NormdocToFieldsList(Observable):
         self._fieldslist = [] # reset list
         # hier komt een compleet meresco:document binnen als LXMLnode:
         # uploadid = kwargs['identifier']
-        print '###', kwargs['identifier'], '###'
+        # print '###', kwargs['identifier'], '###'
 
         # Get meta, header and metadata part(='long') from the normdoc:
         e_metapart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="meta"]/text()', namespaces=namespacesmap)[0])
@@ -480,7 +480,7 @@ class NormdocToFieldsList(Observable):
  
             nids = lxmlNode.xpath('//prs:persoon/prs:nameIdentifier', namespaces=namespacesmap)
             if len(nids) > 0:
-                print "Aantal nod Persoon nameIdentifiers:", len(nids)
+                # print "Aantal nod Persoon nameIdentifiers:", len(nids)
                 for nid in nids:
                     nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
                     if nameId.is_valid():
@@ -509,7 +509,7 @@ class NormdocToFieldsList(Observable):
 
             nids = lxmlNode.xpath('//prj:person/prj:nameIdentifier', namespaces=namespacesmap)
             if len(nids) > 0:
-                print "Aantal nod Project nameIdentifiers:", len(nids)
+                # print "Aantal nod Project nameIdentifiers:", len(nids)
                 for nid in nids:
                     nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
                     if nameId.is_valid():
