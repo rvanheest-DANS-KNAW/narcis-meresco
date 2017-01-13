@@ -31,8 +31,6 @@ from lxml import etree
 
 # TODO: create UnitTestCase for o.a. writeDelete / unDelete
 # TODO: SRU-throttle mogelijkheden uitzoeken.
-# TODO: RSS module will create link to www.narcis.nl/project/RecordID/ instead of: www.narcis.nl/research/RecordID/
-#       - perhaps wcpcollection name should be changed back to 'research' instead of 'project'.
 # TODO: ReIndexer
 
 testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/OAI/2.0/branding/',

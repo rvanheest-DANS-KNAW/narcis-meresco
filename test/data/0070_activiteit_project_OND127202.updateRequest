@@ -1,7 +1,7 @@
 <ucp:updateRequest xmlns:srw="http://www.loc.gov/zing/srw/" xmlns:ucp="info:lc/xmlns/update-v1">
     <srw:version>1.0</srw:version>
     <ucp:action>info:srw/action/1/replace</ucp:action>
-    <ucp:recordIdentifier>project:OND1272024</ucp:recordIdentifier>
+    <ucp:recordIdentifier>research:OND1272024</ucp:recordIdentifier>
     <srw:record xmlns:srw="http://www.loc.gov/zing/srw/">
         <srw:recordPacking>xml</srw:recordPacking>
         <srw:recordSchema>metadata</srw:recordSchema>
@@ -81,19 +81,19 @@
             &lt;/record&gt;</part>
             <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;
                 &lt;upload&gt;
-                &lt;id&gt;project:OND1272024&lt;/id&gt;
+                &lt;id&gt;research:OND1272024&lt;/id&gt;
                 &lt;/upload&gt;
                 &lt;record&gt;
                 &lt;id&gt;OND1272024&lt;/id&gt;
                 &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
                 &lt;/record&gt;
                 &lt;repository&gt;
-                &lt;id&gt;project&lt;/id&gt;
+                &lt;id&gt;research&lt;/id&gt;
                 &lt;set&gt;activiteiten&lt;/set&gt;
                 &lt;baseurl&gt;http://narcis01.bureau.knaw.nl:8181/nodserver-0.0.1/nodbrug&lt;/baseurl&gt;
                 &lt;repositoryGroupId&gt;nod&lt;/repositoryGroupId&gt;
                 &lt;metadataPrefix&gt;nodactiviteit&lt;/metadataPrefix&gt;
-                &lt;collection&gt;project&lt;/collection&gt;
+                &lt;collection&gt;research&lt;/collection&gt;
                 &lt;/repository&gt;
                 &lt;/meta&gt;</part>
         </document>

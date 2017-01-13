@@ -55,7 +55,7 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
     'norm'   : 'http://dans.knaw.nl/narcis/normalized',
 })
 
-WCPNODCOLLECTION = ['project', 'organisation', 'person']
+WCPNODCOLLECTION = ['research', 'organisation', 'person']
 WCPEDUCOLLECTION = ['publication', 'dataset' ]
 WCPCOLLECTION =  WCPEDUCOLLECTION + WCPNODCOLLECTION
 UNQUALIFIED_TERMS = ''  #'__all__'
@@ -81,7 +81,7 @@ def enum(**enums):
     return type('Enum', (), enums)
 
 
-Coll = enum(PUB='publication', DAT='dataset', ORG='organisation', PRJ='project', PRS='person')
+Coll = enum(PUB='publication', DAT='dataset', ORG='organisation', PRJ='research', PRS='person')
 # print "DATA:", Collection.DAT
 
 
@@ -500,7 +500,7 @@ class NormdocToFieldsList(Observable):
                 names.append(org_name)
 
 
-        elif wcpcollection == 'project':
+        elif wcpcollection == 'research':
             # NOD_ACT: (fullnames + dais)
             act_persons = lxmlNode.xpath('//prj:activiteit/prj:person', namespaces=namespacesmap)
             for act_person in act_persons:
