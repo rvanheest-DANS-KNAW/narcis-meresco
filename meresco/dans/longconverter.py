@@ -126,8 +126,8 @@ class NormaliseOaiRecord(UiaConverter):
 
         if self._metadataformat is not None:
             # Create rootelement:
-            e_longroot = etree.SubElement(e_norm_root, namespacesmap.curieToTag('long:long'), nsmap={None:namespacesmap['long']})
-            # e_longroot = etree.Element(namespacesmap.curieToTag('long:long'), nsmap={None:namespacesmap['long']})
+            e_longroot = etree.SubElement(e_norm_root, namespacesmap.curieToTag('long:knaw_long'), nsmap={None:namespacesmap['long']})
+            # e_longroot = etree.Element(namespacesmap.curieToTag('long:knaw_long'), nsmap={None:namespacesmap['long']})
             e_longroot.set("version", LONG_VERSION)
             # Add WCP Collection to long format:
             etree.SubElement(e_longroot, "wcpcollection").text = wcpCollection
@@ -181,7 +181,7 @@ class NormaliseOaiRecord(UiaConverter):
                 except:
                     print 'Error while parsing', tostring(e_longroot)
                     raise
-                self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'long' node.
+                self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'knaw_long' node.
 
             # print 'Long convertion succeeded...' # , tostring(e_norm_root)
 
@@ -925,7 +925,7 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _addHostCitation(self, lxmlNode):
-        relatedItems = lxmlNode.xpath("//long:long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
+        relatedItems = lxmlNode.xpath("//long:knaw_long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
         if len(relatedItems) > 0:
             title, page, volume, published, issn = '', '', '', '', ''
             relatedItem = relatedItems[0]

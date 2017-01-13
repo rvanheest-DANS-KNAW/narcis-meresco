@@ -47,7 +47,7 @@ testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/
 class ApiTest(IntegrationTestCase):
 
     def testSruQuery(self):
-        response = self.doSruQuery(query='*', recordSchema='short')
+        response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
         self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set([
@@ -64,7 +64,7 @@ class ApiTest(IntegrationTestCase):
             ), set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
 
     def testSruQueryWithUntokenized(self):
-        response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "long"})        
+        response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "knaw_long"})        
         # print "humanStartPage:", etree.tostring(response)
         self.assertEqual('meresco:record:1', xpathFirst(response, '//srw:recordIdentifier/text()'))
         response = self.doSruQuery(**{"query": 'untokenized.dd_year exact "2016"'})
@@ -96,7 +96,7 @@ class ApiTest(IntegrationTestCase):
 
 
     def testPublIdentifier(self):
-        response = self.doSruQuery(**{'query':'1937-1632-REL', 'maximumRecords': '1', 'recordSchema':'long'})
+        response = self.doSruQuery(**{'query':'1937-1632-REL', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
         # print "DD body:", etree.tostring(response)
         #print body.searchRetrieveResponse.records.record.recordData.knaw_long.metadata.relatedItem.publication_identifier
         self.assertEqual('Springer', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:publisher/text()'))

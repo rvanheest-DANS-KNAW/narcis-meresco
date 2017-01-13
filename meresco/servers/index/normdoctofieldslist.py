@@ -153,7 +153,7 @@ fieldNamesXpathMap = {
     'dd_penv'        : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
     'dd_fin'         : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
     'publicationid'  : "//long:publication_identifier/text()", # TODO: Bestaat dit veld in LONG??? MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
-    'pidref'         : "//long:long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
+    'pidref'         : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
     }
 
 
@@ -192,7 +192,7 @@ class NormdocToFieldsList(Observable):
         if wcp_collection in WCPNODCOLLECTION:
             record = e_recordpart.xpath('//prs:persoon | //prj:activiteit | //org:organisatie', namespaces=namespacesmap)
         else:
-            record = e_recordpart.xpath('//norm:normalized/long:long', namespaces=namespacesmap)
+            record = e_recordpart.xpath('//norm:normalized/long:knaw_long', namespaces=namespacesmap)
         self._fillFieldslist(record[0], '')
 
         self._addAuthorsAndNamesFields(record[0], wcp_collection)
@@ -584,7 +584,7 @@ class NormdocToFieldsList(Observable):
 #             </oai_dc:dc>
 #         </ns0:md_original>
 #         <ns0:normalized xmlns:ns0="http://dans.knaw.nl/narcis/normalized">
-#             <long xmlns="http://www.knaw.nl/narcis/1.0/long/" version="1.0">
+#             <knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/" version="1.0">
 #                 <modificationDate>2008-12-15T14:08:34Z</modificationDate>
 #                 <humanStartPage>http://meresco.com?record=1</humanStartPage>
 #                 <accessRights>restrictedAccess</accessRights>
@@ -611,7 +611,7 @@ class NormdocToFieldsList(Observable):
 #                     </dateIssued>
 #                     <language>en</language>
 #                 </metadata>
-#             </long>
+#             </knaw_long>
 #         </ns0:normalized>
 #     </metadata>
 # </record>

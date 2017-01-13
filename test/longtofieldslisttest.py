@@ -56,7 +56,7 @@ class DcToFieldsListTest(SeecrTestCase):
             }, observer.calledMethods[0].kwargs)
 
 
-LONG_RECORD = """<long xmlns="http://www.knaw.nl/narcis/1.0/long/" version="1.0">
+LONG_RECORD = """<knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/" version="1.0">
   <modificationDate>2007-03-18T11:02:39Z</modificationDate>
   <humanStartPage>http://repository.tue.nl/711504</humanStartPage>
   <persistentIdentifier ref="http://repository.tue.nl/711504">URN:NBN:NL:UI:25-711504</persistentIdentifier>
@@ -142,4 +142,4 @@ LONG_RECORD = """<long xmlns="http://www.knaw.nl/narcis/1.0/long/" version="1.0"
       </grantAgreement>
     </grantAgreements>
   </metadata>
-</long>"""
+</knaw_long>"""

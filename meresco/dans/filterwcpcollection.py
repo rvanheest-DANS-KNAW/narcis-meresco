@@ -73,7 +73,7 @@ class FilterWcpCollection(Observable):
         recordpart = lxmlNode.xpath('/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()', namespaces=namespacesmap)
         if len(recordpart) == 1:
             record_lxml = etree.fromstring(recordpart[0])
-            longpart = record_lxml.xpath('//norm:normalized/long:long', namespaces=namespacesmap)
+            longpart = record_lxml.xpath('//norm:normalized/long:knaw_long', namespaces=namespacesmap)
             if len(longpart) == 1:
                 print tostring(longpart[0])
                 return longpart[0]
@@ -87,7 +87,7 @@ class FilterWcpCollection(Observable):
             pass
         else:
             # Check if long is available as lxml:
-            long_wcpcollection = lxmlNode.xpath('//long:long/long:wcpcollection/text()', namespaces=namespacesmap)
+            long_wcpcollection = lxmlNode.xpath('//long:knaw_long/long:wcpcollection/text()', namespaces=namespacesmap)
             if len(long_wcpcollection):
                 collection = long_wcpcollection[0]
                 # print 'collection from <wcpcollection>'

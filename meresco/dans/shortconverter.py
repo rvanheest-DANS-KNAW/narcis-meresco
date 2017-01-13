@@ -39,7 +39,6 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
 
 class ShortConverter(Converter):
 
-    
 
     def __init__(self, fromKwarg, toKwarg=None, name=None, truncate_chars=300):
         Converter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
@@ -67,7 +66,7 @@ class ShortConverter(Converter):
                             if metadatakind.text != None: metadatakind.text = self._smarttruncate(metadatakind.text) # , ' (...)' [:self._truncate_chars]
             try:
                 returnxml = etree.tostring(e_root, pretty_print=True, encoding='utf-8').replace(namespacesmap['long'], namespacesmap['short'])
-                returnxml = returnxml.replace('<long ', '<short ').replace('</long>', '</short>')
+                returnxml = returnxml.replace('<knaw_long ', '<knaw_short ').replace('</knaw_long>', '</knaw_short>')
                 parser = etree.XMLParser(remove_blank_text=True)
 #               print etree.tostring(parse(StringIO(returnxml), parser), pretty_print=True)
                 return parse(StringIO(returnxml), parser)

@@ -111,15 +111,15 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                         )
                                     )
                                 ),
-                                (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
-                                    (RewritePartname("long"), # Hernoemt partname van 'record' naar "long".
+                                (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
+                                    (RewritePartname("knaw_long"), # Hernoemt partname van 'record' naar "knaw_long".
                                         (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
                                             (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                 (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
                                             )
                                         ),
-                                        (ShortConverter(fromKwarg='lxmlNode'), # creeer 'short' subset formaat.
-                                            (RewritePartname("short"),
+                                        (ShortConverter(fromKwarg='lxmlNode'), # creeer 'knaw_short' subset formaat.
+                                            (RewritePartname("knaw_short"),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                     (storageComponent,) # Schrijft 'short' naar storage.
                                                 )
@@ -150,18 +150,18 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                     (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publication'], name='NARCISPORTAL'), #TODO: Skip name='NARCISPORTAL'
                                         (oaiJazz,),
                                     ),
-                                    (XmlXPath(["//long:long[long:accessRights ='openAccess']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                    (XmlXPath(["//long:knaw_long[long:accessRights ='openAccess']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
                                         # (LogComponent("OPENACCESS"),),
                                         (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire'], name='NARCISPORTAL'),
                                             (oaiJazz,),
                                         )
                                     ),
-                                    (XmlXPath(["//long:long/long:metadata[long:genre ='doctoralthesis']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                    (XmlXPath(["//long:knaw_long/long:metadata[long:genre ='doctoralthesis']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
                                         (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['thesis'], name='NARCISPORTAL'),
                                             (oaiJazz,),
                                         )
                                     ),
-                                    (XmlXPath(['//long:long/long:metadata/long:grantAgreements/long:grantAgreement[long:code[contains(.,"greement/EC/") or contains(.,"greement/ec/")]][1]'], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                    (XmlXPath(['//long:knaw_long/long:metadata/long:grantAgreements/long:grantAgreement[long:code[contains(.,"greement/EC/") or contains(.,"greement/ec/")]][1]'], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
                                         (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire'], name='NARCISPORTAL'),
                                             (oaiJazz,),
                                         )
@@ -357,9 +357,9 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     executeQueryHelix,
                                     (RssItem(
                                             nsMap=NAMESPACEMAP,                                            
-                                            title = ('short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
-                                            description = ('short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
-                                            pubdate = ('short', '//short:dateIssued/short:parsed/text()'),
+                                            title = ('knaw_short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
+                                            description = ('knaw_short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
+                                            pubdate = ('knaw_short', '//short:dateIssued/short:parsed/text()'),
                                             linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',                                
                                             wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
                                             oai_identifier = ('meta', '//meta:record/meta:id/text()'),
