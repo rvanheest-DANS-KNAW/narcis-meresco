@@ -84,6 +84,7 @@ NAMESPACEMAP = namespaces.copyUpdate({
 })
 
 
+
 def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
     return \
     (periodicDownload, # Scheduled connection to a remote (response / request)...
@@ -112,7 +113,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 ),
                                 (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
                                     (RewritePartname("long"), # Hernoemt partname van 'record' naar "long".
-                                        (FilterWcpCollection(disallowed=['person', 'project', "organisation"]),
+                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
                                             (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                 (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
                                             )
@@ -124,7 +125,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                                 )
                                             )
                                         ),
-                                        (FilterWcpCollection(disallowed=['person', 'project', "organisation"]),
+                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
                                             (DcConverter(fromKwarg='lxmlNode'), # Hernoem partname van 'record' naar "oai_dc".
                                                 (RewritePartname("oai_dc"),
                                                     (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
