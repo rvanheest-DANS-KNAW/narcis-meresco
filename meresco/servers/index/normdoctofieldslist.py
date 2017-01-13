@@ -97,19 +97,19 @@ def getNamespace(tagName):
 # Voor (samengestelde) velden die nog een (inhoudelijke) bewerking nodig hebben moet Xpath gebruikt worden.
 # TODO: alle index field names met ergens 'identifier' zijn hernoemt naar 'id'...
 fieldnamesMapping = {
-    'long.metadata.dateIssued.parsed'      : 'dateissued',
-    'long.metadata.genre'                  : 'pubtype',
-    'long.metadata.publisher'              : 'publisher',
-    'long.metadata.language'               : 'language',
-    'long.metadata.coverage'               : 'coverage',
-    'long.metadata.format'                 : 'format',
-    'long.metadata.relatedItem.placeTerm'       : UNQUALIFIED_TERMS, # __all__
-    'long.metadata.relatedItem.titleInfo.title' : UNQUALIFIED_TERMS, # __all__
-    'long.metadata.relatedItem.publisher'       : UNQUALIFIED_TERMS, # __all__
-    'long.metadata.grantAgreements.grantAgreement.code' : 'fundingid',
-    'long.accessRights'                    : 'access',
-    'long.persistentIdentifier'            : 'persistentid',
-    'long.humanStartPage'            : 'humanstartpage',
+    'knaw_long.metadata.dateIssued.parsed'      : 'dateissued',
+    'knaw_long.metadata.genre'                  : 'pubtype',
+    'knaw_long.metadata.publisher'              : 'publisher',
+    'knaw_long.metadata.language'               : 'language',
+    'knaw_long.metadata.coverage'               : 'coverage',
+    'knaw_long.metadata.format'                 : 'format',
+    'knaw_long.metadata.relatedItem.placeTerm'       : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.relatedItem.titleInfo.title' : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.relatedItem.publisher'       : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.grantAgreements.grantAgreement.code' : 'fundingid',
+    'knaw_long.accessRights'                    : 'access',
+    'knaw_long.persistentIdentifier'            : 'persistentid',
+    'knaw_long.humanStartPage'            : 'humanstartpage',
     'organisatie.acroniem'             : 'acroniem',
     'organisatie.taak_en'              : 'abstract_en',
     'organisatie.taak_nl'              : 'abstract',
@@ -216,7 +216,7 @@ class NormdocToFieldsList(Observable):
         # send addField message
         if value and value.strip() and fieldnamesMapping.has_key(fieldname):
             # Map all accessRights other than 'openAccess' to 'closedAccess' into the index:
-            if fieldname == 'long.accessRights' and value.strip().lower() not in (NormaliseOaiRecord.ACCESS_LEVELS[0].lower(), NormaliseOaiRecord.ACCESS_LEVELS[2].lower()):
+            if fieldname == 'knaw_long.accessRights' and value.strip().lower() not in (NormaliseOaiRecord.ACCESS_LEVELS[0].lower(), NormaliseOaiRecord.ACCESS_LEVELS[2].lower()):
                 if self._verbose: print 'Changing', value, 'to', NormaliseOaiRecord.ACCESS_LEVELS[2]
                 value = NormaliseOaiRecord.ACCESS_LEVELS[2]
             self._fieldslist.append((fieldnamesMapping.get(fieldname), value.strip().replace('\n', '')))

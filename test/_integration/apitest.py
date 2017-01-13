@@ -186,7 +186,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('"Example Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
 
     def assertSruQuery(self, numberOfRecords, query, printout=False):
-        response = self.doSruQuery(**{'query':query, "recordSchema": "short", "x-recordSchema": "header"}) # , 'maximumRecords': '1'
+        response = self.doSruQuery(**{'query':query, "recordSchema": "knaw_short", "x-recordSchema": "header"}) # , 'maximumRecords': '1'
         if printout: print "SruQuery response:", etree.tostring(response, pretty_print = True, encoding='utf-8')
         self.assertEquals(numberOfRecords, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
 
