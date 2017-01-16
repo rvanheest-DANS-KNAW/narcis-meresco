@@ -37,7 +37,7 @@ from unittest import main
 
 from dctofieldslisttest import DcToFieldsListTest
 from storagesplittest import StorageSplitTest
-from metaparttofieldslisttest import MeatToFieldsListTest
+from metaparttofieldslisttest import MetapartToFieldsListTest
 
 # Converters:
 from convertertest import ConverterTest

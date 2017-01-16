@@ -457,12 +457,12 @@ class NormdocToFieldsList(Observable):
                             #  Add 'known' ID format to dais/nameID field:
                             self._fieldslist.append(( nidFieldname, nameId.get_id() ))
                             self._fieldslist.append(( 'nids', nameId.get_id() ))
-                            if not self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id()
-                            if not self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
+                            if self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id()
+                            if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
                             #  Add all ID formats to general field:
                             for variant in nameId.getTypedVariants():
                                 self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
-                                if not self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+                                if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
 
         # NOD_PRS:
         elif wcpcollection == 'person':

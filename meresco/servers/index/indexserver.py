@@ -228,7 +228,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
     # Post commit naar Lucene(server):
     scheduledCommitPeriodicCall = be(
         (PeriodicCall(writerReactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1), initialSchedule=Schedule(period=1)),  # ??? WST: Verhogen van de period resulteert in falen van de integratietesten (API) ???
-            (AllToDo(), # broadcast messag to all components, despite of what kind of message...
+            (AllToDo(), # broadcast message to all components, despite of what kind of message...
                 # (periodicDownload,), # WST: periodicDownload does not do anything with a 'commit' message? So why send it to it???
                 (LuceneCommit(host='localhost', port=luceneserverPort,), # 'commit' message results in http post to /commit/ to Lucene server:
                     # (LogComponent("PERIODIC"),#), # [PERIODIC] httprequest1_1(*(), **{'body': None, 'host': 'localhost', 'request': '/commit/', 'port': 52501, 'method': 'POST'})
