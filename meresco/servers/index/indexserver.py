@@ -214,13 +214,14 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
         host='localhost',
         port=gatewayPort,
         name='gateway',
-        schedule=Schedule(period=1), # ??? WST: Hoe vaak vragen we aan de gateway of ie nog wat heeft? (default=1). Verhogen van de period resulteert in falen van de integratietesten (API) ???
+        schedule=Schedule(period=1), # ??? WST: Na hoeveel seconden vragen we opnieuw een request aan de gateway indien er een fout in het verwerken is opgetreden? (default=1). Verhogen van de period resulteert in falen van de integratietesten (API) ???
         autoStart=True)
 
     oaiDownload = OaiDownloadProcessor(
         path='/oaix',
         metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
+        userAgentAddition='IDX',
         xWait=True,
         name='gateway',
         autoCommit=False)

@@ -211,6 +211,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
         metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
         xWait=True,
+        userAgentAddition='API',
         name='gateway',
         autoCommit=False)
 
