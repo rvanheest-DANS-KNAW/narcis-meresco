@@ -56,7 +56,7 @@ class ModsConverter(Converter):
     def _convert(self, lxmlNode):
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=namespaceMap)
         record_lxml = etree.fromstring(record_part[0]) # Geen xml.sax.saxutils.unescape() hier? Dat doet lxml reeds voor ons.
-        md_format = MetadataFormat.getFormat(record_lxml) #TODO: pass it somehow from DNA, so we need to look this up only once per record...
+        md_format = MetadataFormat(record_lxml) #TODO: pass it somehow from DNA, so we need to look this up only once per record...
         # print "FOUND MetaDataFormat:", md_format
         converted_record_lxml = self._convertRecordMetadataToMods(record_lxml, md_format)# Check en insert normalised mods into record part.
         record_txt = etree.tostring(converted_record_lxml, encoding="UTF-8") # convert from lxml to text...
@@ -107,8 +107,8 @@ class ModsConverter(Converter):
             e_modsroot.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-"+ MODS_VERSION.replace(".", "-") +".xsd")
             # e_modsroot.set("xmlns:xsi" , "http://www.w3.org/2001/XMLSchema-instance")
 
-            if metadataFormat == MetadataFormat.MD_FORMAT[0] or metadataFormat == MetadataFormat.MD_FORMAT[1]:
-                print "CONVERTING MD", metadataFormat
+            if metadataFormat.isDC():
+                print "CONVERTING MD", metadataFormat.getFormat()
 
                 strTitle = lxmlNode.xpath("//dc:title/text()", namespaces=namespaceMap)
                 e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")
@@ -121,8 +121,8 @@ class ModsConverter(Converter):
                 if len(strGenre) > 0:
                     e_genre = etree.SubElement(e_modsroot, "genre").text = strGenre[0]        
 
-            elif metadataFormat == MetadataFormat.MD_FORMAT[2] or metadataFormat == MetadataFormat.MD_FORMAT[3]:
-                print "CONVERTING MD", metadataFormat
+            elif metadataFormat.isMods(): # IS THIS CORRECT??????? ALSO MODS36??????? 
+                print "CONVERTING MD", metadataFormat.getFormat()
                 strTitle = lxmlNode.xpath("//mods:titleInfo/mods:title/text()", namespaces=namespaceMap)
                 if len(strTitle) > 0:
                     e_titleInfo = etree.SubElement(e_modsroot, "titleInfo")

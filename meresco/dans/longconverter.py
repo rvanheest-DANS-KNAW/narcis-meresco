@@ -80,16 +80,14 @@ class NormaliseOaiRecord(UiaConverter):
             if len(collection) == 1: wcpcollection = collection[0]
 
         record_lxml = etree.fromstring(record_part[0]) # Geen xml.sax.saxutils.unescape() hier: Dat doet lxml reeds voor ons.
-        self._metadataformat = MetadataFormat.getFormat(record_lxml, self._uploadid) #TODO: pass it somehow from DNA, so we need to look this up only once per record.
+        self._metadataformat = MetadataFormat(record_lxml, self._uploadid) #TODO: pass it somehow from DNA, so we need to look this up only once per record.
         converted_record_lxml = self._convertRecordMetadataToLong(record_lxml, wcpcollection)# Check en insert normalised mods into record part.
         record_txt = etree.tostring(converted_record_lxml, encoding="UTF-8") # convert from lxml to text.
         record_txt = record_txt.decode('utf-8') # Soms worden er chars opgestuurd die geen unicode zijn. Deze converteren we 'brute force'.
         lxmlNode.find('document:part[@name="record"]', namespaces=namespacesmap).text = record_txt # Set as text value.
         # etree.cleanup_namespaces(lxmlNode)
         return lxmlNode
-
-
-
+            
     def _convertRecordMetadataToLong(self, lxmlNode, wcpCollection):
         
     # lxmlNode record example:
@@ -134,7 +132,7 @@ class NormaliseOaiRecord(UiaConverter):
 
             e_longmetadata = etree.Element("metadata")
 
-            if self._metadataformat in (MetadataFormat.MD_FORMAT[5], MetadataFormat.MD_FORMAT[6], MetadataFormat.MD_FORMAT[7]): # NOD records
+            if self._metadataformat.isNOD(): # NOD records
                 self._convertNODRecord2long(lxmlNode, e_longmetadata)
                 e_longroot.append(e_longmetadata)
 
@@ -181,9 +179,9 @@ class NormaliseOaiRecord(UiaConverter):
                 except:
                     print 'Error while parsing', tostring(e_longroot)
                     raise
-                self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'knaw_long' node.
+                self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'long' node.
 
-            # print 'Long convertion succeeded...' # , tostring(e_norm_root)
+#             print 'Long convertion succeeded...' # , tostring(e_norm_root)
 
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespacesmap)
@@ -207,7 +205,7 @@ class NormaliseOaiRecord(UiaConverter):
         title, title_en, penvoerder_nl, penvoerder_en, abstract, abstract_en, locatie, status, knaw_long, genre, e_name = None, None, None, None, None, None, None, None, None, None, None
 
         # ORGANISATIE:
-        if self._metadataformat == MetadataFormat.MD_FORMAT[5]:
+        if self._metadataformat.isOrganisation():
             genre = 'organisation'
 
             title = lxmlNode.xpath('//org:naam_nl/text()', namespaces=namespacesmap)
@@ -220,7 +218,7 @@ class NormaliseOaiRecord(UiaConverter):
             locatie = lxmlNode.xpath("//org:locatie/text()", namespaces=namespacesmap)
         
         # PROJECT:
-        elif self._metadataformat == MetadataFormat.MD_FORMAT[6]:
+        elif self._metadataformat.isProject():
             genre = 'research'
 
             title = lxmlNode.xpath('//proj:title_nl/text()', namespaces=namespacesmap)
@@ -237,7 +235,7 @@ class NormaliseOaiRecord(UiaConverter):
             status = lxmlNode.xpath("//proj:status/text()", namespaces=namespacesmap)
         
         # PERSOON:
-        elif self._metadataformat == MetadataFormat.MD_FORMAT[7]:
+        elif self._metadataformat.isPerson():
             genre = 'person'
 
             title = lxmlNode.xpath("//prs:fullName/text()", namespaces=namespacesmap)
@@ -317,36 +315,29 @@ class NormaliseOaiRecord(UiaConverter):
             etree.SubElement(e_longRoot, "modificationDate").text = datestamp[0]
 
 
-    def _getTitleInfo(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
-        # In contrast to all other translated tags(xml:lang="en"), this tag will ALWAYS have an xml:lang="en" and none xml:lang value.
-        # Others (f.i. <abstract>) might lack the xml:lang="en" tag.
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[5], MetadataFormat.MD_FORMAT[6], MetadataFormat.MD_FORMAT[7]):
-            title = self._findFirstXpath(lxmlNode, '//org:naam_nl/text()', '//proj:title_nl/text()', '//prs:fullName/text()')
-            if len(title) > 0:
-                etree.SubElement(etree.SubElement(e_longmetadata, "titleInfo"), "title").text = title[0]
-                if self._metadataformat == MetadataFormat.MD_FORMAT[7]: # Person name also in english:
-                    e_titleInfo = etree.SubElement(e_longmetadata, "titleInfo")
-                    e_titleInfo.attrib[namespacesmap.curieToTag('xml:lang')] = "en"
-                    etree.SubElement(e_titleInfo, "title").text = title[0]
+    def _getTitleInfo(self, lxmlNode, e_longmetadata, root=''):
+        titleNL = ['',''] 	 # [title, subtitle/alternative-title]
+        titleEN = ['','']
 
-            title_en = self._findFirstXpath(lxmlNode, '//org:naam_en/text()', '//proj:title_en/text()')
-            if len(title_en) > 0:
-                e_titleInfo = etree.SubElement(e_longmetadata, "titleInfo")
-                e_titleInfo.attrib[namespacesmap.curieToTag('xml:lang')] = "en"
-                etree.SubElement(e_titleInfo, "title").text = title_en[0]
+        if self._datacite:
+            # Datacite format
+            if not root:
+            	root='//datacite:resource/'
+            titles = lxmlNode.xpath(root+"datacite:titles", namespaces=namespacesmap)
+            if len(titles) > 0:
+                titleNL = self._nlTitleFromTitles(titles[0])
+                titleEN = self._enTitleFromTitles(titles[0])
         else:
-            # In contrast to all other translated tags(xml:lang="en"), this tag will ALWAYS have an xml:lang="en" and none xml:lang value. Others (f.i. <abstract>) might lack the xml:lang="en" tag.
-            # MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs']
+            # MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36']
             # SURFSHARE_FORMAT = ['oai_dc', 'didl_dc', 'didl_mmods', 'didl_mods231', 'didl_mods30', 'ore_rem']
-            titleNL = ['',''] #wrapper for titleInfo string -> [('NL'||empty||!='EN')|| DC], ['EN' || [first titleInfo]].
-            titleEN = None
+            if not root:
+                root='//mods:mods/'
             #Get title from any dc: (only ONE)
-            if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]): #if not fullmods:
+            if self._metadataformat.isDC(): #if not fullmods:
                 dc_titles = lxmlNode.xpath('//dc:title[1]/text()', namespaces=namespacesmap)
                 if dc_titles: # Found dc:title. Do NOT check if we're dealing with a subtitle (colon delimited according to SurfShare DC):
                     titleNL[0] = dc_titles[0]
-            # Override found DC (sub)title with (m)mods's title value's:
-            if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+            elif self._metadataformat.isMods():
                 en = lxmlNode.xpath(root+"mods:titleInfo[@xml:lang='en']", namespaces=namespacesmap)
                 nl = lxmlNode.xpath(root+"mods:titleInfo[@xml:lang='nl']", namespaces=namespacesmap)
                 if len(nl) == 0: #If no Dutch, try to find tag without a language designation.
@@ -359,24 +350,45 @@ class NormaliseOaiRecord(UiaConverter):
                     titleNL = self._titleFromTitleInfo(nl[0])
                 if len(en) > 0:
                     titleEN = self._titleFromTitleInfo(en[0])
-            if not titleEN or not titleEN[0] or titleEN[0] == '':
-                titleEN = titleNL
-            e_longmetadata.append(self._titleTag(titleNL))
-            e_longmetadata.append(self._titleTag(titleEN, 'en'))
+
+        if not titleEN[0] or titleEN[0] == '':
+            titleEN = titleNL
+                            
+        e_longmetadata.append(self._titleTag(titleNL))
+        e_longmetadata.append(self._titleTag(titleEN, 'en'))
 
 
     def _titleFromTitleInfo(self, titleInfoNode):
         if titleInfoNode is not None:
-            title = titleInfoNode.xpath('self::mods:titleInfo/mods:title/text()', namespaces=namespacesmap)
-            subtitle = titleInfoNode.xpath('self::mods:titleInfo/mods:subTitle/text()', namespaces=namespacesmap)
+            title = self._title(titleInfoNode.xpath('self::mods:titleInfo/mods:title/text()', namespaces=namespacesmap))
+            subtitle = self._title(titleInfoNode.xpath('self::mods:titleInfo/mods:subTitle/text()', namespaces=namespacesmap))
+            return [title, subtitle]
         else:
             return
-        if len(title) > 0:
-            title = title[0].strip()
-        if len(subtitle) > 0:
-            subtitle = subtitle[0].strip()
-        return [title, subtitle]
 
+    def _nlTitleFromTitles(self, titlesNode):
+        if titlesNode is not None:
+            title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl']/text()", namespaces=namespacesmap)) or \
+            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang)]/text()", namespaces=namespacesmap)) or \
+            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en')]/text()", namespaces=namespacesmap)) 
+            alternative_title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
+            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang) and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
+            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en') and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) 
+            return [title, alternative_title]
+        else:
+            return
+
+    def _enTitleFromTitles(self, titlesNode):
+        if titlesNode is not None:
+            title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en']/text()", namespaces=namespacesmap))
+            alternative_title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en' and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap))
+            return [title, alternative_title]
+        else:
+            return
+
+    def _title(self, title):
+        if len(title) > 0:
+            return title[0].strip()
 
     def _titleTag(self, titles=['',''], xmllang=None):
         if not titles or not titles[0] or titles[0] == '':
@@ -417,14 +429,14 @@ class NormaliseOaiRecord(UiaConverter):
         # MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs']
         # SURFSHARE_FORMAT = ['oai_dc', 'didl_dc', 'didl_mmods', 'didl_mods231', 'didl_mods30', 'ore_rem']
         e_objectFiles = None
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]): #FULLMODS only!
-            if self._metadataformat in (MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]): # MODS >= 3.0
+        if self._metadataformat.isMods(): #FULLMODS only!
+            if self._metadataformat.isMods3(): # MODS >= 3.0
                 objectfiles = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Item[didl:Descriptor/didl:Statement/rdf:type/@rdf:resource="info:eu-repo/semantics/objectFile"]', namespaces=namespacesmap)
             else: #Fallback to DIDL 2.3.1
                 objectfiles = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Item[didl:Descriptor/didl:Statement/dip:ObjectType/text()="info:eu-repo/semantics/objectFile"]', namespaces=namespacesmap)
             if len(objectfiles) > 0: e_objectFiles = etree.SubElement(e_longRoot, "objectFiles")
             
-            if self._metadataformat in (MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+            if self._metadataformat.isMods3():
                 # >= DIDL3.0 only:
                 # Get all accessRights for all objectFiles in one list:
                 accesssRights = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Item[didl:Descriptor/didl:Statement/rdf:type/@rdf:resource="info:eu-repo/semantics/objectFile"]/didl:Descriptor/didl:Statement/dcterms:accessRights/text()', namespaces=namespacesmap)
@@ -453,7 +465,7 @@ class NormaliseOaiRecord(UiaConverter):
                     e_persistentIdentifier.text = pi[0].strip()
 
                 #DIDL3.0 stuff:
-                if self._metadataformat in (MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+                if self._metadataformat.isMods3():
                     #look for embargo:
                     embargo = objectfile.xpath('self::didl:Item/didl:Descriptor/didl:Statement/dcterms:available/text()', namespaces=namespacesmap)
                     if embargo:
@@ -488,7 +500,7 @@ class NormaliseOaiRecord(UiaConverter):
         # SURFSHARE_FORMAT = ['oai_dc', 'didl_dc', 'didl_mmods', 'didl_mods231', 'didl_mods30', 'ore_rem']
         
         #Check for DC: See if any valid dc:rights element is available, if not AccessLevel is available from the requestscope (CA-mapper)
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[0]):
+        if self._metadataformat.isOaiDC():
             # if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None:
             #     accessRight = self.ctx.requestScope.get('accessRights') #AR set in metaPart by mapper: Setting AR to stack value
             # else:
@@ -504,7 +516,7 @@ class NormaliseOaiRecord(UiaConverter):
         #     if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None:
         #         accessRight = self.ctx.requestScope.get('accessRights') #AR set in metaPart by mapper: Setting AR to stack value                
                 
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]): #Gets accessRights from metadata:
+        if self._metadataformat.isMods3(): #Gets accessRights from metadata:
             #Check accessRights from metaPart are available on the stack:
             # if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None: raise AccessRightsError('AccessRights should not be available from metaPart when using DIDL/MODS. (use of wrong wcp mapper?)')
             # else: accessRight = NormaliseOaiRecord.ACCESS_LEVELS[0] if self._openAccess == True else NormaliseOaiRecord.ACCESS_LEVELS[2] # Found AR in metadataPart...
@@ -527,7 +539,7 @@ class NormaliseOaiRecord(UiaConverter):
 
 #knaw_long:
 # <dai>info:eu-repo/dai/nl/328277916</dai><nameIdentifier type=\"dai-nl\">328277916</nameIdentifier><nameIdentifier type=\"orcid\">000000021694233X</nameIdentifier><nameIdentifier type=\"isni\">0000000117247366</nameIdentifier>
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             nameTypes = ['personal','corporate','conference','NOTYPE'] # NOTYPE used to catch names without a type attribute! We will tread them as type 'personal'.
             namepartTypes=['family','given','termsOfAddress'] # 'unstructured' is special :(
             for nameType in nameTypes: #alle personal namen, alle corporate namen etc.
@@ -630,7 +642,7 @@ class NormaliseOaiRecord(UiaConverter):
 
 
         # Get creators and contributors from DC if NO FULLMODS available, or if MMODS did not yield any authors:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
+        if self._metadataformat.isDC():
             dc_creators = lxmlNode.xpath('//dc:creator/text()', namespaces=namespacesmap)
             for dc_creator in dc_creators:
                 e_name_type = etree.SubElement(e_longmetadata, 'name')
@@ -654,7 +666,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getRightsDescription(self, lxmlNode, e_longmetadata):
         # DC: special treatment...
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
+        if self._metadataformat.isDC():
             dc_rights = lxmlNode.xpath('//dc:rights/text()', namespaces=namespacesmap)
             if len(dc_rights) > 0:
                 filteredlist = [dc for dc in dc_rights if not self._isValidAccessLevel(dc)]
@@ -675,7 +687,7 @@ class NormaliseOaiRecord(UiaConverter):
         if len(dcGenre) > 0 and self._DCType2PublicationType(dcGenre[0].strip()) in pubTypes:
             etree.SubElement(e_longmetadata, "genre").text = self._DCType2PublicationType(dcGenre[0].strip())
         # FMODS checken:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             modsGenre = lxmlNode.xpath('//mods:mods/mods:genre[1]/text()', namespaces=namespacesmap)
             if len(modsGenre) > 0 and self._getLabelFromGenreURI(modsGenre[0]) in pubTypes:
                 etree.SubElement(e_longmetadata, "genre").text = self._getLabelFromGenreURI(modsGenre[0])
@@ -690,7 +702,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getPhysicalDescription(self, lxmlNode, e_longmetadata):
         # The nuber of pages of a book, thesis or report:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             modsGenre = lxmlNode.xpath('//mods:mods/mods:genre[1]/text()', namespaces=namespacesmap)
             if len(modsGenre) > 0 and self._getLabelFromGenreURI(modsGenre[0]) in (pubTypes[2], pubTypes[3], pubTypes[8], pubTypes[11], pubTypes[14]):
                 m_extend = lxmlNode.xpath('//mods:mods/mods:physicalDescription/mods:extent[1]/text()', namespaces=namespacesmap)
@@ -701,12 +713,12 @@ class NormaliseOaiRecord(UiaConverter):
     def _getSubject(self, lxmlNode, e_longmetadata): # TODO: Check metadataformat logic    
         subjects = [[],[]] #wrapper for max 2 subject.topic strings -> ['NL', leeg, !='EN' taal OF DC], ['EN' only].   
         # Get subjects from dc:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
+        if self._metadataformat.isDC():
             dc_subjects = lxmlNode.xpath('//dc:subject/text()', namespaces=namespacesmap)
             if len(dc_subjects) > 0:
                 subjects[0] = subjects[0] + dc_subjects
 
-        elif self._metadataformat in (MetadataFormat.MD_FORMAT[1], MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        elif self.isDidlDC() or self._metadataformat.isMods():
             en = lxmlNode.xpath("//mods:mods/mods:subject[@xml:lang='en']/mods:topic/text()", namespaces=namespacesmap)
             nl = lxmlNode.xpath("//mods:mods/mods:subject[@xml:lang='nl']/mods:topic/text()", namespaces=namespacesmap)
             if not nl:
@@ -732,12 +744,12 @@ class NormaliseOaiRecord(UiaConverter):
     def _getAbstract(self, lxmlNode, e_longmetadata): # TODO: Check metadataformat logic
         abstracts = [[],[]] #wrapper for max 2 abstract strings -> [('NL', leeg, !='EN') OF DC], ['EN' only].        
         #Get abstract from dc: (only ONE)
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
+        if self._metadataformat.isDC():
             dc_description = lxmlNode.xpath('//dc:description[1]/text()', namespaces=namespacesmap)  
             if len(dc_description) > 0: # dc:description gevonden.
                 abstracts[0] = abstracts[0] + dc_description
         # Override dc:description with mods's abstract value's
-        elif self._metadataformat in (MetadataFormat.MD_FORMAT[1], MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        elif self._metadataformat.isDidlDC() or self._metadataformat.isMods():
             en = lxmlNode.xpath("//mods:mods/mods:abstract[@xml:lang='en']/text()", namespaces=namespacesmap)
             nl = lxmlNode.xpath("//mods:mods/mods:abstract[@xml:lang='nl']/text()", namespaces=namespacesmap)
             if not nl:                
@@ -789,7 +801,7 @@ class NormaliseOaiRecord(UiaConverter):
         # SS-specs: [@type='uri'] is preferred. However, [@type='issn'] is valid!
         # [@type='uri']: 2 example ns's are given: URN & INFO, others are valid though.
         # Use of @type is mandatory.
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             identifierList = lxmlNode.xpath( root+"mods:identifier", namespaces=namespacesmap)
             returnXML = ''
             for identifier in identifierList:
@@ -825,7 +837,7 @@ class NormaliseOaiRecord(UiaConverter):
     def _getLocationUrl(self, lxmlNode, e_longmetadata):
         # FMODS only!
         # Versions of the publication OUTSIDE the repository! protocolized url's only! (://)
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             locations = lxmlNode.xpath("//mods:mods/mods:location/mods:url[contains(.,'://')]/text()", namespaces=namespacesmap)
             for loc in locations:
                 e_dateissued = etree.SubElement(e_longmetadata, "location_url").text = loc
@@ -834,7 +846,7 @@ class NormaliseOaiRecord(UiaConverter):
     def _getRelatedItems(self, lxmlNode, e_longmetadata):
         # Dit gaat 'slechts' 1 nivo diep. Bij diepere nesting gaat dit fout.
         # FMODS only
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             relateditemtypes = ['preceding', 'succeeding', 'host', 'series', 'otherVersion']
             for relateditemtype in relateditemtypes:
                 relatedItems = lxmlNode.xpath('//mods:mods/mods:relatedItem[@type="'+relateditemtype+'"]', namespaces=namespacesmap)
@@ -850,7 +862,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getPlaceterm(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
         # FMODS only! Return first palceterm we can find:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             placeterms = lxmlNode.xpath(root+"mods:originInfo/mods:place/mods:placeTerm[@type='text']/text()", namespaces=namespacesmap)
             if len(placeterms) > 0:
                 etree.SubElement(e_longmetadata, "placeTerm").text = placeterms[0]
@@ -858,7 +870,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getCoverage(self, lxmlNode, e_longmetadata):
         #Get coverages from dc:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
+        if self._metadataformat.isDC():
             dc_coverages = lxmlNode.xpath('//dc:coverage/text()', namespaces=namespacesmap)
             for coverage in dc_coverages:
                 etree.SubElement(e_longmetadata, "coverage").text = coverage.strip()
@@ -866,7 +878,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getFormat(self, lxmlNode, e_longmetadata):
         #Get formats from dc:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[0], MetadataFormat.MD_FORMAT[1]):
+        if self._metadataformat.isDC():
             dc_formats = lxmlNode.xpath('//dc:format/text()', namespaces=namespacesmap)
             for format in dc_formats:
                 etree.SubElement(e_longmetadata, "format").text = format.strip()
@@ -874,7 +886,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getTypeOfResource(self, lxmlNode, e_longmetadata):
         # FMODS only:
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             typeOfResources = lxmlNode.xpath('//mods:mods/mods:typeOfResource/text()', namespaces=namespacesmap)
             mods_resource_types = ['text'] # May be extended by mods3.0 with "video" etc.
             if len(typeOfResources) > 0 and typeOfResources[0].lower().strip() in mods_resource_types:
@@ -888,7 +900,7 @@ class NormaliseOaiRecord(UiaConverter):
         # This is OpenAIRE stuff.
         # MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs']
         # SURFSHARE_FORMAT = ['oai_dc', 'didl_dc', 'didl_mmods', 'didl_mods231', 'didl_mods30', 'ore_rem']        
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             e_gas = None
             #Look for grantAgreements with mandatory Project Reference (@code)
             gas = lxmlNode.xpath("//mods:mods/mods:extension/gal:grantAgreementList/gal:grantAgreement[@code]", namespaces=namespacesmap)
@@ -925,7 +937,7 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _addHostCitation(self, lxmlNode):
-        relatedItems = lxmlNode.xpath("//long:knaw_long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
+        relatedItems = lxmlNode.xpath("//long:long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
         if len(relatedItems) > 0:
             title, page, volume, published, issn = '', '', '', '', ''
             relatedItem = relatedItems[0]
@@ -981,7 +993,7 @@ class NormaliseOaiRecord(UiaConverter):
         # FMODS only! part can only be used as a subelement of relatedItem type=host || type=series !
         if not relatedItemType in ('host', 'series'):
             return ''
-        if self._metadataformat in (MetadataFormat.MD_FORMAT[2], MetadataFormat.MD_FORMAT[3], MetadataFormat.MD_FORMAT[4]):
+        if self._metadataformat.isMods():
             bln_foundTag = False
             #create part element:
             e_part = etree.Element("part")

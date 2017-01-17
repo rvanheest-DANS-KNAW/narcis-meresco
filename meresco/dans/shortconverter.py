@@ -14,7 +14,7 @@ from copy import deepcopy
 from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
 from meresco.components import lxmltostring, Converter
-from meresco.dans.metadataformats import MetadataFormat
+# from meresco.dans.metadataformats import MetadataFormat
 from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
 from meresco.xml import namespaces
 

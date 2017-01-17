@@ -11,7 +11,7 @@ from weightless.core import NoneOfTheObserversRespond, DeclineMessage
 from meresco.core import Observable
 from meresco.components import lxmltostring, Converter
 from xml.sax.saxutils import unescape
-from meresco.dans.metadataformats import MetadataFormat
+# from meresco.dans.metadataformats import MetadataFormat
 
 import time
 
