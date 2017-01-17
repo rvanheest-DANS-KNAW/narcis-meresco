@@ -331,7 +331,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (SruParser(
                                             host='sru.narcis.nl',
                                             port=80,
-                                            defaultRecordSchema='short',
+                                            defaultRecordSchema='knaw_short',
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(
