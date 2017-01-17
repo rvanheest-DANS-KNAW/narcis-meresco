@@ -160,8 +160,6 @@ class Rss(Observable):
         arguments = parse_qs(query)
         arguments.update({'maximumRecords' : maximumRecords}) #Reset 'maximumRecords' in case of overvragen...
         currentStartRecordNumber = int(arguments.get('startRecord', [self._startRecord])[0])
-        
-        print 'currentStartRecordNumber', currentStartRecordNumber
 
         # Add atom:next link:
         if self._totalhits > int(currentStartRecordNumber)+maximumRecords-SRU_IS_ONE_BASED:
