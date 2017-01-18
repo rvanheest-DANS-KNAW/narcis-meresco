@@ -205,15 +205,16 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
         host='localhost',
         port=gatewayPort,
         schedule=Schedule(period=10), # WST: Interval in seconds before sending a new request to the GATEWAY in case of an error while processing batch records.(default=1). IntegrationTests need 1 second! Otherwise tests will fail!
-        name='gateway')
+        name='api',
+        autoStart=True)
 
     oaiDownload = OaiDownloadProcessor(
         path='/oaix',
         metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
-        xWait=True,
         userAgentAddition='API',
-        name='gateway',
+        xWait=True,
+        name='api',
         autoCommit=False)
 
     # def sortFieldRename(name):
