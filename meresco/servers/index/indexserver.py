@@ -101,7 +101,7 @@ drilldownFields = [
     # def __init__(self, name, hierarchical=False, multiValued=True, indexFieldName=None):
     DrilldownField(untokenizedFieldname('meta:repositorygroupid')), # Was: 'repositorygroup_id'
     DrilldownField(untokenizedFieldname('meta:collection')), # was: 'collection'
-    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdijnen automagic: Nergens meer te vinden...
+    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdwijnen automagic: Nergens meer te vinden...
     DrilldownField(untokenizedFieldname('access')),
     DrilldownField(untokenizedFieldname('dd_year')),
     DrilldownField(untokenizedFieldname('status')),
@@ -193,7 +193,7 @@ def readerMain(readerReactor, statePath, port, defaultLuceneSettings, luceneserv
 
 
 def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserverPort, gatewayPort):
-    #apacheLogStream = stdout
+    # apacheLogStream = stdout
 
     http11Request = be(
         (HttpRequest1_1(),
@@ -214,7 +214,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
         host='localhost',
         port=gatewayPort,
         name='gateway',
-        schedule=Schedule(period=1), # ??? WST: Na hoeveel seconden vragen we opnieuw een request aan de gateway indien er een fout in het verwerken is opgetreden? (default=1). Verhogen van de period resulteert in falen van de integratietesten (API) ???
+        schedule=Schedule(period=10), # WST: Interval in seconds before sending a new request to the GATEWAY in case of an error while processing batch records.(default=1). IntegrationTests need 1 second! Otherwise tests will fail!
         autoStart=True)
 
     oaiDownload = OaiDownloadProcessor(
@@ -228,7 +228,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
 
     # Post commit naar Lucene(server):
     scheduledCommitPeriodicCall = be(
-        (PeriodicCall(writerReactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1), initialSchedule=Schedule(period=1)),  # ??? WST: Verhogen van de period resulteert in falen van de integratietesten (API) ???
+        (PeriodicCall(writerReactor, message='commit', name='Scheduled commit', schedule=Schedule(period=300), initialSchedule=Schedule(period=1)), # WST: Flushes data from memory to disk. IntegrationTests need 1 second! Otherwise tests will fail! (API).
             (AllToDo(), # broadcast message to all components, despite of what kind of message...
                 # (periodicDownload,), # WST: periodicDownload does not do anything with a 'commit' message? So why send it to it???
                 (LuceneCommit(host='localhost', port=luceneserverPort,), # 'commit' message results in http post to /commit/ to Lucene server:
