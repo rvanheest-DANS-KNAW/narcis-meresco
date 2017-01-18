@@ -192,7 +192,7 @@ def readerMain(readerReactor, statePath, port, defaultLuceneSettings, luceneserv
     )
 
 
-def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserverPort, gatewayPort):
+def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserverPort, gatewayPort, quickCommit=False):
     # apacheLogStream = stdout
 
     http11Request = be(
@@ -213,7 +213,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
         writerReactor,
         host='localhost',
         port=gatewayPort,
-        schedule=Schedule(period=10), # WST: Interval in seconds before sending a new request to the GATEWAY in case of an error while processing batch records.(default=1). IntegrationTests need 1 second! Otherwise tests will fail!
+        schedule=Schedule(period=1 if quickCommit else 10), # WST: Interval in seconds before sending a new request to the GATEWAY in case of an error while processing batch records.(default=1). IntegrationTests need 1 second! Otherwise tests will fail!
         name='index',
         autoStart=True)
 
@@ -228,7 +228,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
 
     # Post commit naar Lucene(server):
     scheduledCommitPeriodicCall = be(
-        (PeriodicCall(writerReactor, message='commit', name='Scheduled commit', schedule=Schedule(period=300), initialSchedule=Schedule(period=1)), # WST: Flushes data from memory to disk. IntegrationTests need 1 second! Otherwise tests will fail! (API).
+        (PeriodicCall(writerReactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1 if quickCommit else 300), initialSchedule=Schedule(period=1)), # WST: Flushes data from memory to disk. IntegrationTests need 1 second! Otherwise tests will fail! (API).
             (AllToDo(), # broadcast message to all components, despite of what kind of message...
                 # (periodicDownload,), # WST: periodicDownload does not do anything with a 'commit' message? So why send it to it???
                 (LuceneCommit(host='localhost', port=luceneserverPort,), # 'commit' message results in http post to /commit/ to Lucene server:
@@ -317,7 +317,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
     return readerServer, writerServer
 
 
-def startServer(port, stateDir, luceneserverPort, gatewayPort, **ignored):
+def startServer(port, stateDir, luceneserverPort, gatewayPort, quickCommit=False, **ignored):
     
     setSignalHandlers()
     print 'Firing up Index Server.'
@@ -333,6 +333,7 @@ def startServer(port, stateDir, luceneserverPort, gatewayPort, **ignored):
             statePath=statePath,
             luceneserverPort=luceneserverPort,
             gatewayPort=gatewayPort,
+            quickCommit=quickCommit,
         )
 
     readerServer = be(reader)
@@ -358,3 +359,4 @@ def startServer(port, stateDir, luceneserverPort, gatewayPort, **ignored):
     stdout.flush()
 
     writerReactor.loop()
+    

@@ -88,6 +88,7 @@ class ExampleIntegrationState(IntegrationState):
             luceneserverPort=self.lucenePort,
             gatewayPort=self.gatewayPort,
             stateDir=join(self.integrationTempdir, 'index'),
+            quickCommit=True,
             waitForStart=False)
 
     def startApiServer(self):
