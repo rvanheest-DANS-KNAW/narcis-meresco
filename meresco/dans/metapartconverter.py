@@ -12,6 +12,7 @@ from meresco.core import Observable
 from meresco.components import lxmltostring
 from meresco.dans.uiaconverter import UiaConverter
 from meresco.dans.metadataformats import MetadataFormat
+from meresco.dans.namespacemapping import Namespaces
 
 import time
 
@@ -54,7 +55,7 @@ class AddMetadataNamespace(UiaConverter):
                     # print 'Added harvestDate tag to meta part:', e_harvestdate.text
                 if not _bln_has_metadataNamespace:
                     e_metadataNamespace = etree.SubElement(child, HVSTR_NS + 'metadataNamespace')
-                    e_metadataNamespace.text = MetadataFormat.getMetadataNamespace(metadataFormat)
+                    e_metadataNamespace.text = Namespaces.getNamespace(metadataFormat)
                     # print 'Added metadataNamespace tag to meta part:', e_metadataNamespace.text
                 break
         return lxmlNode        

@@ -31,3 +31,7 @@ class Namespaces():
         'proj'         : NAMESPACEMAP.get('proj'),
         'prs'          : NAMESPACEMAP.get('prs'),
     }
+
+    @staticmethod
+    def getNamespace(format):
+        return Namespaces.NAMESPACEMAPPER.get(format, None)

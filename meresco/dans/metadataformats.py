@@ -15,35 +15,35 @@ class MetadataFormat():
     def __init__(self, lxmlNode, uploadId):
         
         md_format = None
-        if len(lxmlNode.xpath('//didl:DIDL[1]', namespaces=MetadataFormat.NAMESPACEMAP)) > 0: # Check for DIDL container, Max. 1 according to EduStandaard.
+        if len(lxmlNode.xpath('//didl:DIDL[1]', namespaces=Namespaces.NAMESPACEMAP)) > 0: # Check for DIDL container, Max. 1 according to EduStandaard.
             
-            if int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) >= 1: # Check for MODS container.
+            if int(lxmlNode.xpath("count(//mods:mods)", namespaces=Namespaces.NAMESPACEMAP)) >= 1: # Check for MODS container.
                 # Found MODS: Check op aanwezigheid rdf namespace, to differentiate between known versions:
-                if lxmlNode.xpath("boolean(count(//rdf:*))", namespaces=MetadataFormat.NAMESPACEMAP):
+                if lxmlNode.xpath("boolean(count(//rdf:*))", namespaces=Namespaces.NAMESPACEMAP):
                     md_format = 'didl_mods30'
                 else:
                     md_format = 'didl_mods231'
-            elif int(lxmlNode.xpath("count(//oai_dc:dc)", namespaces=MetadataFormat.NAMESPACEMAP)) == 1: # Check for OAI_DC container.
+            elif int(lxmlNode.xpath("count(//oai_dc:dc)", namespaces=Namespaces.NAMESPACEMAP)) == 1: # Check for OAI_DC container.
                 md_format = 'didl_dc'
             
-        elif int(lxmlNode.xpath("count(//mods:mods)", namespaces=MetadataFormat.NAMESPACEMAP)) >= 1: # Full MODS (MODS only)
+        elif int(lxmlNode.xpath("count(//mods:mods)", namespaces=Namespaces.NAMESPACEMAP)) >= 1: # Full MODS (MODS only)
             md_format ='didl_mods36'
-        elif lxmlNode.xpath("boolean(count(//oai_dc:dc))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
+        elif lxmlNode.xpath("boolean(count(//oai_dc:dc))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
             md_format = 'oai_dc'
-        elif lxmlNode.xpath("boolean(count(//org:organisatie))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
+        elif lxmlNode.xpath("boolean(count(//org:organisatie))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
             md_format = 'org' # NOD organization
-        elif lxmlNode.xpath("boolean(count(//proj:activiteit))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
+        elif lxmlNode.xpath("boolean(count(//proj:activiteit))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
             md_format = 'proj' # NOD project
-        elif lxmlNode.xpath("boolean(count(//prs:persoon))", namespaces=MetadataFormat.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
+        elif lxmlNode.xpath("boolean(count(//prs:persoon))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
             md_format = 'prs' # NOD Person
-        elif lxmlNode.xpath("boolean(count(//datacite:resource))", namespaces=SurfShareFormat.NAMESPACEMAP): # No DIDL, nor MODS or ORE was found, check for DATACITE:
+        elif lxmlNode.xpath("boolean(count(//datacite:resource))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS or ORE was found, check for DATACITE:
             md_format = 'datacite'
-
+        
         if md_format == None:
             raise ValidateException("No known EduStandaard format was found in the metadata for uploadid: %s! This record cannot be processed." % (uploadId))
 
         self._format = md_format
-        self._namespace = Namespaces.NAMESPACEMAPPER.get(format, None)
+        self._namespace = Namespaces.getNamespace(format)
          
 
     def getFormat(self):
@@ -71,7 +71,7 @@ class MetadataFormat():
         return self._format == 'datacite'
 
     def isNOD(self):
-        return self._format in ('org', 'proj', 'datacite')
+        return self._format in ('org', 'proj', 'prs')
 
     def isOrganisation(self):
         return self._format == 'org'

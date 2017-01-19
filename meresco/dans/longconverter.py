@@ -27,19 +27,20 @@ import time
 
 namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco-xml/blob/master/meresco/xml/namespaces.py
     
-    'dip'    : 'urn:mpeg:mpeg21:2005:01-DIP-NS',
-    'dii'    : 'urn:mpeg:mpeg21:2002:01-DII-NS',
-    'dai'    : 'info:eu-repo/dai',
-    'gal'    : 'info:eu-repo/grantAgreement',
-    'wmp'    : 'http://www.surfgroepen.nl/werkgroepmetadataplus',
-    'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
-    'proj'   : 'http://www.onderzoekinformatie.nl/nod/act',
-    'org'    : 'http://www.onderzoekinformatie.nl/nod/org',
-    'long'   : 'http://www.knaw.nl/narcis/1.0/long/',
-    'short'  : 'http://www.knaw.nl/narcis/1.0/short/',
-    'mods'   : 'http://www.loc.gov/mods/v3',
-    'didl'   : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
-    'norm'   : 'http://dans.knaw.nl/narcis/normalized',
+    'dip'     : 'urn:mpeg:mpeg21:2005:01-DIP-NS',
+    'dii'     : 'urn:mpeg:mpeg21:2002:01-DII-NS',
+    'dai'     : 'info:eu-repo/dai',
+    'gal'     : 'info:eu-repo/grantAgreement',
+    'wmp'     : 'http://www.surfgroepen.nl/werkgroepmetadataplus',
+    'prs'     : 'http://www.onderzoekinformatie.nl/nod/prs',
+    'proj'    : 'http://www.onderzoekinformatie.nl/nod/act',
+    'org'     : 'http://www.onderzoekinformatie.nl/nod/org',
+    'long'    : 'http://www.knaw.nl/narcis/1.0/long/',
+    'short'   : 'http://www.knaw.nl/narcis/1.0/short/',
+    'mods'    : 'http://www.loc.gov/mods/v3',
+    'didl'    : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
+    'norm'    : 'http://dans.knaw.nl/narcis/normalized',
+    'datacite': 'http://datacite.org/schema/kernel-3'
 })
 
 
@@ -122,7 +123,7 @@ class NormaliseOaiRecord(UiaConverter):
         e_original_root = etree.Element(namespacesmap.curieToTag('norm:md_original'))
         e_norm_root = etree.Element(namespacesmap.curieToTag('norm:normalized'))
 
-        if self._metadataformat is not None:
+        if self._metadataformat.getFormat() is not None:
             # Create rootelement:
             e_longroot = etree.SubElement(e_norm_root, namespacesmap.curieToTag('long:knaw_long'), nsmap={None:namespacesmap['long']})
             # e_longroot = etree.Element(namespacesmap.curieToTag('long:knaw_long'), nsmap={None:namespacesmap['long']})
@@ -319,7 +320,7 @@ class NormaliseOaiRecord(UiaConverter):
         titleNL = ['',''] 	 # [title, subtitle/alternative-title]
         titleEN = ['','']
 
-        if self._datacite:
+        if self._metadataformat.isDatacite():
             # Datacite format
             if not root:
             	root='//datacite:resource/'
@@ -360,35 +361,35 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _titleFromTitleInfo(self, titleInfoNode):
         if titleInfoNode is not None:
-            title = self._title(titleInfoNode.xpath('self::mods:titleInfo/mods:title/text()', namespaces=namespacesmap))
-            subtitle = self._title(titleInfoNode.xpath('self::mods:titleInfo/mods:subTitle/text()', namespaces=namespacesmap))
+            title = self._firstElement(titleInfoNode.xpath('self::mods:titleInfo/mods:title/text()', namespaces=namespacesmap))
+            subtitle = self._firstElement(titleInfoNode.xpath('self::mods:titleInfo/mods:subTitle/text()', namespaces=namespacesmap))
             return [title, subtitle]
         else:
             return
 
     def _nlTitleFromTitles(self, titlesNode):
         if titlesNode is not None:
-            title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl']/text()", namespaces=namespacesmap)) or \
-            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang)]/text()", namespaces=namespacesmap)) or \
-            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en')]/text()", namespaces=namespacesmap)) 
-            alternative_title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
-            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang) and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
-            		self._title(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en') and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) 
+            title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl']/text()", namespaces=namespacesmap)) or \
+            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang)]/text()", namespaces=namespacesmap)) or \
+            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en')]/text()", namespaces=namespacesmap)) 
+            alternative_title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
+            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang) and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
+            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en') and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) 
             return [title, alternative_title]
         else:
             return
 
     def _enTitleFromTitles(self, titlesNode):
         if titlesNode is not None:
-            title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en']/text()", namespaces=namespacesmap))
-            alternative_title = self._title(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en' and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap))
+            title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en']/text()", namespaces=namespacesmap))
+            alternative_title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en' and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap))
             return [title, alternative_title]
         else:
             return
 
-    def _title(self, title):
-        if len(title) > 0:
-            return title[0].strip()
+    def _firstElement(self, item):
+        if len(item) > 0:
+            return item[0].strip()
 
     def _titleTag(self, titles=['',''], xmllang=None):
         if not titles or not titles[0] or titles[0] == '':
@@ -417,17 +418,21 @@ class NormaliseOaiRecord(UiaConverter):
             etree.SubElement(e_longRoot, "humanStartPage").text = hsp[0].strip()
 
     def _getPersistentIdentifier(self, lxmlNode, e_longRoot):
-        pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap)
-        if len(pi) > 0:
-            e_pi = etree.SubElement(e_longRoot, "persistentIdentifier")
-            e_pi.text = pi[0].strip()
-            uri = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Component/didl:Resource/@ref', namespaces=namespacesmap)
-            if len(uri) > 0:
-                e_pi.attrib['ref'] = uri[0]
+        if self._metadataformat.isDatacite():
+            pi = lxmlNode.xpath("//datacite:resource/datacite:alternateIdentifiers/datacite:alternateIdentifier[@datacite:alternateIdentifierType='URN']/text()", namespaces=namespacesmap)
+            if len(pi) > 0:
+                e_pi = etree.SubElement(e_longRoot, "persistentIdentifier")
+                e_pi.text = self._firstElement(pi)
+        else:
+            pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap)
+            if len(pi) > 0:
+                e_pi = etree.SubElement(e_longRoot, "persistentIdentifier")
+                e_pi.text = self._firstElement(pi)
+                uri = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Component/didl:Resource/@ref', namespaces=namespacesmap)
+                if len(uri) > 0:
+                    e_pi.attrib['ref'] = uri[0]
 
     def _getObjectFiles(self, lxmlNode, e_longRoot):
-        # MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs']
-        # SURFSHARE_FORMAT = ['oai_dc', 'didl_dc', 'didl_mmods', 'didl_mods231', 'didl_mods30', 'ore_rem']
         e_objectFiles = None
         if self._metadataformat.isMods(): #FULLMODS only!
             if self._metadataformat.isMods3(): # MODS >= 3.0
@@ -511,16 +516,20 @@ class NormaliseOaiRecord(UiaConverter):
                         if ar.lower() in dc_accesslevel.strip().lower():
                             accessRight = ar
                             break
-        
         # if self._ssFormat not in (SurfShareFormat.SURFSHARE_FORMAT[4]): #No format found capable of setting accessRights from metadata...
         #     if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None:
         #         accessRight = self.ctx.requestScope.get('accessRights') #AR set in metaPart by mapper: Setting AR to stack value                
                 
-        if self._metadataformat.isMods3(): #Gets accessRights from metadata:
+        elif self._metadataformat.isMods3(): #Gets accessRights from metadata:
             #Check accessRights from metaPart are available on the stack:
             # if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None: raise AccessRightsError('AccessRights should not be available from metaPart when using DIDL/MODS. (use of wrong wcp mapper?)')
             # else: accessRight = NormaliseOaiRecord.ACCESS_LEVELS[0] if self._openAccess == True else NormaliseOaiRecord.ACCESS_LEVELS[2] # Found AR in metadataPart...
             accessRight = NormaliseOaiRecord.ACCESS_LEVELS[0] if self._openAccess == True else NormaliseOaiRecord.ACCESS_LEVELS[2] # Found AR in metadataPart...
+        elif self._metadataformat.isDatacite():
+            rights = lxmlNode.xpath('//datacite:resource/datacite:rightsList/datacite:rights/text()', namespaces=namespacesmap)
+            if len(rights) > 0:
+                accessRight = self._firstElement(rights)
+                accessRight = accessRight[accessRight.rfind('/') + 1:]
             
         etree.SubElement(e_longRoot, "accessRights").text = accessRight # default 'openAccess'
 
@@ -718,7 +727,7 @@ class NormaliseOaiRecord(UiaConverter):
             if len(dc_subjects) > 0:
                 subjects[0] = subjects[0] + dc_subjects
 
-        elif self.isDidlDC() or self._metadataformat.isMods():
+        elif self._metadataformat.isDidlDC() or self._metadataformat.isMods():
             en = lxmlNode.xpath("//mods:mods/mods:subject[@xml:lang='en']/mods:topic/text()", namespaces=namespacesmap)
             nl = lxmlNode.xpath("//mods:mods/mods:subject[@xml:lang='nl']/mods:topic/text()", namespaces=namespacesmap)
             if not nl:

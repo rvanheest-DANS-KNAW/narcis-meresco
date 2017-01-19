@@ -49,7 +49,7 @@ class ApiTest(IntegrationTestCase):
     def testSruQuery(self):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
-        self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('11', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set([
             'Example Program 1',
             'Example Program 2',
@@ -116,7 +116,7 @@ class ApiTest(IntegrationTestCase):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
         response = self.doSruQuery(**{"query": '*', 'maximumRecords': '1', "x-term-drilldown": "dd_cat:0"})
         # print "DD body:", etree.tostring(response)
-        self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('11', xpathFirst(response, '//srw:numberOfRecords/text()'))
         # self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
@@ -134,7 +134,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('openAccess', '4'), ('closedAccess', '3')], drilldown)
+        self.assertEqual([('openAccess', '5'), ('closedAccess', '3')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="pubtype"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -149,7 +149,7 @@ class ApiTest(IntegrationTestCase):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
         # print "OAI body:", etree.tostring(body) #
         records = xpath(body, '//oai:record/oai:metadata')
-        self.assertEqual(7, len(records))
+        self.assertEqual(8, len(records))
         self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
     # def testOaiPovenance(self):
@@ -171,7 +171,7 @@ class ApiTest(IntegrationTestCase):
     def testRSS(self):
         #TODO: sortering testen.
         # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
-        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai:id,,0', startRecord='4'))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai:id,,0', startRecord='5'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(3, len(items))
