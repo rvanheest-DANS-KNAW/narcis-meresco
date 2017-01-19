@@ -192,7 +192,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
         )
     )
 
-def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
+def main(reactor, port, statePath, indexPort, gatewayPort, quickCommit=False, **ignored):
     apacheLogStream = sys.stdout
 
 
@@ -204,14 +204,17 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
         reactor,
         host='localhost',
         port=gatewayPort,
-        name='gateway')
+        schedule=Schedule(period=1 if quickCommit else 10), # WST: Interval in seconds before sending a new request to the GATEWAY in case of an error while processing batch records.(default=1). IntegrationTests need 1 second! Otherwise tests will fail!
+        name='api',
+        autoStart=True)
 
     oaiDownload = OaiDownloadProcessor(
         path='/oaix',
         metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
+        userAgentAddition='API',
         xWait=True,
-        name='gateway',
+        name='api',
         autoCommit=False)
 
     # def sortFieldRename(name):
@@ -262,7 +265,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
 
     # # Post commit naar storage en ??
     # scheduledCommitPeriodicCall = be(
-    #     (PeriodicCall(reactor, message='commit', name='Scheduled commit', initialSchedule=Schedule(period=1), schedule=Schedule(period=1)),
+    #     (PeriodicCall(reactor, message='commit', name='Scheduled commit', initialSchedule=Schedule(period=1 if quickCommit else 300), schedule=Schedule(period=1)),
     #         (AllToDo(),
     #             (LogComponent("PeriodicCall"),), # commit(*(), **{})
     #             (storage,),
@@ -331,7 +334,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
                                     (SruParser(
                                             host='sru.narcis.nl',
                                             port=80,
-                                            defaultRecordSchema='short',
+                                            defaultRecordSchema='knaw_short',
                                             defaultRecordPacking='xml'),
                                         (SruLimitStartRecord(limitBeyond=4000),
                                             (SruHandler(
@@ -381,7 +384,7 @@ def main(reactor, port, statePath, indexPort, gatewayPort, **ignored):
         )
     )
 
-def startServer(port, stateDir, **kwargs):
+def startServer(port, stateDir, quickCommit=False, **kwargs):
     setSignalHandlers()
     print 'Firing up API Server.'
     reactor = Reactor()
@@ -392,6 +395,7 @@ def startServer(port, stateDir, **kwargs):
         reactor=reactor,
         port=port,
         statePath=statePath,
+        quickCommit=quickCommit,
         **kwargs
     )
     #/main

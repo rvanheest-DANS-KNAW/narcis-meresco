@@ -101,7 +101,7 @@ drilldownFields = [
     # def __init__(self, name, hierarchical=False, multiValued=True, indexFieldName=None):
     DrilldownField(untokenizedFieldname('meta:repositorygroupid')), # Was: 'repositorygroup_id'
     DrilldownField(untokenizedFieldname('meta:collection')), # was: 'collection'
-    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdijnen automagic: Nergens meer te vinden...
+    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdwijnen automagic: Nergens meer te vinden...
     DrilldownField(untokenizedFieldname('access')),
     DrilldownField(untokenizedFieldname('dd_year')),
     DrilldownField(untokenizedFieldname('status')),
@@ -192,8 +192,8 @@ def readerMain(readerReactor, statePath, port, defaultLuceneSettings, luceneserv
     )
 
 
-def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserverPort, gatewayPort):
-    #apacheLogStream = stdout
+def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserverPort, gatewayPort, quickCommit=False):
+    # apacheLogStream = stdout
 
     http11Request = be(
         (HttpRequest1_1(),
@@ -213,21 +213,22 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
         writerReactor,
         host='localhost',
         port=gatewayPort,
-        name='gateway',
-        schedule=Schedule(period=1), # ??? WST: Hoe vaak vragen we aan de gateway of ie nog wat heeft? (default=1). Verhogen van de period resulteert in falen van de integratietesten (API) ???
+        schedule=Schedule(period=1 if quickCommit else 10), # WST: Interval in seconds before sending a new request to the GATEWAY in case of an error while processing batch records.(default=1). IntegrationTests need 1 second! Otherwise tests will fail!
+        name='index',
         autoStart=True)
 
     oaiDownload = OaiDownloadProcessor(
         path='/oaix',
         metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
+        userAgentAddition='index',
         xWait=True,
-        name='gateway',
+        name='index',
         autoCommit=False)
 
     # Post commit naar Lucene(server):
     scheduledCommitPeriodicCall = be(
-        (PeriodicCall(writerReactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1), initialSchedule=Schedule(period=1)),  # ??? WST: Verhogen van de period resulteert in falen van de integratietesten (API) ???
+        (PeriodicCall(writerReactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1 if quickCommit else 300), initialSchedule=Schedule(period=1)), # WST: Flushes data from memory to disk. IntegrationTests need 1 second! Otherwise tests will fail! (API).
             (AllToDo(), # broadcast message to all components, despite of what kind of message...
                 # (periodicDownload,), # WST: periodicDownload does not do anything with a 'commit' message? So why send it to it???
                 (LuceneCommit(host='localhost', port=luceneserverPort,), # 'commit' message results in http post to /commit/ to Lucene server:
@@ -240,12 +241,11 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
     )
 
     readerServer = readerMain(
-            readerReactor=readerReactor,
-            statePath=statePath,
-            port=readerPort,
-            defaultLuceneSettings=defaultLuceneSettings,
-            luceneserverPort=luceneserverPort,
-        )
+        readerReactor=readerReactor,
+        statePath=statePath,
+        port=readerPort,
+        defaultLuceneSettings=defaultLuceneSettings,
+        luceneserverPort=luceneserverPort)
 
     writerServer = \
     (Observable(),
@@ -317,7 +317,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
     return readerServer, writerServer
 
 
-def startServer(port, stateDir, luceneserverPort, gatewayPort, **ignored):
+def startServer(port, stateDir, luceneserverPort, gatewayPort, quickCommit=False, **ignored):
     
     setSignalHandlers()
     print 'Firing up Index Server.'
@@ -333,6 +333,7 @@ def startServer(port, stateDir, luceneserverPort, gatewayPort, **ignored):
             statePath=statePath,
             luceneserverPort=luceneserverPort,
             gatewayPort=gatewayPort,
+            quickCommit=quickCommit,
         )
 
     readerServer = be(reader)
@@ -358,3 +359,4 @@ def startServer(port, stateDir, luceneserverPort, gatewayPort, **ignored):
     stdout.flush()
 
     writerReactor.loop()
+    

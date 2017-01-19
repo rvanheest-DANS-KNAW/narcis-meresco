@@ -77,6 +77,7 @@
             &lt;/person&gt;
             &lt;invoer_datum&gt;2001-08-20&lt;/invoer_datum&gt;
             &lt;url&gt;http://www.narcis.nl/research/RecordID/OND1272024&lt;/url&gt;
+            &lt;dissertatie&gt;true&lt;/dissertatie&gt;
             &lt;/activiteit&gt;&lt;/metadata&gt;
             &lt;/record&gt;</part>
             <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;

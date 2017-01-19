@@ -43,6 +43,7 @@ if __name__ == '__main__':
     parser.addOption('', '--stateDir', help="Directory to write state.", mandatory=True)
     parser.addOption('', '--indexPort', type='int', help="Portnumber of index server.", mandatory=True)
     parser.addOption('', '--gatewayPort', type='int', help="Portnumber of gateway server.", mandatory=True)
+    parser.addOption('', '--quickCommit', help="True or False. Use True for integration tests. Defaults to False.", mandatory=False)
     options, arguments =  parser.parse()
 
     from meresco.servers.api.apiserver import startServer

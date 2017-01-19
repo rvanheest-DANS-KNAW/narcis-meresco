@@ -147,7 +147,7 @@ fieldNamesXpathMap = {
     'dd_werkzaamheid': "//prs:persoon/prs:jobs/prs:job",
     'titulatuur'     : "//prs:persoon/prs:titulatuur/text()",
     'dd_cat'         : "//*[local-name()='category' and (@code)]", # Alle category elementen met attribuut 'code=', zonder namespace...(staan in zowel PRS als ORG...)
-    'dd_thesis'      : "//prj:dissertatie[contains(.='true')]", # Alle promotie onderzoeken... xpath retourneerd een boolean...
+    'dd_thesis'      : "//prj:dissertatie/text()", #Promotie onderzoeken.
     'dd_institute'   : "//org:organisatie/@code",
     'dd_os'          : "//org:organisatie/@code", # Onderzoekschool
     'dd_penv'        : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
@@ -183,7 +183,7 @@ class NormdocToFieldsList(Observable):
         e_recordpart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="record"]/text()', namespaces=namespacesmap)[0])
         # print "lxml recordpart:", tostring(e_recordpart)
 
-        # Add known meta fields for all records: 
+        # Add known metapart fields for all records: 
         for field, xpad in MetaFieldNamesToXpath.iteritems():
             self._fieldslist.append((field, e_metapart.xpath(xpad, namespaces=namespacesmap)[0]))
             if self._verbose: print 'addField:', field.upper(), "-->", e_metapart.xpath(xpad, namespaces=namespacesmap)[0]
@@ -305,9 +305,9 @@ class NormdocToFieldsList(Observable):
                 elif (func): # Only function was given: 'LCT' only!
                     if self._verbose: print 'addField:', "dd_position".upper(), "-->", func
                     self._fieldslist.append(("dd_position", func))
-        elif fieldName == 'dd_thesis': #results is a boolean (returned by Xpath)...
-            if self._verbose: print 'addField:', fieldName.upper(), "-->", str(results).lower()
-            self._fieldslist.append((fieldName, str(results).lower()))
+        elif fieldName == 'dd_thesis' and results[0].lower() in ['true', '1']:
+            if self._verbose: print 'addField:', fieldName.upper(), "-->", results[0].lower()
+            self._fieldslist.append((fieldName, 'true'))
             # Replaced to generic elif@bottom ;-)
             # elif fieldName == 'publication_identifier': #results are all <publication_identifier> tags from mods root, as well as mods/related_item.
             #     for pid in results:
