@@ -27,6 +27,12 @@
                 &lt;creator&gt;
                     &lt;creatorName&gt;Burnier, C.Y.&lt;/creatorName&gt;
                 &lt;/creator&gt;
+                &lt;creator&gt;
+                    &lt;creatorName&gt;Miller, Elizabeth&lt;/creatorName&gt;
+                    &lt;givenName&gt;Elizabeth&lt;/givenName&gt;
+                    &lt;familyName&gt;Miller&lt;/familyName&gt;
+                    &lt;nameIdentifier schemeURI=&quot;http://orcid.org/&quot; nameIdentifierScheme=&quot;ORCID&quot;&gt;0000-0001-5000-0007&lt;/nameIdentifier&gt;
+                &lt;/creator&gt;
             &lt;/creators&gt;
             &lt;titles&gt;
                 &lt;title&gt;Locatie &apos;Matthijs Tinxgracht 16&apos; te Edam, gemeente Edam-Volendam. Een archeologische opgraving.&lt;/title&gt;
@@ -36,9 +42,9 @@
             &lt;publicationYear&gt;2009&lt;/publicationYear&gt;
             &lt;subjects&gt;
                 &lt;subject&gt;Archaeology&lt;/subject&gt;
-                &lt;subject&gt;OPGRAVING&lt;/subject&gt;
+                &lt;subject xml:lang=&quot;en&quot;&gt;OPGRAVING&lt;/subject&gt;
                 &lt;subject subjectScheme=&quot;ABR-periode&quot;&gt;LME&lt;/subject&gt;
-                &lt;subject subjectScheme=&quot;ABR-periode-label&quot;&gt;Periode: Middeleeuwen laat: 1050 - 1500 nC&lt;/subject&gt;
+                &lt;subject xml:lang=&quot;en-us&quot; subjectScheme=&quot;ABR-periode-label&quot;&gt;Periode: Middeleeuwen laat: 1050 - 1500 nC&lt;/subject&gt;
                 &lt;subject subjectScheme=&quot;ABR-periode&quot;&gt;NT&lt;/subject&gt;
                 &lt;subject subjectScheme=&quot;ABR-periode-label&quot;&gt;Periode: Nieuwe tijd: 1500 - heden&lt;/subject&gt;
             &lt;/subjects&gt;
@@ -68,6 +74,8 @@
             &lt;/rightsList&gt;
             &lt;descriptions&gt;
                 &lt;description descriptionType=&quot;Other&quot;&gt;onderzoeksrapport&lt;/description&gt;
+                &lt;description descriptionType=&quot;Abstract&quot;&gt;Abstract van dit document&lt;/description&gt;
+                &lt;description xml:lang=&quot;en-us&quot; descriptionType=&quot;Abstract&quot;&gt;Abstract of this document&lt;/description&gt;
             &lt;/descriptions&gt;
             &lt;geoLocations&gt;
                 &lt;geoLocation&gt;

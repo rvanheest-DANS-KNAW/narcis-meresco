@@ -339,14 +339,11 @@ class NormaliseOaiRecord(UiaConverter):
                 if dc_titles: # Found dc:title. Do NOT check if we're dealing with a subtitle (colon delimited according to SurfShare DC):
                     titleNL[0] = dc_titles[0]
             elif self._metadataformat.isMods():
-                en = lxmlNode.xpath(root+"mods:titleInfo[@xml:lang='en']", namespaces=namespacesmap)
-                nl = lxmlNode.xpath(root+"mods:titleInfo[@xml:lang='nl']", namespaces=namespacesmap)
-                if len(nl) == 0: #If no Dutch, try to find tag without a language designation.
-                    nl = lxmlNode.xpath(root+"mods:titleInfo[not(@xml:lang)]", namespaces=namespacesmap)
-                    if len(nl) == 0: #If not empty language desigation, try to find tag with language designation other than 'en':
-                        nl = lxmlNode.xpath(root+"mods:titleInfo[not(@xml:lang='en')]", namespaces=namespacesmap)
-                        if len(nl) == 0: # Assign English lang.
-                            nl = en
+                en = lxmlNode.xpath(root+"mods:titleInfo[starts-with(@xml:lang, 'en')]", namespaces=namespacesmap)
+                nl = lxmlNode.xpath(root+"mods:titleInfo[@xml:lang='nl']", namespaces=namespacesmap) or \
+                     lxmlNode.xpath(root+"mods:titleInfo[not(@xml:lang)]", namespaces=namespacesmap) or \
+                     lxmlNode.xpath(root+"mods:titleInfo[not(starts-with(@xml:lang, 'en'))]", namespaces=namespacesmap) or \
+                     en
                 if len(nl) > 0:
                     titleNL = self._titleFromTitleInfo(nl[0])
                 if len(en) > 0:
@@ -371,10 +368,10 @@ class NormaliseOaiRecord(UiaConverter):
         if titlesNode is not None:
             title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl']/text()", namespaces=namespacesmap)) or \
             		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang)]/text()", namespaces=namespacesmap)) or \
-            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en')]/text()", namespaces=namespacesmap)) 
+            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(starts-with(@xml:lang, 'en'))]/text()", namespaces=namespacesmap)) 
             alternative_title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
             		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang) and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) or \
-            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang='en') and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) 
+            		self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(starts-with(@xml:lang, 'en')) and @datacite:titleType='AlternativeTitle']/text()", namespaces=namespacesmap)) 
             return [title, alternative_title]
         else:
             return
@@ -386,10 +383,6 @@ class NormaliseOaiRecord(UiaConverter):
             return [title, alternative_title]
         else:
             return
-
-    def _firstElement(self, item):
-        if len(item) > 0:
-            return item[0].strip()
 
     def _titleTag(self, titles=['',''], xmllang=None):
         if not titles or not titles[0] or titles[0] == '':
@@ -529,7 +522,8 @@ class NormaliseOaiRecord(UiaConverter):
             rights = lxmlNode.xpath('//datacite:resource/datacite:rightsList/datacite:rights/text()', namespaces=namespacesmap)
             if len(rights) > 0:
                 accessRight = self._firstElement(rights)
-                accessRight = accessRight[accessRight.rfind('/') + 1:]
+                if accessRight.startswith('info:eu-repo/semantics/'):
+                    accessRight = accessRight[len('info:eu-repo/semantics/'):]
             
         etree.SubElement(e_longRoot, "accessRights").text = accessRight # default 'openAccess'
 
@@ -587,35 +581,6 @@ class NormaliseOaiRecord(UiaConverter):
                     roleTerm = name.xpath('self::mods:name/mods:role/mods:roleTerm[@authority="marcrelator"]/text()', namespaces=namespacesmap)
                     if roleTerm and roleTerm[0].strip() in marcRelatorRoleTerms:
                         etree.SubElement(e_name_type, "mcRoleTerm").text = roleTerm[0].strip()
-                    # Get all mods name/nameIdentifier:
-                    # Known (NOD person) nameIdentifiers to look for:
-                    # bln_hasDAI_NID = False
-                    # supportedNids = ['dai-nl', 'orcid', 'isni']
-                    # for nid_type in supportedNids:
-                    #     nameidentifiers = name.xpath('self::mods:name/mods:nameIdentifier[@type="'+nid_type+'"]/text()', namespaces=namespacesmap)
-                        
-                    #     for nid in nameidentifiers:
-                    #         nameId = NameIdentifierFactory.factory(nid_type, nid)
-                    #         if nameId.is_valid():
-                    #             e_nid = etree.SubElement(e_name_type, "nameIdentifier")
-                    #             e_nid.attrib['type'] = nameId.get_name()
-                    #             e_nid.text = nameId.get_id()
-                    #             if nameId.get_name() == 'dai-nl': bln_hasDAI_NID = True
-
-                    # # Get DAI from DaiList-extension:
-                    # if not bln_hasDAI_NID: # Only look for DAI-extension if no valid dai has been found in (mods 3.6) nameIdentifier tag.
-                    #     extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
-                    #     if extensionid:
-                    #         # Select dai and mandatory 'some' authority:
-                    #         dai = lxmlNode.xpath(root+'mods:extension/dai:daiList/dai:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
-                    #         # Hack, since MODS doc example is in wrong (mods) namespace!
-                    #         if not dai: dai = lxmlNode.xpath(root+'mods:extension/mods:daiList/mods:identifier[@IDref="'+extensionid[0]+'" and @authority]/text()', namespaces=namespacesmap)
-                    #         if dai:
-                    #             nameId = NameIdentifierFactory.factory('dai-nl', dai[0].strip())
-                    #             if nameId.is_valid():
-                    #                 e_nid = etree.SubElement(e_name_type, "nameIdentifier")
-                    #                 e_nid.attrib['type'] = nameId.get_name()
-                    #                 e_nid.text = nameId.get_id()
 
                     # Transfer valid & known nameIdentifiers from MODS name:
                     daiset = set() # Unique dai-container.
@@ -651,7 +616,7 @@ class NormaliseOaiRecord(UiaConverter):
 
 
         # Get creators and contributors from DC if NO FULLMODS available, or if MMODS did not yield any authors:
-        if self._metadataformat.isDC():
+        elif self._metadataformat.isDC():
             dc_creators = lxmlNode.xpath('//dc:creator/text()', namespaces=namespacesmap)
             for dc_creator in dc_creators:
                 e_name_type = etree.SubElement(e_longmetadata, 'name')
@@ -672,6 +637,39 @@ class NormaliseOaiRecord(UiaConverter):
                 etree.SubElement(e_name_type, 'unstructured').text = dc_contrib
                 etree.SubElement(e_name_type, 'mcRoleTerm').text = dc_type_e
 
+        elif self._metadataformat.isDatacite():
+            creators = lxmlNode.xpath('//datacite:resource/datacite:creators/datacite:creator', namespaces=namespacesmap)
+            for creator in creators:
+                creatorName = creator.xpath('self::datacite:creator/datacite:creatorName/text()', namespaces=namespacesmap)
+                givenName = creator.xpath('self::datacite:creator/datacite:givenName/text()', namespaces=namespacesmap)
+                familyName = creator.xpath('self::datacite:creator/datacite:familyName/text()', namespaces=namespacesmap)
+                nameIdentifier = creator.xpath('self::datacite:creator/datacite:nameIdentifier/text()', namespaces=namespacesmap)
+                nameIdentifierType = creator.xpath('self::datacite:creator/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
+                self._knawName(e_longmetadata, creatorName, givenName, familyName, nameIdentifier, nameIdentifierType)
+            contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
+            for contributor in contributors:
+                creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
+                givenName = contributor.xpath('self::datacite:contributor/datacite:givenName/text()', namespaces=namespacesmap)
+                familyName = contributor.xpath('self::datacite:contributor/datacite:familyName/text()', namespaces=namespacesmap)
+                nameIdentifier = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/text()', namespaces=namespacesmap)
+                nameIdentifierType = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
+                self._knawName(e_longmetadata, creatorName, givenName, familyName, nameIdentifier, nameIdentifierType)
+
+    def _knawName(self, e_longmetadata, name="", givenName="", familyName="", nameIdentifier="", nameIdentifierType=""):
+        e_name_type = etree.SubElement(e_longmetadata, 'name')
+        etree.SubElement(e_name_type, 'type').text = 'personal'
+        if len(name) > 0:
+            etree.SubElement(e_name_type, 'unstructured').text = name[0]
+        if len(familyName) > 0:
+            etree.SubElement(e_name_type, 'family').text = familyName[0]
+        if len(givenName) > 0:
+            etree.SubElement(e_name_type, 'family').text = givenName[0]
+        if len(nameIdentifier) > 0:
+            e_nid = etree.SubElement(e_name_type, 'nameIdentifier')
+            e_nid.text = nameIdentifier[0]
+            if len(nameIdentifierType) > 0:
+                e_nid.attrib['type'] = nameIdentifierType[0]
+		
 
     def _getRightsDescription(self, lxmlNode, e_longmetadata):
         # DC: special treatment...
@@ -703,10 +701,13 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _getPublisher(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
-        # MODS, otherwise DC (1st dc:publisher)
-        publishers = self._findFirstXpath(lxmlNode, root+'mods:originInfo/mods:publisher[1]/text()', '//dc:publisher[1]/text()')
-        if len(publishers) > 0:
-            etree.SubElement(e_longmetadata, "publisher").text = publishers[0]
+        if self._metadataformat.isDatacite():
+            publisher = lxmlNode.xpath('//datacite:resource/datacite:publisher/text()', namespaces=namespacesmap)
+        else:
+            # MODS, otherwise DC (1st dc:publisher)
+            publisher = self._findFirstXpath(lxmlNode, root+'mods:originInfo/mods:publisher[1]/text()', '//dc:publisher[1]/text()')
+        if len(publisher) > 0:
+            etree.SubElement(e_longmetadata, "publisher").text = publisher[0]
 
 
     def _getPhysicalDescription(self, lxmlNode, e_longmetadata):
@@ -728,14 +729,20 @@ class NormaliseOaiRecord(UiaConverter):
                 subjects[0] = subjects[0] + dc_subjects
 
         elif self._metadataformat.isDidlDC() or self._metadataformat.isMods():
-            en = lxmlNode.xpath("//mods:mods/mods:subject[@xml:lang='en']/mods:topic/text()", namespaces=namespacesmap)
-            nl = lxmlNode.xpath("//mods:mods/mods:subject[@xml:lang='nl']/mods:topic/text()", namespaces=namespacesmap)
-            if not nl:
-                nl = lxmlNode.xpath("//mods:mods/mods:subject[not(@xml:lang)]/mods:topic/text()", namespaces=namespacesmap)
-                if not nl:
-                    nl = lxmlNode.xpath("//mods:mods/mods:subject[not(@xml:lang='en')]/mods:topic/text()", namespaces=namespacesmap)
-                    if not nl:
-                        nl = en
+            en = lxmlNode.xpath("//mods:mods/mods:subject[starts-with(@xml:lang, 'en')]/mods:topic/text()", namespaces=namespacesmap)
+            nl = lxmlNode.xpath("//mods:mods/mods:subject[@xml:lang='nl']/mods:topic/text()", namespaces=namespacesmap) or \
+                 lxmlNode.xpath("//mods:mods/mods:subject[not(@xml:lang)]/mods:topic/text()", namespaces=namespacesmap) or \
+                 lxmlNode.xpath("//mods:mods/mods:subject[not(starts-with(@xml:lang, 'en'))]/mods:topic/text()", namespaces=namespacesmap) or \
+                 en
+            if len(nl) > 0: subjects[0] = subjects[0] + nl
+            if len(en) > 0: subjects[1] = subjects[1] + en
+
+        elif self._metadataformat.isDatacite():
+            en = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[starts-with(@xml:lang, 'en')]/text()", namespaces=namespacesmap)
+            nl = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[@xml:lang='nl']/text()", namespaces=namespacesmap) or \
+                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(@xml:lang)]/text()", namespaces=namespacesmap) or \
+                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(starts-with(@xml:lang, 'en'))]/text()", namespaces=namespacesmap) or \
+                 en
             if len(nl) > 0: subjects[0] = subjects[0] + nl
             if len(en) > 0: subjects[1] = subjects[1] + en
 
@@ -752,21 +759,25 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getAbstract(self, lxmlNode, e_longmetadata): # TODO: Check metadataformat logic
         abstracts = [[],[]] #wrapper for max 2 abstract strings -> [('NL', leeg, !='EN') OF DC], ['EN' only].        
-        #Get abstract from dc: (only ONE)
         if self._metadataformat.isDC():
             dc_description = lxmlNode.xpath('//dc:description[1]/text()', namespaces=namespacesmap)  
             if len(dc_description) > 0: # dc:description gevonden.
                 abstracts[0] = abstracts[0] + dc_description
-        # Override dc:description with mods's abstract value's
         elif self._metadataformat.isDidlDC() or self._metadataformat.isMods():
             en = lxmlNode.xpath("//mods:mods/mods:abstract[@xml:lang='en']/text()", namespaces=namespacesmap)
-            nl = lxmlNode.xpath("//mods:mods/mods:abstract[@xml:lang='nl']/text()", namespaces=namespacesmap)
-            if not nl:                
-                nl = lxmlNode.xpath("//mods:mods/mods:abstract[not(@xml:lang)]/text()", namespaces=namespacesmap)
-                if not nl:
-                    nl = lxmlNode.xpath("//mods:mods/mods:abstract[not(@xml:lang='en')]/text()", namespaces=namespacesmap)
-                    if not nl:
-                        nl = en            
+            nl = lxmlNode.xpath("//mods:mods/mods:abstract[@xml:lang='nl']/text()", namespaces=namespacesmap) or \
+            	 lxmlNode.xpath("//mods:mods/mods:abstract[not(@xml:lang)]/text()", namespaces=namespacesmap) or \
+                 lxmlNode.xpath("//mods:mods/mods:abstract[not(@xml:lang='en')]/text()", namespaces=namespacesmap) or \
+                 en            
+            if len(nl) > 0: abstracts[0] = abstracts[0] + nl
+            if len(en) > 0: abstracts[1] = abstracts[1] + en
+
+        elif self._metadataformat.isDatacite():
+            en = lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[starts-with(@xml:lang, 'en') and @descriptionType='Abstract']/text()", namespaces=namespacesmap)
+            nl = lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[@xml:lang='nl' and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
+                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(@xml:lang) and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
+                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(starts-with(@xml:lang, 'en')) and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
+                en          
             if len(nl) > 0: abstracts[0] = abstracts[0] + nl
             if len(en) > 0: abstracts[1] = abstracts[1] + en
 
@@ -777,8 +788,8 @@ class NormaliseOaiRecord(UiaConverter):
             e_abstract = etree.SubElement(e_longmetadata, "abstract")
             e_abstract.attrib[namespacesmap.curieToTag('xml:lang')] = 'en'
             e_abstract.text = abstracts[1][0].strip()
-
-
+            
+            
     def _getDateIssued(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
 
         # MODS otherwise DC(1st dc:date)
@@ -1042,6 +1053,11 @@ class NormaliseOaiRecord(UiaConverter):
         elif(dctype.find('partofbook')>=0 or dctype.find('chapterofbook')>=0): return pubTypes[4]
         elif(dctype.find('book')>=0 ): return pubTypes[3]
         return ''
+
+
+    def _firstElement(self, item):
+        if len(item) > 0:
+            return item[0].strip()
 
     def _findFirstXpath(self, node, *xpaths):
         # Will return the first non-empty list that matches an xpath.
