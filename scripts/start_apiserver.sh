@@ -22,7 +22,7 @@ fi
 
 LANG=en_US.UTF-8
 export LANG
-nohup sh -c "exec /home/meresco/meresco/narcisindex/bin/start-api --port=8003 --indexPort=8002 --gatewayPort=8000 --stateDir=/data/meresco/api 1>> ${LOG} 2>&1" >/dev/null &
+nohup sh -c "exec /home/meresco/meresco/narcisindex/bin/start-api --port=8004 --indexPort=8002 --gatewayPort=8000 --stateDir=/data/meresco/api 1>> ${LOG} 2>&1" >/dev/null &
 PID=$!
 echo $PID > $PIDFILE
 
