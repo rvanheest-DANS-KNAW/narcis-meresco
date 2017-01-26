@@ -75,7 +75,7 @@ class ApiTest(IntegrationTestCase):
     def testSruIndex(self):
         self.assertSruQuery(2, '__all__ = "Seecr"')
         self.assertSruQuery(2, 'title = program')
-        self.assertSruQuery(3, 'untokenized.oai:id exact "record:1"')
+        self.assertSruQuery(3, 'untokenized.oai_id exact "record:1"')
         self.assertSruQuery(3, 'untokenized.dd_year exact "2016"')
         self.assertSruQuery(1, 'untokenized.nids exact "info:eu-repo/dai/nl/29806278"')
         self.assertSruQuery(1, 'coverage = Europe')
@@ -89,7 +89,7 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(4, '"info:eu-repo/dai/nl/071792279"')
         self.assertSruQuery(1, '"OND1272024"')
         self.assertSruQuery(1, '"ORG1236141"')
-        self.assertSruQuery(1, 'untokenized.oai:id exact "ORG1236141"')
+        self.assertSruQuery(1, 'untokenized.oai_id exact "ORG1236141"')
         self.assertSruQuery(1, '"1937-1632-REL"')
         self.assertSruQuery(3, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/282797"')
         self.assertSruQuery(1, '"Veenendaal"')
@@ -130,7 +130,7 @@ class ApiTest(IntegrationTestCase):
 
     def testSruQueryWithMultipleDrilldown(self):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
-        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta:collection:0,meta:repositorygroupid:0,access:0,pubtype:0"})
+        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,pubtype:0"})
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -171,7 +171,7 @@ class ApiTest(IntegrationTestCase):
     def testRSS(self):
         #TODO: sortering testen.
         # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
-        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai:id,,0', startRecord='4'))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai_id,,0', startRecord='4'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(3, len(items))

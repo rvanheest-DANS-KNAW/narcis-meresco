@@ -99,8 +99,8 @@ UNQUALIFIED_TERM_FIELDS = [('__all__', 1.0)]
 
 drilldownFields = [
     # def __init__(self, name, hierarchical=False, multiValued=True, indexFieldName=None):
-    DrilldownField(untokenizedFieldname('meta:repositorygroupid')), # Was: 'repositorygroup_id'
-    DrilldownField(untokenizedFieldname('meta:collection')), # was: 'collection'
+    DrilldownField(untokenizedFieldname('meta_repositorygroupid')), # Was: 'repositorygroup_id'
+    DrilldownField(untokenizedFieldname('meta_collection')), # was: 'collection'
     DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdwijnen automagic: Nergens meer te vinden...
     DrilldownField(untokenizedFieldname('access')),
     DrilldownField(untokenizedFieldname('dd_year')),
@@ -120,10 +120,10 @@ drilldownFields = [
 
 # Add any non-drilldown untokenized fields:
 untokenizedFieldnames = [f.name for f in drilldownFields] + [
-    untokenizedFieldname('oai:id'), # Was: 'oai_identifier'
-    untokenizedFieldname('meta:repositoryid'), # Was:
+    untokenizedFieldname('oai_id'), # Was: 'oai_identifier'
+    untokenizedFieldname('meta_repositoryid'), # Was:
     untokenizedFieldname('fundingid'), # Was funding_id
-    untokenizedFieldname('dare:id'), #Was: dare_identifier
+    untokenizedFieldname('dare_id'), #Was: dare_identifier
     untokenizedFieldname('publicationid'), # Was: publication_identifier
     untokenizedFieldname('mutatiedatum'),
     untokenizedFieldname('dateissued'),
@@ -297,7 +297,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
                                                     #rewriteIdentifier=(lambda idee: idee.split(':', 1)[-1]) # meresco:record:1' => 'record:1'
                                                 ),
                                                 # (LogComponent("FIELDS TO LUCENE_WRITER"),), # [LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': 'dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'StringField', 'name': 'untokenized.dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': '__all__', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': 'dc:description', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': 'dc:title', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:creator', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:publisher', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': '2016'}, {'type': 'TextField', 'name': 'dc:date', 'value': '2016'}, {'path': ['2016'], 'type': 'FacetField', 'name': 'untokenized.dc:date'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example'}, {'type': 'TextField', 'name': 'dc:type', 'value': 'Example'}, {'type': 'TextField', 'name': '__all__', 'value': 'Search'}, {'type': 'TextField', 'name': 'dc:subject', 'value': 'Search'}, {'path': ['Search'], 'type': 'FacetField', 'name': 'untokenized.dc:subject'}, {'type': 'TextField', 'name': '__all__', 'value': 'en'}, {'type': 'TextField', 'name': 'dc:language', 'value': 'en'}, {'type': 'TextField', 'name': '__all__', 'value': 'Open Source'}, {'type': 'TextField', 'name': 'dc:rights', 'value': 'Open Source'}], 'identifier': 'meresco:record:1'})
-                                                    # [####LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:id', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'olddata'}, {'type': 'TextField', 'name': 'meta:set', 'value': 'olddata'}, {'type': 'TextField', 'name': '__all__', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': 'meta:baseurl', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:repositoryGroupId', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'nl_didl'}, {'type': 'TextField', 'name': 'meta:metadataPrefix', 'value': 'nl_didl'}, {'type': 'TextField', 'name': '__all__', 'value': 'publication'}, {'type': 'TextField', 'name': 'meta:collection', 'value': 'publication'}, {'path': ['publication'], 'type': 'FacetField', 'name': 'untokenized.meta:collection'}], 'identifier': 'knaw:record:3'})
+                                                    # [####LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:id', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'olddata'}, {'type': 'TextField', 'name': 'meta:set', 'value': 'olddata'}, {'type': 'TextField', 'name': '__all__', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': 'meta:baseurl', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:repositoryGroupId', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'nl_didl'}, {'type': 'TextField', 'name': 'meta:metadataPrefix', 'value': 'nl_didl'}, {'type': 'TextField', 'name': '__all__', 'value': 'publication'}, {'type': 'TextField', 'name': 'meta_collection', 'value': 'publication'}, {'path': ['publication'], 'type': 'FacetField', 'name': 'untokenized.meta_collection'}], 'identifier': 'knaw:record:3'})
                                                 (luceneWriter,),
                                                 # ),
                                             )

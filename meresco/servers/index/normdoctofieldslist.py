@@ -124,11 +124,11 @@ fieldnamesMapping = {
     }
 
 MetaFieldNamesToXpath = {
-    'oai:id'        : '/meta:meta/meta:record/meta:id/text()',
-    'dare:id'       : '/meta:meta/meta:record/meta:id/text()',
-    'meta:repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
-    'meta:repositorygroupid': '/meta:meta/meta:repository/meta:repositoryGroupId/text()',
-    'meta:collection'       : '/meta:meta/meta:repository/meta:collection/text()',
+    'oai_id'        : '/meta:meta/meta:record/meta:id/text()',
+    'dare_id'       : '/meta:meta/meta:record/meta:id/text()',
+    'meta_repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
+    'meta_repositorygroupid': '/meta:meta/meta:repository/meta:repositoryGroupId/text()',
+    'meta_collection'       : '/meta:meta/meta:repository/meta:collection/text()',
     }
 
 
