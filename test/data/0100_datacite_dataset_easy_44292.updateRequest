@@ -52,6 +52,9 @@
                 &lt;contributor contributorType=&quot;RightsHolder&quot;&gt;
                     &lt;contributorName&gt;Jacobs en Burnier&lt;/contributorName&gt;
                 &lt;/contributor&gt;
+                &lt;contributor&gt;
+                    &lt;contributorName&gt;Jack en Jill&lt;/contributorName&gt;
+                &lt;/contributor&gt;
             &lt;/contributors&gt;
             &lt;fundingReference&gt;
                &lt;funderName&gt;European Commission&lt;/funderName&gt;
@@ -92,9 +95,10 @@
                 &lt;/geoLocation&gt;
                 &lt;geoLocation&gt;
                     &lt;geoLocationPlace&gt;Matthijs Tinxgracht 16&lt;/geoLocationPlace&gt;
-                &lt;/geoLocation&gt;
-                &lt;geoLocation&gt;
-                    &lt;geoLocationPoint&gt;52.51483176 5.04757305&lt;/geoLocationPoint&gt;
+                    &lt;geoLocationPoint&gt;
+	                    &lt;pointLongitude&gt;52.51483176&lt;/pointLongitude&gt;
+	                    &lt;pointLatitude&gt;5.04757305&lt;/pointLatitude&gt;
+                    &lt;/geoLocationPoint&gt;
                 &lt;/geoLocation&gt;
             &lt;/geoLocations&gt;
         &lt;/resource&gt;        

@@ -46,6 +46,31 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
 
 LONG_VERSION = '1.0'
 
+dataciteContributorToMarcRelator = {
+	'Creator'				: 'cre',
+	'ContactPerson'			: 'mdc',
+	'DataCollector'			: 'col',
+	'DataCurator'			: 'cur',
+	'DataManager'			: 'dtm',
+	'Distributor'			: 'dst',
+	'Editor'				: 'edt',
+	'HostingInstitution'	: 'his',
+	'Producer'				: 'pro',
+	'ProjectLeader'			: 'pdr',
+	'ProjectManager'		: 'pdr',
+	'ProjectMember'			: 'rtm',
+	'RegistrationAgency'	: '',
+	'RegistrationAuthority'	: '',
+	'RelatedPerson'			: '',
+	'Researcher'			: 'res',
+	'ResearchGroup'			: '',
+	'RightsHolder'			: 'cph',
+	'Sponsor'				: 'spn',
+	'Supervisor'			: '',
+	'WorkPackageLeader'		: '',
+	'Other'					: '',
+}
+
 marcRelatorRoleTerms=['abr','acp','act','adi','adp','aft','anl','anm','ann','ant','ape','apl','app','aqt','arc','ard','arr','art','asg','asn','ato','att','auc','aud','aui','aus','aut','bdd','bjd','bkd','bkp','blw','bnd','bpd','brd','brl','bsl','cas','ccp','chr','clb','cli','cll','clr','clt','cmm','cmp','cmt','cnd','cng','cns','coe','col','com','con','cor','cos','cot','cou','cov','cpc','cpe','cph','cpl','cpt','cre','crp','crr','crt','csl','csp','cst','ctb','cte','ctg','ctr','cts','ctt','cur','cwt','dbp','dfd','dfe','dft','dgg','dgs','dis','dln','dnc','dnr','dpc','dpt','drm','drt','dsr','dst','dtc','dte','dtm','dto','dub','edc','edm','edt','egr','elg','elt','eng','enj','etr','evp','exp','fac','fds','fld','flm','fmd','fmk','fmo','fmp','fnd','fpy','frg','gis','grt','his','hnr','hst','ill','ilu','ins','inv','isb','itr','ive','ivr','jud','jug','lbr','lbt','ldr','led','lee','lel','len','let','lgd','lie','lil','lit','lsa','lse','lso','ltg','lyr','mcp','mdc','med','mfp','mfr','mod','mon','mrb','mrk','msd','mte','mtk','mus','nrt','opn','org','orm','osp','oth','own','pan','pat','pbd','pbl','pdr','pfr','pht','plt','pma','pmn','pop','ppm','ppt','pra','prc','prd','pre','prf','prg','prm','prn','pro','prp','prs','prt','prv','pta','pte','ptf','pth','ptt','pup','rbr','rcd','rce','rcp','rdd','red','ren','res','rev','rpc','rps','rpt','rpy','rse','rsg','rsp','rsr','rst','rth','rtm','sad','sce','scl','scr','sds','sec','sgd','sgn','sht','sll','sng','spk','spn','spy','srv','std','stg','stl','stm','stn','str','tcd','tch','ths','tld','tlp','trc','trl','tyd','tyg','uvp','vac','vdg','voc','wac','wal','wam','wat','wdc','wde','win','wit','wpr','wst']
 
 ## ORDER DOES MATTER!:
@@ -156,7 +181,7 @@ class NormaliseOaiRecord(UiaConverter):
                 self._getPhysicalDescription(lxmlNode, e_longmetadata)
                 self._getSubject(lxmlNode, e_longmetadata)
                 self._getAbstract(lxmlNode, e_longmetadata)
-                self._getDateIssued(lxmlNode, e_longmetadata)
+                self._getDates(lxmlNode, e_longmetadata)
                 self._getPublicationIdentifier(lxmlNode, e_longmetadata)
                 self._getLanguage(lxmlNode, e_longmetadata)
                 self._getLocationUrl(lxmlNode, e_longmetadata)
@@ -166,6 +191,7 @@ class NormaliseOaiRecord(UiaConverter):
                 self._getFormat(lxmlNode, e_longmetadata)
                 self._getTypeOfResource(lxmlNode, e_longmetadata)
                 self._getFunding(lxmlNode, e_longmetadata)
+                self._getGeoLocations(lxmlNode, e_longmetadata)
 
                 # Add metadata element to 'long' root:
                 e_longroot.append(e_longmetadata)
@@ -645,18 +671,19 @@ class NormaliseOaiRecord(UiaConverter):
                 familyName = creator.xpath('self::datacite:creator/datacite:familyName/text()', namespaces=namespacesmap)
                 nameIdentifier = creator.xpath('self::datacite:creator/datacite:nameIdentifier/text()', namespaces=namespacesmap)
                 nameIdentifierType = creator.xpath('self::datacite:creator/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
-                self._nameParts(e_longmetadata, creatorName, givenName, familyName, nameIdentifier, nameIdentifierType)
+                self._nameParts(e_longmetadata, creatorName, givenName, familyName, ['Creator'], nameIdentifier, nameIdentifierType)
             contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
             for contributor in contributors:
                 creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
                 givenName = contributor.xpath('self::datacite:contributor/datacite:givenName/text()', namespaces=namespacesmap)
                 familyName = contributor.xpath('self::datacite:contributor/datacite:familyName/text()', namespaces=namespacesmap)
+                contributorType = contributor.xpath('self::datacite:contributor/@contributorType', namespaces=namespacesmap)
                 nameIdentifier = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/text()', namespaces=namespacesmap)
                 nameIdentifierType = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
-                self._nameParts(e_longmetadata, creatorName, givenName, familyName, nameIdentifier, nameIdentifierType)
+                self._nameParts(e_longmetadata, creatorName, givenName, familyName, contributorType, nameIdentifier, nameIdentifierType)
+                
 
-
-    def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", nameIdentifier="", nameIdentifierType=""):
+    def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", contributorType="", nameIdentifier="", nameIdentifierType=""):
         e_name_type = etree.SubElement(e_longmetadata, 'name')
         etree.SubElement(e_name_type, 'type').text = 'personal'
         if len(name) > 0:
@@ -665,11 +692,20 @@ class NormaliseOaiRecord(UiaConverter):
             etree.SubElement(e_name_type, 'family').text = familyName[0]
         if len(givenName) > 0:
             etree.SubElement(e_name_type, 'family').text = givenName[0]
+        if len(contributorType) > 0:
+            marcRelator = dataciteContributorToMarcRelator.get(contributorType[0])
+            if marcRelator and len(marcRelator) > 0:
+                etree.SubElement(e_name_type, 'mcRoleTerm').text = marcRelator
+            else:
+                etree.SubElement(e_name_type, 'mcRoleTerm').text = 'ctb' # cbt = contributor
+        else:
+            etree.SubElement(e_name_type, 'mcRoleTerm').text = 'ctb' # cbt = contributor
         if len(nameIdentifier) > 0:
             e_nid = etree.SubElement(e_name_type, 'nameIdentifier')
             e_nid.text = nameIdentifier[0]
             if len(nameIdentifierType) > 0:
                 e_nid.attrib['type'] = nameIdentifierType[0]
+
 		
 
     def _getRightsDescription(self, lxmlNode, e_longmetadata):
@@ -721,13 +757,11 @@ class NormaliseOaiRecord(UiaConverter):
                     etree.SubElement(e_longmetadata, "physicalDescription").text = m_extend[0]
 
 
-    def _getSubject(self, lxmlNode, e_longmetadata): # TODO: Check metadataformat logic    
-        subjects = [[],[]] #wrapper for max 2 subject.topic strings -> ['NL', leeg, !='EN' taal OF DC], ['EN' only].   
-        # Get subjects from dc:
+    def _getSubject(self, lxmlNode, e_longmetadata):            
         if self._metadataformat.isDC():
+            e_subject = etree.SubElement(e_longmetadata, "subject")
             dc_subjects = lxmlNode.xpath('//dc:subject/text()', namespaces=namespacesmap)
-            if len(dc_subjects) > 0:
-                subjects[0] = subjects[0] + dc_subjects
+            self._getTopic(e_subject, dc_subjects)
 
         elif self._metadataformat.isDidlDC() or self._metadataformat.isMods():
             en = lxmlNode.xpath("//mods:mods/mods:subject[starts-with(@xml:lang, 'en')]/mods:topic/text()", namespaces=namespacesmap)
@@ -735,27 +769,38 @@ class NormaliseOaiRecord(UiaConverter):
                  lxmlNode.xpath("//mods:mods/mods:subject[not(@xml:lang)]/mods:topic/text()", namespaces=namespacesmap) or \
                  lxmlNode.xpath("//mods:mods/mods:subject[not(starts-with(@xml:lang, 'en'))]/mods:topic/text()", namespaces=namespacesmap) or \
                  en
-            if len(nl) > 0: subjects[0] = subjects[0] + nl
-            if len(en) > 0: subjects[1] = subjects[1] + en
-
-        elif self._metadataformat.isDatacite():
-            en = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[starts-with(@xml:lang, 'en')]/text()", namespaces=namespacesmap)
-            nl = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[@xml:lang='nl']/text()", namespaces=namespacesmap) or \
-                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(@xml:lang)]/text()", namespaces=namespacesmap) or \
-                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(starts-with(@xml:lang, 'en'))]/text()", namespaces=namespacesmap) or \
-                 en
-            if len(nl) > 0: subjects[0] = subjects[0] + nl
-            if len(en) > 0: subjects[1] = subjects[1] + en
-
-        if len (subjects[0]) > 0:
             e_subject = etree.SubElement(e_longmetadata, "subject")
-            for topic in subjects[0]:
-                etree.SubElement(e_subject, "topic").text = topic.strip()
-        if len (subjects[1]) > 0:
+            self._getTopic(e_subject, nl)
             e_subject = etree.SubElement(e_longmetadata, "subject")
             e_subject.attrib[namespacesmap.curieToTag('xml:lang')] = 'en'
-            for topic in subjects[1]:
-                etree.SubElement(e_subject, "topic").text = topic.strip()
+            self._getTopic(e_subject, en)
+
+        elif self._metadataformat.isDatacite():
+            en = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[starts-with(@xml:lang, 'en')]", namespaces=namespacesmap)
+            nl = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[@xml:lang='nl']", namespaces=namespacesmap) or \
+                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(@xml:lang)]", namespaces=namespacesmap) or \
+                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(starts-with(@xml:lang, 'en'))]", namespaces=namespacesmap) or \
+                 en
+            e_subject = etree.SubElement(e_longmetadata, "subject")
+            self._getDataciteTopic(e_subject, nl)
+            e_subject = etree.SubElement(e_longmetadata, "subject")
+            e_subject.attrib[namespacesmap.curieToTag('xml:lang')] = 'en'
+            self._getDataciteTopic(e_subject, en)
+
+    def _getTopic(self, e_subject, topics):  
+        for topic in topics:
+            etree.SubElement(e_subject, "topic").text = topic.strip()
+
+    def _getDataciteTopic(self, e_subject, topics):  
+        for topic in topics:
+            e_topic = etree.SubElement(e_subject, "topic")
+            e_topic.text = topic.text.strip()
+            subjectScheme = topic.attrib.get('subjectScheme')
+            self._getSubjectScheme(e_topic, subjectScheme)
+
+    def _getSubjectScheme(self, e_topic, subjectScheme):  
+        if subjectScheme and subjectScheme.lower() in ("audience", "abr-periode", "abr-periode-label"):
+            etree.SubElement(e_topic, "subjectScheme").text = subjectScheme
 
 
     def _getAbstract(self, lxmlNode, e_longmetadata): # TODO: Check metadataformat logic
@@ -791,34 +836,37 @@ class NormaliseOaiRecord(UiaConverter):
             e_abstract.text = abstracts[1][0].strip()
             
             
-    def _getDateIssued(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
+    def _getDates(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
 
         # Return: Normalized date and original unParsed date.
         if self._metadataformat.isDatacite():
-            dateIssued = lxmlNode.xpath("//datacite:resource/datacite:dates/datacite:date[@dateType='Issued']/text()", namespaces=namespacesmap) or \
-                         lxmlNode.xpath("//datacite:resource/datacite:dates/datacite:date[@dateType='Submitted']/text()", namespaces=namespacesmap) or \
-                         lxmlNode.xpath("//datacite:resource/datacite:dates/datacite:date[@dateType='Accepted']/text()", namespaces=namespacesmap) or \
-                         lxmlNode.xpath("//datacite:resource/datacite:dates/datacite:date[@dateType='Created']/text()", namespaces=namespacesmap) or \
-                         lxmlNode.xpath("//datacite:resource/datacite:dates/datacite:date[@dateType='Updated']/text()", namespaces=namespacesmap)
+            dateTypes = ['Issued', 'Submitted', 'Accepted', 'Created', 'Updated', 'Available', 'Copyrighted', 'Valid', 'Collected']
+            for dateType in dateTypes:
+                date = lxmlNode.xpath("//datacite:resource/datacite:dates/datacite:date[@dateType='" + dateType + "']/text()", namespaces=namespacesmap)
+                if len(date) > 0:
+                    e_date = etree.SubElement(e_longmetadata, "date" + dateType)
+                    if self._isISO8601( date[0] ):
+                        e_parsed = etree.SubElement(e_date, "parsed").text = self._normaliseDate(date[0])
+                    e_unparsed = etree.SubElement(e_date, "unParsed").text = date[0]
         else:
-        	dateIssued = lxmlNode.xpath(root+"mods:originInfo/mods:dateIssued[@encoding='w3cdtf' or @encoding='iso8601']/text()", namespaces=namespacesmap)
-        if len(dateIssued) > 0:
-            e_dateissued = etree.SubElement(e_longmetadata, "dateIssued")
-            if self._isISO8601( dateIssued[0] ):
-                e_parsed = etree.SubElement(e_dateissued, "parsed").text = self._normaliseDate(dateIssued[0])
-            e_unparsed = etree.SubElement(e_dateissued, "unParsed").text = dateIssued[0]
-        elif self._metadataformat.isMods() or self._metadataformat.isDC():
-            dcdates = lxmlNode.xpath('//dc:date/text()', namespaces=namespacesmap)
-            for dcdate in dcdates:
-                if self._isISO8601(dcdate):
-                    e_dateissued = etree.SubElement(e_longmetadata, "dateIssued")
-                    e_parsed = etree.SubElement(e_dateissued, "parsed").text = self._normaliseDate(dcdate)
-                    e_unparsed = etree.SubElement(e_dateissued, "unParsed").text = dcdate
-                    break
-            else: # No valid iso dc dates found: just add the first invalid date.
-                if len(dcdates) > 0:
-                    e_dateissued = etree.SubElement(e_longmetadata, "dateIssued")
-                    e_unparsed = etree.SubElement(e_dateissued, "unParsed").text = dcdates[0]
+            dateIssued = lxmlNode.xpath(root+"mods:originInfo/mods:dateIssued[@encoding='w3cdtf' or @encoding='iso8601']/text()", namespaces=namespacesmap)
+            if len(dateIssued) > 0:
+                e_dateissued = etree.SubElement(e_longmetadata, "dateIssued")
+                if self._isISO8601( dateIssued[0] ):
+                    e_parsed = etree.SubElement(e_dateissued, "parsed").text = self._normaliseDate(dateIssued[0])
+                e_unparsed = etree.SubElement(e_dateissued, "unParsed").text = dateIssued[0]
+            elif self._metadataformat.isMods() or self._metadataformat.isDC():
+                dcdates = lxmlNode.xpath('//dc:date/text()', namespaces=namespacesmap)
+                for dcdate in dcdates:
+                    if self._isISO8601(dcdate):
+                        e_dateissued = etree.SubElement(e_longmetadata, "dateIssued")
+                        e_parsed = etree.SubElement(e_dateissued, "parsed").text = self._normaliseDate(dcdate)
+                        e_unparsed = etree.SubElement(e_dateissued, "unParsed").text = dcdate
+                        break
+            	else: # No valid iso dc dates found: just add the first invalid date.
+                    if len(dcdates) > 0:
+                        e_dateissued = etree.SubElement(e_longmetadata, "dateIssued")
+                        e_unparsed = etree.SubElement(e_dateissued, "unParsed").text = dcdates[0]
 
 
     def _getPublicationIdentifier(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
@@ -891,7 +939,7 @@ class NormaliseOaiRecord(UiaConverter):
                     e_relateditem = etree.SubElement(e_longmetadata, "relatedItem", type=relateditemtype)
                     # Get stuff from related item:
                     self._addRelatedItemPart(relatedItem, relateditemtype, e_relateditem)
-                    methodNames = [ self._getTitleInfo, self._getPublicationIdentifier, self._getNames, self._getDateIssued, self._getPlaceterm, self._getPublisher ]
+                    methodNames = [ self._getTitleInfo, self._getPublicationIdentifier, self._getNames, self._getDates, self._getPlaceterm, self._getPublisher ]
                     for method in methodNames:
                         method(relatedItem, e_relateditem, root='self::mods:relatedItem/')
 
@@ -975,6 +1023,26 @@ class NormaliseOaiRecord(UiaConverter):
                         etree.SubElement(e_ga, "funder").text = ', '.join(funder)
             if e_gas is not None:
                 e_longmetadata.append(e_gas)
+
+
+    def _getGeoLocations(self, lxmlNode, e_longmetadata):
+        if self._metadataformat.isDatacite():
+            geoLocations = lxmlNode.xpath("//datacite:resource/datacite:geoLocations/datacite:geoLocation", namespaces=namespacesmap)
+            if len(geoLocations) > 0:
+                e_geoLocations = etree.SubElement(e_longmetadata, "geoLocations")
+                for geoLocation in geoLocations:
+                    e_geoLocation = etree.SubElement(e_geoLocations, "geoLocation")
+                    geoLocationPlaces = geoLocation.xpath('self::datacite:geoLocation/datacite:geoLocationPlace/text()', namespaces=namespacesmap)
+                    for geoLocationPlace in geoLocationPlaces:
+                        etree.SubElement(e_geoLocation, "geoLocationPlace").text = geoLocationPlace
+                    geoLocationPoints = geoLocation.xpath('self::datacite:geoLocation/datacite:geoLocationPoint', namespaces=namespacesmap)
+                    for geoLocationPoint in geoLocationPoints:
+                        pointLongitude = geoLocationPoint.xpath('self::datacite:geoLocationPoint/datacite:pointLongitude/text()', namespaces=namespacesmap)
+                        pointLatitude = geoLocationPoint.xpath('self::datacite:geoLocationPoint/datacite:pointLatitude/text()', namespaces=namespacesmap)
+                        if len(pointLongitude) > 0 and len(pointLatitude) > 0:
+                            e_geoLocationPoint = etree.SubElement(e_geoLocation, "geoLocationPoint")
+                            etree.SubElement(e_geoLocationPoint, "pointLongitude").text = pointLongitude[0]
+                            etree.SubElement(e_geoLocationPoint, "pointLatitude").text = pointLatitude[0]
 
 ################### Helper methods #########################
 
