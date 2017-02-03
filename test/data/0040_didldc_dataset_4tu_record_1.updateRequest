@@ -35,6 +35,7 @@
                                     xmlns:oai_dc=&quot;http://www.openarchives.org/OAI/2.0/oai_dc/&quot;&gt;
                                     &lt;dc:coverage&gt;years 1971-2100&lt;/dc:coverage&gt;
                                     &lt;dc:coverage&gt;Europe&lt;/dc:coverage&gt;
+						            &lt;dc:language&gt;en-us&lt;/dc:language&gt;
                                     &lt;dc:format&gt;application/pdf&lt;/dc:format&gt;
                                     &lt;dc:format&gt;application/pdf&lt;/dc:format&gt;
                                     &lt;dc:format&gt;image/jpeg&lt;/dc:format&gt;
@@ -43,7 +44,7 @@
                                     &lt;dc:creator&gt;TU Delft, Faculty of Civil Engineering and Geosciences, Department of Hydraulic Engineering&lt;/dc:creator&gt;
                                     &lt;dc:creator&gt;Freie Universität Berlin, Institute of Meteorology&lt;/dc:creator&gt;
                                     &lt;dc:creator&gt;Finnish Meteorological Institute&lt;/dc:creator&gt;
-                                    &lt;dc:date&gt;2016&lt;/dc:date&gt;
+                                    &lt;dc:date&gt;2016/1/31&lt;/dc:date&gt;
                                     &lt;dc:date&gt;2014 through 2016 (created)&lt;/dc:date&gt;
                                     &lt;dc:date&gt;2016 (issued)&lt;/dc:date&gt;
                                     &lt;dc:description&gt;This collection contains results  of Work Package 2 &quot;Hazard Identification&quot; of project RAIN (&quot; Risk Analysis of Infrastructure Networks in response to extreme weather&quot;). Pan-European gridded data sets of the probability of occurrence of river floods, coastal floods, heavy precipitation, windstorms, heavy snowfall, blizzards, crown snow load, freezing rain, forest fires, thunderstorms, hailstorms, tornadoes and convective wind gusts under present and future climate.&lt;/dc:description&gt;

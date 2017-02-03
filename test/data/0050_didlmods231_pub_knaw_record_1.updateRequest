@@ -59,6 +59,9 @@
                                 &lt;/mods:titleInfo&gt;
                                 &lt;mods:abstract xml:lang=&quot;nl&quot;&gt;FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang&lt;/mods:abstract&gt;
                                 &lt;mods:abstract xml:lang=&quot;en&quot;&gt;EngelsDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD&lt;/mods:abstract&gt;
+                                &lt;mods:subject xml:lang=&quot;en&quot;&gt;
+                                	&lt;mods:topic xml:lang=&quot;en&quot;&gt;This is the subject&lt;/mods:topic&gt;
+                                &lt;/mods:subject&gt;
                                 &lt;mods:name type=&quot;personal&quot; ID=&quot;n565-aut0&quot;&gt;
                                     &lt;mods:namePart type=&quot;given&quot;&gt;prof.dr. H.J.&lt;/mods:namePart&gt;
                                     &lt;mods:namePart type=&quot;family&quot;&gt;Bennis&amp;amp;Bennis&lt;/mods:namePart&gt;

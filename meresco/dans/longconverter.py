@@ -438,7 +438,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getPersistentIdentifier(self, lxmlNode, e_longRoot):
         if self._metadataformat.isDatacite():
-            pi = lxmlNode.xpath("//datacite:resource/datacite:alternateIdentifiers/datacite:alternateIdentifier[@datacite:alternateIdentifierType='URN']/text()", namespaces=namespacesmap)
+            pi = lxmlNode.xpath("//datacite:resource/datacite:alternateIdentifiers/datacite:alternateIdentifier[@alternateIdentifierType='URN']/text()", namespaces=namespacesmap)
             if len(pi) > 0:
                 e_pi = etree.SubElement(e_longRoot, "persistentIdentifier")
                 e_pi.text = self._firstElement(pi)
@@ -691,7 +691,7 @@ class NormaliseOaiRecord(UiaConverter):
         if len(familyName) > 0:
             etree.SubElement(e_name_type, 'family').text = familyName[0]
         if len(givenName) > 0:
-            etree.SubElement(e_name_type, 'family').text = givenName[0]
+            etree.SubElement(e_name_type, 'given').text = givenName[0]
         if len(contributorType) > 0:
             marcRelator = dataciteContributorToMarcRelator.get(contributorType[0])
             if marcRelator and len(marcRelator) > 0:
