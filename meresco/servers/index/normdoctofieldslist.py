@@ -271,8 +271,9 @@ class NormdocToFieldsList(Observable):
         #                 self._fieldslist.append(( '', variant ))
         #                 if self._verbose: print 'addField:',  "__all__ -->", variant
         elif fieldName == 'dd_year':
-            if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
-            self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )))
+            if self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') ) is not None: # 201 returns None, however it is a valid year, but not wanted for drilldown.
+                if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
+                self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )))
         elif fieldName == 'dd_prices':
             for price in results:
                 if self._verbose: print 'addField:', fieldName.upper(), price.strip().replace('\n', ''), "--->", self._getPriceNameForDrilldown( price.strip().replace('\n', '') )
