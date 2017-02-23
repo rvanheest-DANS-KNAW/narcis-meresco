@@ -278,7 +278,7 @@ class NormaliseOaiRecord(UiaConverter):
             etree.SubElement(e_titleInfo, "title").text = title_en[0]
 
 
-        ###### Penvoerder ##################
+        ###### Add Penvoerder ##################
         if penvoerder_nl and len(penvoerder_nl) > 0:
             e_penvoerder = etree.SubElement(e_longmetadata, "penvoerder")
             e_penvoerder.attrib[namespacesmap.curieToTag('xml:lang')] = "nl"
@@ -310,6 +310,9 @@ class NormaliseOaiRecord(UiaConverter):
         if status and len(status) > 0:
             etree.SubElement(e_longmetadata, "status").text = status[0]
 
+        ############ ADD Location (ORG only) #######################
+        if locatie and len(locatie) > 0:
+            etree.SubElement(e_longmetadata, "locatie").text = locatie[0]
 
     def _getModificationDate(self, lxmlNode, e_longRoot):
         datestamp = lxmlNode.xpath('//oai:header/oai:datestamp/text()', namespaces=namespacesmap)
