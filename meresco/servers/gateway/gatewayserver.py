@@ -55,7 +55,7 @@ from storage.storagecomponent import HashDistributeStrategy, DefaultStrategy
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.metapartconverter import AddMetadataNamespace
 from meresco.dans.longconverter import NormaliseOaiRecord
-from meresco.dans.writedeleted import WriteTombstone, ResurrectTombstone
+# from meresco.dans.writedeleted import WriteTombstone, ResurrectTombstone
 
 NORMALISED_DOC_NAME = 'normdoc'
 
@@ -125,9 +125,9 @@ def main(reactor, port, statePath, **ignored):
                                         (storeComponent,),
                                         (oaiJazz,),
                                         # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
-                                        (WriteTombstone(),
-                                            (storeComponent,),
-                                        )
+#                                         (WriteTombstone(),
+#                                             (storeComponent,),
+#                                         )
                                     ),
                                     (FilterMessages(allowed=['add']),
 
@@ -153,9 +153,9 @@ def main(reactor, port, statePath, **ignored):
                                             )
 
                                         ),
-                                        (ResurrectTombstone(),
-                                            (storeComponent,),
-                                        )                                            
+#                                         (ResurrectTombstone(),
+#                                             (storeComponent,),
+#                                         )                                            
                                     )
                                 )
                             )

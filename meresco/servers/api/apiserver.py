@@ -70,7 +70,12 @@ from meresco.servers.index.indexserver import untokenizedFieldname, untokenizedF
 from meresco.servers.gateway.gatewayserver import NORMALISED_DOC_NAME
 
 
-DEFAULT_PARTNAME = 'oai_dc'
+OAI_DC_PARTNAME = 'oai_dc'
+HEADER_PARTNAME = 'header'
+META_PARTNAME = 'meta'
+METADATA_PARTNAME = 'metadata'
+LONG_PARTNAME = 'knaw_long'
+SHORT_PARTNAME = 'knaw_short'
 
 NAMESPACEMAP = namespaces.copyUpdate({
     'prs'   : 'http://www.onderzoekinformatie.nl/nod/prs',
@@ -244,10 +249,10 @@ def main(reactor, port, statePath, indexPort, gatewayPort, quickCommit=False, **
     luceneRemote = LuceneRemote(host='localhost', port=indexPort, path='/lucene')
 
     strategie = Md5HashDistributeStrategy()
-    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[DEFAULT_PARTNAME, NORMALISED_DOC_NAME])
+    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None)
+    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, None, None)
     # def updateMetadataFormat(self, prefix, schema, namespace):
     # self._prefixes[prefix] = (schema, namespace)
 
