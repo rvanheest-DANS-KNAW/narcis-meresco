@@ -99,7 +99,7 @@ def getNamespace(tagName):
 # TODO: alle index field names met ergens 'identifier' zijn hernoemt naar 'id'...
 fieldnamesMapping = {
     'knaw_long.metadata.dateIssued.parsed'      : 'dateissued',
-    'knaw_long.metadata.genre'                  : 'pubtype',
+    'knaw_long.metadata.genre'                  : 'genre',
     'knaw_long.metadata.publisher'              : 'publisher',
     'knaw_long.metadata.language'               : 'language',
     'knaw_long.metadata.coverage'               : 'coverage',

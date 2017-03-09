@@ -125,9 +125,9 @@ def main(reactor, port, statePath, **ignored):
                                         (storeComponent,),
                                         (oaiJazz,),
                                         # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
-#                                         (WriteTombstone(),
-#                                             (storeComponent,),
-#                                         )
+                                        # (WriteTombstone(),
+                                        #     (storeComponent,),
+                                        # )
                                     ),
                                     (FilterMessages(allowed=['add']),
 
@@ -153,9 +153,9 @@ def main(reactor, port, statePath, **ignored):
                                             )
 
                                         ),
-#                                         (ResurrectTombstone(),
-#                                             (storeComponent,),
-#                                         )                                            
+                                        # (ResurrectTombstone(),
+                                        #     (storeComponent,),
+                                        # )                                            
                                     )
                                 )
                             )

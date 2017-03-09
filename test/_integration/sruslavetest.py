@@ -44,7 +44,7 @@ testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/
     'norm'   : 'http://dans.knaw.nl/narcis/normalized',
     })
 
-class ApiTest(IntegrationTestCase):
+class SruSlaveTest(IntegrationTestCase):
 
     def testSruQuery(self):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
@@ -67,9 +67,9 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "knaw_long"})        
         # print "humanStartPage:", etree.tostring(response)
         self.assertEqual('meresco:record:1', xpathFirst(response, '//srw:recordIdentifier/text()'))
-        response = self.doSruQuery(**{"query": 'untokenized.dd_year exact "2016"'})
-        # print "dd_year:", etree.tostring(response)
-        self.assertEqual('3', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        response = self.doSruQuery(**{"query": 'untokenized.dd_year exact "1993"'})
+        #print "dd_year:", etree.tostring(response)
+        self.assertEqual('1', xpathFirst(response, '//srw:numberOfRecords/text()'))
 
 
     def testSruIndex(self):
@@ -145,33 +145,11 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(**{'maximumRecords': '1', 'startRecord': '4002', 'query':'*'})
         self.assertEqual("Argument 'startRecord' too high, maximum: 4000", xpathFirst(response, '//diag:diagnostic/diag:details/text()'))
 
-    def testOai(self):
-        header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
-        # print "OAI body:", etree.tostring(body) #
-        records = xpath(body, '//oai:record/oai:metadata')
-        self.assertEqual(7, len(records))
-        self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
-
-    # def testOaiPovenance(self):
-    #     header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
-    #     # print "OAI body:", etree.tostring(body)
-    #     self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
-
-    def testOaiIdentify(self):
-        header, body = getRequest(self.apiPort, '/oai', dict(verb="Identify"))
-        # print "OAI body:", etree.tostring(body)
-        self.assertEqual('NARCIS OAI-pmh', xpathFirst(body, '//oai:Identify/oai:repositoryName/text()'))
-        self.assertEqual('Narcis - The gateway to scholarly information in The Netherlands', testNamespaces.xpathFirst(body, '//oai:Identify/oai:description/oaibrand:branding/oaibrand:collectionIcon/oaibrand:title/text()'))
-
-    def testOaiListSets(self):
-        header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))
-        # print "ListSets", etree.tostring(body)
-        self.assertEqual(set(['publication','openaire','oa_publication','ec_fundedresources','thesis','dataset']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
         #TODO: sortering testen.
         # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
-        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai_id,,0', startRecord='4'))
+        header, body = getRequest(self.sruslavePort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai_id,,0', startRecord='4'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(3, len(items))
@@ -182,7 +160,7 @@ class ApiTest(IntegrationTestCase):
 
 
     def testLog(self):
-        header, body = getRequest(self.apiPort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
+        header, body = getRequest(self.sruslavePort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
         self.assertEqual('"SRU Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
 
     def assertSruQuery(self, numberOfRecords, query, printout=False):
@@ -193,5 +171,5 @@ class ApiTest(IntegrationTestCase):
     def doSruQuery(self, **arguments):
         queryArguments = {'version': '1.2', 'operation': 'searchRetrieve'}
         queryArguments.update(arguments)
-        header, body = getRequest(self.apiPort, '/sru', queryArguments)
+        header, body = getRequest(self.sruslavePort, '/sru', queryArguments)
         return body
