@@ -171,14 +171,14 @@ class NormaliseOaiRecord(UiaConverter):
                 # Add metadata element to 'long' root:
                 e_longroot.append(e_longmetadata)
 
-            try:
-                hostCitation = self._getHostCitation(parse(StringIO(tostring(e_longroot))))
-                if hostCitation:
-                    # Add hostcitation string from '/long/metadata' to 'knaw_long' node.
-                    e_citation = etree.SubElement(e_longmetadata, namespacesmap.curieToTag('long:hostCitation')).text = hostCitation
-            except:
-                print 'Error while parsing ', tostring(e_longroot)
-                raise
+                try:
+                    hostCitation = self._getHostCitation(parse(StringIO(tostring(e_longroot))))
+                    if hostCitation:
+                        # Add hostcitation string from '/long/metadata' to 'knaw_long' node.
+                        etree.SubElement(e_longmetadata, namespacesmap.curieToTag('long:hostCitation')).text = hostCitation
+                except:
+                    print 'Error while parsing', tostring(e_longroot)
+                    raise
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespacesmap)
 
@@ -969,10 +969,10 @@ class NormaliseOaiRecord(UiaConverter):
             if issnen:
                 issn = '. ISSN %s.' % (issnen[0])
     
-    		if title:
-	            return '<i>%s</i>%s%s%s%s' % (title, volume, page, published, issn)
-	        else:
-	            return ""
+            if title:
+                return '<i>%s</i>%s%s%s%s' % (title, volume, page, published, issn)
+            else:
+                return ""
 
 
     def _addRelatedItemPart(self, lxmlNode, relatedItemType, relatedItemElement):        
