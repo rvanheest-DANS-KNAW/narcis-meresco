@@ -30,7 +30,7 @@ from lxml.etree import XML, ElementTree
 from weightless.core import consume
 
 
-class DcToFieldsListTest(SeecrTestCase):
+class Knaw_longToFieldsListTest(SeecrTestCase):
 
     def testOne(self):
         longToFieldsList = LongToFieldsList()

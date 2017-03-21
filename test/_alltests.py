@@ -41,6 +41,8 @@ from metaparttofieldslisttest import MetapartToFieldsListTest
 
 # Converters:
 from convertertest import ConverterTest
+
+# from longtofieldslisttest import Knaw_longToFieldsListTest
 # from addprovenancetometaparttest import AddProvenanceToMetaPartTest
 
 if __name__ == '__main__':
