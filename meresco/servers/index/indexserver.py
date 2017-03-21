@@ -61,7 +61,7 @@ from meresco.lucene.adaptertolucenequery import AdapterToLuceneQuery
 from meresco.lucene.remote import LuceneRemoteService
 from meresco.lucene.fieldregistry import FieldRegistry
 
-from .dctofieldslist import DcToFieldsList
+
 from .dcfields import DcFields
 from .metaparttofieldslist import MetaToFieldsList
 from .normdoctofieldslist import NormdocToFieldsList

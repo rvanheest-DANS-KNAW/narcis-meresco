@@ -137,7 +137,7 @@ def main(reactor, port, statePath, **ignored):
                                         # ),
 
                                         (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
-                                            # (LogComponent("TO LONG CONVERTER:"),),
+                                            (LogComponent("TO LONG CONVERTER:"),),
                                             (AddMetadataNamespace(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds metadataNamespace to meta part in the message.
                                                 (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts. Raises ValidationException if no 'known' metadataformat 
                                                     # TODO: Carriage return \n in gateway store normdoc checken
