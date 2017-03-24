@@ -147,16 +147,13 @@ class SruSlaveTest(IntegrationTestCase):
 
 
     def testRSS(self):
-        #TODO: sortering testen.
-        # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
-        header, body = getRequest(self.sruslavePort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai_id,,0', startRecord='4'))
+        header, body = getRequest(self.sruslavePort, '/rss', dict(query="*", querylabel='MyWorkerLabel', sortKeys='untokenized.dateissued,,1'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
-        self.assertEquals(3, len(items))
+        self.assertEquals(10, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual(set(['Appositie en de interne struktuur van de NP', 'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate','Example Program 1']), set(xpath(body, "//item/title/text()")))
-        self.assertEqual(set(['This collection contains results  of Work Package 2 "Hazard Identification" of project RAIN (" Risk Analysis of Infrastructure Networks in response to extreme weather"). Pan-European gridded data sets of the probability of occurrence of river floods, coastal floods, heavy precipitation, windstorms,', "This is an example program about Search with Meresco", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
-        self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
+        self.assertEqual(['1993-01-01', '2004-06-30', '2014', '2016', '2016', '2016'], xpath(body, "//item/pubDate/text()"))
+        self.assertEqual('MyWorkerLabel', xpathFirst(body, '//channel/title/text()'))
 
 
     def testLog(self):

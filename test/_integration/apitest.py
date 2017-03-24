@@ -169,15 +169,13 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(set(['publication','openaire','oa_publication','ec_fundedresources','thesis','dataset']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
-        #TODO: sortering testen.
-        # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
-        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai_id,,0', startRecord='4'))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.dateissued,,0', startRecord='3'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
-        self.assertEquals(3, len(items))
+        self.assertEquals(8, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual(set(['Appositie en de interne struktuur van de NP', 'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate','Example Program 1']), set(xpath(body, "//item/title/text()")))
-        self.assertEqual(set(['This collection contains results  of Work Package 2 "Hazard Identification" of project RAIN (" Risk Analysis of Infrastructure Networks in response to extreme weather"). Pan-European gridded data sets of the probability of occurrence of river floods, coastal floods, heavy precipitation, windstorms,', "This is an example program about Search with Meresco", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
+        self.assertEqual(set(['Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate']), set(xpath(body, "//item/title/text()")))
+        self.assertEqual(set(['FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'This collection contains results  of Work Package 2 "Hazard Identification" of project RAIN (" Risk Analysis of Infrastructure Networks in response to extreme weather"). Pan-European gridded data sets of the probability of occurrence of river floods, coastal floods, heavy precipitation, windstorms,']), set(xpath(body, "//item/description/text()")))
         self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
 
 

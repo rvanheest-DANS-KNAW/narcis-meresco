@@ -276,7 +276,7 @@ def main(reactor, port, statePath, lucenePort, **ignored):
                                         title = {'nl':'NARCIS', 'en':'NARCIS'},
                                         description = {'nl':'NARCIS: De toegang tot de Nederlandse wetenschapsinformatie', 'en':'NARCIS: The gateway to Dutch scientific information'},
                                         link = {'nl':'http://www.narcis.nl/?Language=nl', 'en':'http://www.narcis.nl/?Language=en'},
-                                        maximumRecords = 3),
+                                        maximumRecords = 20),
                                     executeQueryHelix,
                                     (RssItem(
                                             nsMap=NAMESPACEMAP,                                            
