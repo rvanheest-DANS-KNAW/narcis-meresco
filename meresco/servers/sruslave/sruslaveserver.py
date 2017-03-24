@@ -218,7 +218,7 @@ def main(reactor, port, statePath, lucenePort, **ignored):
     #     )
     # )
 
-    directoryLog = DirectoryLog(join(statePath, 'log'), extension='-query.log') ## Dit Zorgt voor de rotering. Door verschillende DirectoryLog's aan te maken kan je aparte dirs loggen. Nu logging allemaal indezelfde file ... 
+    directoryLog = DirectoryLog(join(statePath, 'log'), extension='-sru-worker.log') ## Dit Zorgt voor de rotering. Door verschillende DirectoryLog's aan te maken kan je aparte dirs loggen. Nu logging allemaal indezelfde file ... 
 
     executeQueryHelix = \
         (FilterMessages(allowed=['executeQuery']),
@@ -240,11 +240,11 @@ def main(reactor, port, statePath, lucenePort, **ignored):
         (ObservableHttpServer(reactor, port, compressResponse=True),
             (LogCollector(),
                 (ApacheLogWriter(apacheLogStream),),
-                (QueryLogWriter.forHttpArguments(
-                        log=directoryLog,
-                        scopeNames=('http-scope',)
-                    ),
-                ),
+                # (QueryLogWriter.forHttpArguments(
+                #         log=directoryLog,
+                #         scopeNames=('http-scope',)
+                #     ),
+                # ),
                 (QueryLogWriter(log=directoryLog, scopeNames=('sru-scope',)),),
                 (Deproxy(),
                     (HandleRequestLog(),
@@ -260,7 +260,7 @@ def main(reactor, port, statePath, lucenePort, **ignored):
                                             (SruHandler(
                                                     includeQueryTimes=False,
                                                     extraXParameters=[],
-                                                    enableCollectLog=True),
+                                                    enableCollectLog=True), #2017-03-24T12:00:33Z 127.0.0.1 3.5K 0.019s - /sru OF (TRUE): 2017-03-24T11:58:53Z 127.0.0.1 2.3K 0.004s 1hits /sru maximumRecords=10&operation=searchRetrieve&query=untokenized.dd_year+exact+%221993%22&recordPacking=xml&recordSchema=knaw_short&startRecord=1&version=1.2
                                                 (SruTermDrilldown(),),
                                                 executeQueryHelix,
                                                 (StorageAdapter(),

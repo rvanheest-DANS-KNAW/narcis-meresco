@@ -342,7 +342,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     #     )
     # )
 
-    directoryLog = DirectoryLog(join(statePath, 'log'), extension='-query.log') ## Dit Zorgt voor de rotering. Door verschillende DirectoryLog's aan te maken kan je aparte dirs loggen. Nu logging allemaal indezelfde file ... 
+    directoryLog = DirectoryLog(join(statePath, 'log'), extension='-sru-master.log') ## Dit Zorgt voor de rotering. Door verschillende DirectoryLog's aan te maken kan je aparte dirs loggen. Nu logging allemaal indezelfde file ... 
 
     executeQueryHelix = \
         (FilterMessages(allowed=['executeQuery']),
@@ -363,11 +363,11 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
         (ObservableHttpServer(reactor, port, compressResponse=True),
             (LogCollector(),
                 (ApacheLogWriter(apacheLogStream),),
-                (QueryLogWriter.forHttpArguments(
-                        log=directoryLog,
-                        scopeNames=('http-scope',)
-                    ),
-                ),
+                # (QueryLogWriter.forHttpArguments(
+                #         log=directoryLog,
+                #         scopeNames=('http-scope',)
+                #     ),
+                # ),
                 (QueryLogWriter(log=directoryLog, scopeNames=('sru-scope',)),),
                 (Deproxy(),
                     (HandleRequestLog(),

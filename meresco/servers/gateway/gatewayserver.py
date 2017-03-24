@@ -131,16 +131,14 @@ def main(reactor, port, statePath, **ignored):
                                     ),
                                     (FilterMessages(allowed=['add']),
 
-                                         # Does not work? See comments in component...
+                                        # Does not work? See comments in component...
                                         # (AddMetadataFormat(fromKwarg="lxmlNode", name='md_format'),
                                         #     (LogComponent("AddMetadataFormat"),),
                                         # ),
-
                                         (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
-                                            (LogComponent("TO LONG CONVERTER:"),),
+                                            # (LogComponent("TO LONG CONVERTER:"),),
                                             (AddMetadataNamespace(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds metadataNamespace to meta part in the message.
                                                 (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts. Raises ValidationException if no 'known' metadataformat 
-                                                    # TODO: Carriage return \n in gateway store normdoc checken
                                                     (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
                                                         (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
                                                             (storeComponent,), # Store converted/renamed part.
