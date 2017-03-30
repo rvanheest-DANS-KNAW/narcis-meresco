@@ -10,7 +10,7 @@ class Namespaces():
     NAMESPACEMAP = {
         'oai_dc'    : 'http://www.openarchives.org/OAI/2.0/oai_dc/',
         'mods'      : 'http://www.loc.gov/mods/v3',
-        'datacite'  : 'http://datacite.org/schema/kernel-3',
+        'datacite'  : 'http://datacite.org/schema/kernel-4',
         'org'       : 'http://www.onderzoekinformatie.nl/nod/org',
         'proj'      : 'http://www.onderzoekinformatie.nl/nod/act',
         'prs'       : 'http://www.onderzoekinformatie.nl/nod/prs',

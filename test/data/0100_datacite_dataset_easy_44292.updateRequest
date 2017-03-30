@@ -15,10 +15,10 @@
         &lt;setSpec&gt;easy-collection:4&lt;/setSpec&gt;
     &lt;/header&gt;
     &lt;metadata xmlns=&quot;http://www.openarchives.org/OAI/2.0/&quot;&gt;
-        &lt;resource xmlns=&quot;http://datacite.org/schema/kernel-3&quot;
+        &lt;resource xmlns=&quot;http://datacite.org/schema/kernel-4&quot;
             xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;
             xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-            xsi:schemaLocation=&quot;http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd&quot;&gt;
+            xsi:schemaLocation=&quot;http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd&quot;&gt;
             &lt;identifier identifierType=&quot;DOI&quot;&gt;10.17026/dans-zqm-htb9&lt;/identifier&gt;
             &lt;creators&gt;
                 &lt;creator&gt;

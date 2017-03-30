@@ -40,7 +40,7 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
     'mods'    : 'http://www.loc.gov/mods/v3',
     'didl'    : 'urn:mpeg:mpeg21:2002:02-DIDL-NS',
     'norm'    : 'http://dans.knaw.nl/narcis/normalized',
-    'datacite': 'http://datacite.org/schema/kernel-3'
+    'datacite': 'http://datacite.org/schema/kernel-4'
 })
 
 
