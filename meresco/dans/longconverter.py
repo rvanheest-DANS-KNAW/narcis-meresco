@@ -671,7 +671,8 @@ class NormaliseOaiRecord(UiaConverter):
                 familyName = creator.xpath('self::datacite:creator/datacite:familyName/text()', namespaces=namespacesmap)
                 nameIdentifier = creator.xpath('self::datacite:creator/datacite:nameIdentifier/text()', namespaces=namespacesmap)
                 nameIdentifierType = creator.xpath('self::datacite:creator/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
-                self._nameParts(e_longmetadata, creatorName, givenName, familyName, ['Creator'], nameIdentifier, nameIdentifierType)
+                affiliation = creator.xpath('self::datacite:creator/datacite:affiliation/text()', namespaces=namespacesmap)
+                self._nameParts(e_longmetadata, creatorName, givenName, familyName, ['Creator'], nameIdentifier, nameIdentifierType, affiliation)
             contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
             for contributor in contributors:
                 creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
@@ -680,10 +681,11 @@ class NormaliseOaiRecord(UiaConverter):
                 contributorType = contributor.xpath('self::datacite:contributor/@contributorType', namespaces=namespacesmap)
                 nameIdentifier = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/text()', namespaces=namespacesmap)
                 nameIdentifierType = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
-                self._nameParts(e_longmetadata, creatorName, givenName, familyName, contributorType, nameIdentifier, nameIdentifierType)
+                affiliation = contributor.xpath('self::datacite:contributor/datacite:affiliation/text()', namespaces=namespacesmap)
+                self._nameParts(e_longmetadata, creatorName, givenName, familyName, contributorType, nameIdentifier, nameIdentifierType, affiliation)
                 
 
-    def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", contributorType="", nameIdentifier="", nameIdentifierType=""):
+    def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", contributorType="", nameIdentifier="", nameIdentifierType="", affiliation=""):
         e_name_type = etree.SubElement(e_longmetadata, 'name')
         etree.SubElement(e_name_type, 'type').text = 'personal'
         if len(name) > 0:
@@ -705,6 +707,8 @@ class NormaliseOaiRecord(UiaConverter):
             e_nid.text = nameIdentifier[0]
             if len(nameIdentifierType) > 0:
                 e_nid.attrib['type'] = nameIdentifierType[0]
+        if len(affiliation) > 0:
+            etree.SubElement(e_name_type, 'affiliation').text = affiliation[0]
 
 		
 
@@ -776,16 +780,25 @@ class NormaliseOaiRecord(UiaConverter):
             self._getTopic(e_subject, en)
 
         elif self._metadataformat.isDatacite():
-            en = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[starts-with(@xml:lang, 'en')]", namespaces=namespacesmap)
-            nl = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[@xml:lang='nl']", namespaces=namespacesmap) or \
-                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(@xml:lang)]", namespaces=namespacesmap) or \
-                 lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject[not(starts-with(@xml:lang, 'en'))]", namespaces=namespacesmap) or \
-                 en
+            en, nl = [], []
+            subjects = lxmlNode.xpath("//datacite:resource/datacite:subjects/datacite:subject", namespaces=namespacesmap)
+            for subject in subjects:
+                subj_en = subject.xpath("self::datacite:subject[starts-with(@xml:lang, 'en')]", namespaces=namespacesmap)
+                subj_nl = subject.xpath("self::datacite:subject[@xml:lang='nl']", namespaces=namespacesmap) or \
+                     subject.xpath("self::datacite:subject[not(@xml:lang)]", namespaces=namespacesmap) or \
+                     subject.xpath("self::datacite:subject[not(starts-with(@xml:lang, 'en'))]", namespaces=namespacesmap)
+                if subj_en:
+                    en.append(subj_en[0])
+                if subj_nl:
+                    nl.append(subj_nl[0])
             e_subject = etree.SubElement(e_longmetadata, "subject")
+            if len(nl) == 0:
+                nl = en
             self._getDataciteTopic(e_subject, nl)
             e_subject = etree.SubElement(e_longmetadata, "subject")
             e_subject.attrib[namespacesmap.curieToTag('xml:lang')] = 'en'
             self._getDataciteTopic(e_subject, en)
+
 
     def _getTopic(self, e_subject, topics):  
         for topic in topics:
@@ -799,7 +812,7 @@ class NormaliseOaiRecord(UiaConverter):
             self._getSubjectScheme(e_topic, subjectScheme)
 
     def _getSubjectScheme(self, e_topic, subjectScheme):  
-        if subjectScheme and subjectScheme.lower() in ("audience", "abr-periode", "abr-periode-label"):
+        if subjectScheme and subjectScheme.lower() in ("audience", "abr-periode", "abr-complex", "narcis-classification"):
             etree.SubElement(e_topic, "subjectScheme").text = subjectScheme
 
 
@@ -1043,6 +1056,18 @@ class NormaliseOaiRecord(UiaConverter):
                             e_geoLocationPoint = etree.SubElement(e_geoLocation, "geoLocationPoint")
                             etree.SubElement(e_geoLocationPoint, "pointLongitude").text = pointLongitude[0]
                             etree.SubElement(e_geoLocationPoint, "pointLatitude").text = pointLatitude[0]
+                    geoLocationBoxes = geoLocation.xpath('self::datacite:geoLocation/datacite:geoLocationBox', namespaces=namespacesmap)
+                    for geoLocationBox in geoLocationBoxes:
+                        northBoundLatitude = geoLocationBox.xpath('self::datacite:geoLocationBox/datacite:northBoundLatitude/text()', namespaces=namespacesmap)
+                        eastBoundLongitude = geoLocationBox.xpath('self::datacite:geoLocationBox/datacite:eastBoundLongitude/text()', namespaces=namespacesmap)
+                        southBoundLatitude = geoLocationBox.xpath('self::datacite:geoLocationBox/datacite:southBoundLatitude/text()', namespaces=namespacesmap)
+                        westBoundLongitude = geoLocationBox.xpath('self::datacite:geoLocationBox/datacite:westBoundLongitude/text()', namespaces=namespacesmap)
+                        if len(northBoundLatitude) > 0 and len(eastBoundLongitude) > 0 and len(southBoundLatitude) > 0 and len(westBoundLongitude) > 0:
+                            e_geoLocationBox = etree.SubElement(e_geoLocation, "geoLocationBox")
+                            etree.SubElement(e_geoLocationBox, "northBoundLatitude").text = northBoundLatitude[0]
+                            etree.SubElement(e_geoLocationBox, "eastBoundLongitude").text = eastBoundLongitude[0]
+                            etree.SubElement(e_geoLocationBox, "northBoundLatitude").text = northBoundLatitude[0]
+                            etree.SubElement(e_geoLocationBox, "westBoundLongitude").text = westBoundLongitude[0]
 
 ################### Helper methods #########################
 
