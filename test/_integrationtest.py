@@ -46,6 +46,7 @@ if __name__ == '__main__':
         tests=[
             '_integration.gatewaytest.GatewayTest',
             '_integration.apitest.ApiTest',
+            '_integration.sruslavetest.SruSlaveTest',
         ],
         fastMode=runner.fastMode).addToTestRunner(runner)
     runner.run()

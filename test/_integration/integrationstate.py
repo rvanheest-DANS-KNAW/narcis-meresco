@@ -53,6 +53,7 @@ class ExampleIntegrationState(IntegrationState):
         self.indexPort = PortNumberGenerator.next()
         self.apiPort = PortNumberGenerator.next()
         self.lucenePort = PortNumberGenerator.next()
+        self.sruslavePort = PortNumberGenerator.next()
 
     def binDir(self):
         return join(projectDir, 'bin')
@@ -62,6 +63,7 @@ class ExampleIntegrationState(IntegrationState):
         self.startLuceneServer()
         self.startIndexServer()
         self.startApiServer()
+        self.startSruSlaveServer()
         self.waitForServicesStarted()
         self._createDatabase()
         sleep(0.2)
@@ -82,7 +84,7 @@ class ExampleIntegrationState(IntegrationState):
         self._startServer(
             serviceName='index',
             executable=executable,
-            serviceReadyUrl='http://localhost:%s/info/version' % self.indexPort,
+            serviceReadyUrl='http://localhost:%s/als/het/maar/connecten/kan/404/is/prima' % self.gatewayPort, # Ding heeft geen http interface meer... We moeten wat...
             cwd=dirname(abspath(executable)),
             port=self.indexPort,
             luceneserverPort=self.lucenePort,
@@ -99,7 +101,7 @@ class ExampleIntegrationState(IntegrationState):
             serviceReadyUrl='http://localhost:%s/info/version' % self.apiPort,
             cwd=dirname(abspath(executable)),
             port=self.apiPort,
-            indexPort=self.indexPort,
+            lucenePort=self.lucenePort,
             gatewayPort=self.gatewayPort,
             stateDir=join(self.integrationTempdir, 'api'),
             quickCommit=True,
@@ -117,6 +119,18 @@ class ExampleIntegrationState(IntegrationState):
             waitForStart=True,
             core=["narcis"], # core=["oai_dc"],
             env=dict(JAVA_BIN=JAVA_BIN, LANG="en_US.UTF-8"))
+
+    def startSruSlaveServer(self):
+        executable = self.binPath('start-sruslave')
+        self._startServer(
+            serviceName='sruslave',
+            executable=executable,
+            serviceReadyUrl='http://localhost:%s/info/version' % self.sruslavePort,
+            cwd=dirname(abspath(executable)),
+            port=self.sruslavePort,
+            lucenePort=self.lucenePort,
+            stateDir=join(self.integrationTempdir, 'api'),
+            waitForStart=False)
 
     def _createDatabase(self):
         if self.fastMode:

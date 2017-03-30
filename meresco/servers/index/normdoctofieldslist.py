@@ -36,6 +36,7 @@ from meresco.dans.longconverter import NormaliseOaiRecord
 
 from re import compile
 from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
+from meresco.components.xml_generic.validate import ValidateException
 
 
 namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco-xml/blob/master/meresco/xml/namespaces.py
@@ -98,7 +99,7 @@ def getNamespace(tagName):
 # TODO: alle index field names met ergens 'identifier' zijn hernoemt naar 'id'...
 fieldnamesMapping = {
     'knaw_long.metadata.dateIssued.parsed'      : 'dateissued',
-    'knaw_long.metadata.genre'                  : 'pubtype',
+    'knaw_long.metadata.genre'                  : 'genre',
     'knaw_long.metadata.publisher'              : 'publisher',
     'knaw_long.metadata.language'               : 'language',
     'knaw_long.metadata.coverage'               : 'coverage',
@@ -124,11 +125,11 @@ fieldnamesMapping = {
     }
 
 MetaFieldNamesToXpath = {
-    'oai:id'        : '/meta:meta/meta:record/meta:id/text()',
-    'dare:id'       : '/meta:meta/meta:record/meta:id/text()',
-    'meta:repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
-    'meta:repositorygroupid': '/meta:meta/meta:repository/meta:repositoryGroupId/text()',
-    'meta:collection'       : '/meta:meta/meta:repository/meta:collection/text()',
+    'oai_id'        : '/meta:meta/meta:record/meta:id/text()',
+    'dare_id'       : '/meta:meta/meta:record/meta:id/text()',
+    'meta_repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
+    'meta_repositorygroupid': '/meta:meta/meta:repository/meta:repositoryGroupId/text()',
+    'meta_collection'       : '/meta:meta/meta:repository/meta:collection/text()',
     }
 
 
@@ -176,7 +177,9 @@ class NormdocToFieldsList(Observable):
 
         # Get meta, header and metadata part(='long') from the normdoc:
         e_metapart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="meta"]/text()', namespaces=namespacesmap)[0])
-        wcp_collection = e_metapart.xpath('/meta:meta/meta:repository/meta:collection/text()', namespaces=namespacesmap)[0]
+        wcp_collection = e_metapart.xpath('/meta:meta/meta:repository/meta:collection/text()', namespaces=namespacesmap)
+        if not wcp_collection:
+            raise ValidateException("Collection is missing from metapart! Please add collection in WCP.")
          
         # print "lxml metapart:", tostring(e_metapart)
 
@@ -189,13 +192,13 @@ class NormdocToFieldsList(Observable):
             if self._verbose: print 'addField:', field.upper(), "-->", e_metapart.xpath(xpad, namespaces=namespacesmap)[0]
 
         record = None
-        if wcp_collection in WCPNODCOLLECTION:
+        if wcp_collection[0] in WCPNODCOLLECTION:
             record = e_recordpart.xpath('//prs:persoon | //prj:activiteit | //org:organisatie', namespaces=namespacesmap)
         else:
             record = e_recordpart.xpath('//norm:normalized/long:knaw_long', namespaces=namespacesmap)
         self._fillFieldslist(record[0], '')
 
-        self._addAuthorsAndNamesFields(record[0], wcp_collection)
+        self._addAuthorsAndNamesFields(record[0], wcp_collection[0])
         
         for field, xpad in fieldNamesXpathMap.iteritems():
             self._findAndAddToFieldslist(record[0], field, xpad)
@@ -268,8 +271,9 @@ class NormdocToFieldsList(Observable):
         #                 self._fieldslist.append(( '', variant ))
         #                 if self._verbose: print 'addField:',  "__all__ -->", variant
         elif fieldName == 'dd_year':
-            if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
-            self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )))
+            if self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') ) is not None: # 201 returns None, however it is a valid year, but not wanted for drilldown.
+                if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
+                self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )))
         elif fieldName == 'dd_prices':
             for price in results:
                 if self._verbose: print 'addField:', fieldName.upper(), price.strip().replace('\n', ''), "--->", self._getPriceNameForDrilldown( price.strip().replace('\n', '') )

@@ -100,115 +100,6 @@ NAMESPACEMAP = namespaces.copyUpdate({
 })
 
 
-
-def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
-    return \
-    (periodicDownload, # Scheduled connection to a remote (response / request)...
-        (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)), # Convert from plain text to lxml-object.
-            (oaiDownload, # Implementation/Protocol of a PeriodicDownload...
-                (UpdateAdapterFromOaiDownloadProcessor(), # Maakt van een SRU update/delete bericht (lxmlNode) een relevante message: 'delete' of 'add' message.
-                    (FilterMessages(['delete']), # Filtert delete messages
-                        # (LogComponent("Delete Update"),),
-                        (storageComponent,), # Delete from storage
-                        (oaiJazz,), # Delete from OAI-pmh repo
-                        # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
-                        (WriteTombstone(),
-                            (storageComponent,),
-                        )
-                    ),
-                    (FilterMessages(allowed=['add']),
-                        # TODO: onderstaande toKwarg='data' kan eruit. Dan de volgende regel ook:-)
-                        (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
-                            (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
-                                (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
-                                    (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
-                                        (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
-                                            (storageComponent,) # Schrijft oai:metadata (=origineel) naar storage.
-                                        )
-                                    )
-                                ),
-                                (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
-                                    (RewritePartname("knaw_long"), # Hernoemt partname van 'record' naar "knaw_long".
-                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
-                                            (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                                (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
-                                            )
-                                        ),
-                                        (ShortConverter(fromKwarg='lxmlNode'), # creeer 'knaw_short' subset formaat.
-                                            (RewritePartname("knaw_short"),
-                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                                    (storageComponent,) # Schrijft 'short' naar storage.
-                                                )
-                                            )
-                                        ),
-                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
-                                            (DcConverter(fromKwarg='lxmlNode'), # Hernoem partname van 'record' naar "oai_dc".
-                                                (RewritePartname("oai_dc"),
-                                                    (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
-                                                        (storageComponent,) # Schrijft 'oai_dc' naar storage.
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    )
-                                ),
-                                # TODO: Check indien conversies misgaan, dat ook de meta en header part niet naar storage gaan: geen 1 part als het even kan...
-                                # Schrijf 'header' partname naar storage:
-                                (XmlXPath(['/oai:record/oai:header'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP),
-                                    (RewritePartname("header"),
-                                        (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
-                                            (storageComponent,) # Schrijft OAI-header naar storage.
-                                        )
-                                    )
-                                ),
-                                (FilterWcpCollection(allowed=['publication']),
-                                    # (LogComponent("PUBLICATION"),),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publication'], name='NARCISPORTAL'), #TODO: Skip name='NARCISPORTAL'
-                                        (oaiJazz,),
-                                    ),
-                                    (XmlXPath(["//long:knaw_long[long:accessRights ='openAccess']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        # (LogComponent("OPENACCESS"),),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire'], name='NARCISPORTAL'),
-                                            (oaiJazz,),
-                                        )
-                                    ),
-                                    (XmlXPath(["//long:knaw_long/long:metadata[long:genre ='doctoralthesis']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['thesis'], name='NARCISPORTAL'),
-                                            (oaiJazz,),
-                                        )
-                                    ),
-                                    (XmlXPath(['//long:knaw_long/long:metadata/long:grantAgreements/long:grantAgreement[long:code[contains(.,"greement/EC/") or contains(.,"greement/ec/")]][1]'], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire'], name='NARCISPORTAL'),
-                                            (oaiJazz,),
-                                        )
-                                    )
-                                ),
-                                (FilterWcpCollection(allowed=['dataset']),
-                                    # (LogComponent("DATASET"),),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset'], name='NARCISPORTAL'),
-                                        (oaiJazz,),
-                                    )
-                                )
-                            )
-                        ), # Schrijf 'meta' partname naar storage:
-                        (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="meta"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
-                            (RewritePartname("meta"),
-                                (storageComponent,) # Schrijft harvester 'meta' data naar storage.
-                            )
-                        )
-                    ),
-                    (FilterMessages(allowed=['add']), # TODO: Remove this line.
-                        # (LogComponent("UnDelete"),),
-                        (ResurrectTombstone(),
-                            (storageComponent,),
-                        )
-                    )
-                )
-            )
-        )
-    )
-
-
 ######## START Lucene Integration ###############################################################
 
 def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, lucenePort):
@@ -226,8 +117,7 @@ def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, lucenePort)
 ######## END Lucene Integration ###############################################################
 
 
-
-def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, **ignored):
+def main(reactor, port, statePath, lucenePort, **ignored):
     apacheLogStream = sys.stdout
 
     # xsltPath = join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'MODS3-5_DC_XSLT1-0.xsl')
@@ -242,7 +132,6 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     # readerReactor = Reactor() # Do we need a new one OR the existing 'reactor'???
     # readerReactor = reactor
     
-    
     http11Request = be(
         (HttpRequest1_1(),
             (SocketPool(reactor=reactor, unusedTimeout=5, limits=dict(totalSize=100, destinationSize=10)),),
@@ -250,7 +139,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     )
     
     luceneIndex = luceneAndReaderConfig(defaultLuceneSettings.clone(readonly=True), http11Request, lucenePort)
-    # print "POSTDICT:", defaultLuceneSettings.clone(readonly=True).asPostDict()
+    
     
     luceneRoHelix = be(
         (AdapterToLuceneQuery(
@@ -259,7 +148,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                     DEFAULT_CORE: QueryExpressionToLuceneQueryDict(UNQUALIFIED_TERM_FIELDS, luceneSettings=luceneIndex.settings),
                 }
             ),
-            (MultiLucene(host='localhost', port=lucenePort, defaultCore=DEFAULT_CORE),
+            (MultiLucene(host='127.0.0.1', port=lucenePort, defaultCore=DEFAULT_CORE),
                 (luceneIndex,),
                 (http11Request,),
             )
@@ -267,6 +156,8 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     )
 
 ######## END Lucene Integration ###############################################################
+
+
 
     # def sortFieldRename(name):
     #     if not name.startswith('__'):
@@ -296,8 +187,9 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     strategie = Md5HashDistributeStrategy()
     storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME])
 
-    oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, None, None)
+
+    # oaiJazz = OaiJazz(join(statePath, 'oai'))
+    # oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None)
     # def updateMetadataFormat(self, prefix, schema, namespace):
     # self._prefixes[prefix] = (schema, namespace)
 
@@ -313,22 +205,6 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
         ).filterAndModifier(),
     ]
 
-    periodicGateWayDownload = PeriodicDownload(
-        reactor,
-        host='localhost',
-        port=gatewayPort,
-        schedule=Schedule(period=1 if quickCommit else 10), # WST: Interval in seconds before sending a new request to the GATEWAY in case of an error while processing batch records.(default=1). IntegrationTests need 1 second! Otherwise tests will fail!
-        name='api',
-        autoStart=True)
-
-    oaiDownload = OaiDownloadProcessor(
-        path='/oaix',
-        metadataPrefix=NORMALISED_DOC_NAME,
-        workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
-        userAgentAddition='ApiServer',
-        xWait=True,
-        name='api',
-        autoCommit=False)
 
 
     # # Post commit naar storage en ??
@@ -342,7 +218,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     #     )
     # )
 
-    directoryLog = DirectoryLog(join(statePath, 'log'), extension='-sru-master.log') ## Dit Zorgt voor de rotering. Door verschillende DirectoryLog's aan te maken kan je aparte dirs loggen. Nu logging allemaal indezelfde file ... 
+    directoryLog = DirectoryLog(join(statePath, 'log'), extension='-sru-worker.log') ## Dit Zorgt voor de rotering. Door verschillende DirectoryLog's aan te maken kan je aparte dirs loggen. Nu logging allemaal indezelfde file ... 
 
     executeQueryHelix = \
         (FilterMessages(allowed=['executeQuery']),
@@ -355,11 +231,12 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
             )
         )
 
+
     return \
     (Observable(),
         # (scheduledCommitPeriodicCall,),
         # (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
-        createDownloadHelix(reactor, periodicGateWayDownload, oaiDownload, storage, oaiJazz),
+        
         (ObservableHttpServer(reactor, port, compressResponse=True),
             (LogCollector(),
                 (ApacheLogWriter(apacheLogStream),),
@@ -372,31 +249,6 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                 (Deproxy(),
                     (HandleRequestLog(),
                         (BasicHttpHandler(),
-                            (PathFilter(["/oai"]),
-                                (LogCollectorScope("http-scope"),
-                                    (OaiPmh(repositoryName="NARCIS OAI-pmh", adminEmail="narcis@dans.knaw.nl"),
-                                        (oaiJazz,),
-                                        (StorageAdapter(),
-                                            (storage,)
-                                        ),
-                                        (OaiBranding(
-                                            url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", 
-                                            link="http://oai.narcis.nl", 
-                                            title="Narcis - The gateway to scholarly information in The Netherlands"),
-                                        ),
-                                        (OaiProvenance(
-                                            nsMap=NAMESPACEMAP,
-                                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 
-                                            harvestDate=('meta', '//meta:record/meta:harvestdate/text()'),
-                                            metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
-                                            identifier=('header','//oai:identifier/text()'),
-                                            datestamp=('header', '//oai:datestamp/text()')
-                                            ),
-                                            (storage,)
-                                        )
-                                    )
-                                )
-                            ),
                             (PathFilter(['/sru']),
                                 (LogCollectorScope('sru-scope'),
                                     (SruParser(
@@ -408,7 +260,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                                             (SruHandler(
                                                     includeQueryTimes=False,
                                                     extraXParameters=[],
-                                                    enableCollectLog=True),
+                                                    enableCollectLog=True), #2017-03-24T12:00:33Z 127.0.0.1 3.5K 0.019s - /sru OF (TRUE): 2017-03-24T11:58:53Z 127.0.0.1 2.3K 0.004s 1hits /sru maximumRecords=10&operation=searchRetrieve&query=untokenized.dd_year+exact+%221993%22&recordPacking=xml&recordSchema=knaw_short&startRecord=1&version=1.2
                                                 (SruTermDrilldown(),),
                                                 executeQueryHelix,
                                                 (StorageAdapter(),
@@ -452,20 +304,19 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
         )
     )
 
-def startServer(port, stateDir, lucenePort, gatewayPort, quickCommit=False, **kwargs):
+def startServer(port, stateDir, lucenePort, **kwargs):
     setSignalHandlers()
-    print 'Firing up API Server.'
+    print 'Firing up SRU-slave.'
     reactor = Reactor()
     statePath = abspath(stateDir)
 
     #main
+    # reactor, port, statePath, lucenePort, **ignored
     dna = main(
         reactor=reactor,
         port=port,
         statePath=statePath,
         lucenePort=lucenePort,
-        gatewayPort=gatewayPort,
-        quickCommit=quickCommit,
         **kwargs
     )
     #/main

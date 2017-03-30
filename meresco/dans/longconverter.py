@@ -196,20 +196,14 @@ class NormaliseOaiRecord(UiaConverter):
                 # Add metadata element to 'long' root:
                 e_longroot.append(e_longmetadata)
 
-                # print "WST:", type(e_longroot)
-                # savedxml = etree.ElementTree(e_longroot)
-                # print "CONVERTED:", type(savedxml)
-                # We need to parse the _Element type first to be able to use proper xpath with namespaces on the nodes? WHY? Conversion to _ElementTree does NOT work??
-                # tree_long = None
-                try: # TODO: try this: .getroot().getroottree()
-                    e_longroot = parse(StringIO(tostring(e_longroot)))
+                try:
+                    hostCitation = self._getHostCitation(parse(StringIO(tostring(e_longroot))))
+                    if hostCitation:
+                        # Add hostcitation string from '/long/metadata' to 'knaw_long' node.
+                        etree.SubElement(e_longmetadata, namespacesmap.curieToTag('long:hostCitation')).text = hostCitation
                 except:
                     print 'Error while parsing', tostring(e_longroot)
                     raise
-                self._addHostCitation(e_longroot) # Adds hostcitation string from '/long/metadata' to 'long' node.
-
-#             print 'Long convertion succeeded...' # , tostring(e_norm_root)
-
 
         metadata_tags = lxmlNode.xpath("//oai:metadata/*", namespaces=namespacesmap)
 
@@ -303,7 +297,7 @@ class NormaliseOaiRecord(UiaConverter):
             etree.SubElement(e_titleInfo, "title").text = title_en[0]
 
 
-        ###### Penvoerder ##################
+        ###### Add Penvoerder ##################
         if penvoerder_nl and len(penvoerder_nl) > 0:
             e_penvoerder = etree.SubElement(e_longmetadata, "penvoerder")
             e_penvoerder.attrib[namespacesmap.curieToTag('xml:lang')] = "nl"
@@ -335,6 +329,9 @@ class NormaliseOaiRecord(UiaConverter):
         if status and len(status) > 0:
             etree.SubElement(e_longmetadata, "status").text = status[0]
 
+        ############ ADD Location (ORG only) #######################
+        if locatie and len(locatie) > 0:
+            etree.SubElement(e_longmetadata, "locatie").text = locatie[0]
 
     def _getModificationDate(self, lxmlNode, e_longRoot):
         datestamp = lxmlNode.xpath('//oai:header/oai:datestamp/text()', namespaces=namespacesmap)
@@ -1072,8 +1069,8 @@ class NormaliseOaiRecord(UiaConverter):
 ################### Helper methods #########################
 
 
-    def _addHostCitation(self, lxmlNode):
-        relatedItems = lxmlNode.xpath("//long:long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
+    def _getHostCitation(self, lxmlNode):
+        relatedItems = lxmlNode.xpath("//long:knaw_long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
         if len(relatedItems) > 0:
             title, page, volume, published, issn = '', '', '', '', ''
             relatedItem = relatedItems[0]
@@ -1120,9 +1117,10 @@ class NormaliseOaiRecord(UiaConverter):
             if issnen:
                 issn = '. ISSN %s.' % (issnen[0])
     
-            metadata = lxmlNode.xpath('//long:metadata', namespaces=namespacesmap)[0]
-            citation = etree.SubElement(metadata, namespacesmap.curieToTag('long:hostCitation'))
-            citation.text = '<i>%s</i>%s%s%s%s' % (title, volume, page, published, issn)
+            if title:
+                return '<i>%s</i>%s%s%s%s' % (title, volume, page, published, issn)
+            else:
+                return ""
 
 
     def _addRelatedItemPart(self, lxmlNode, relatedItemType, relatedItemElement):        

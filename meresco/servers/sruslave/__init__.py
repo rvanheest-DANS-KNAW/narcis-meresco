@@ -23,20 +23,3 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 ## end license ##
-
-from meresco.core import Observable
-from meresco.xml.namespaces import tagToCurie
-
-class DcToFieldsList(Observable):
-
-    def add(self, lxmlNode, **kwargs):
-        fieldslist = []
-        for child in lxmlNode.getroot().getchildren():
-            fieldname = tagToCurie(child.tag)
-            fieldslist.append((fieldname, child.text))
-            if fieldname == 'dc:identifier' and child.text=='http://meresco.com?record=1':
-            	fieldslist.append(('dc:genre', 'boek'))
-            elif fieldname == 'dc:identifier':
-            	fieldslist.append(('dc:genre', 'boek'))
-
-        yield self.all.add(fieldslist=fieldslist, **kwargs)

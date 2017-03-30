@@ -56,11 +56,14 @@ class ShortConverter(Converter):
                 if child.tag == namespacesmap.curieToTag('long:metadata'):
                     for metadatakind in child.iterchildren():
                         if metadatakind.tag != namespacesmap.curieToTag('long:titleInfo') \
-                            and metadatakind.tag != namespacesmap.curieToTag('long:name') \
-                                and metadatakind.tag != namespacesmap.curieToTag('long:genre') \
-                                    and metadatakind.tag != namespacesmap.curieToTag('long:abstract') \
-                                        and metadatakind.tag != namespacesmap.curieToTag('long:dateIssued') \
-                                             and metadatakind.tag != namespacesmap.curieToTag('long:hostCitation'):
+                        and metadatakind.tag != namespacesmap.curieToTag('long:name') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:genre') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:abstract') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:dateIssued') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:hostCitation') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:status') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:penvoerder') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:locatie'):
                             child.remove(metadatakind)
                         if metadatakind.tag == namespacesmap.curieToTag('long:abstract'):
                             if metadatakind.text != None: metadatakind.text = self._smarttruncate(metadatakind.text) # , ' (...)' [:self._truncate_chars]

@@ -61,7 +61,7 @@ from meresco.lucene.adaptertolucenequery import AdapterToLuceneQuery
 from meresco.lucene.remote import LuceneRemoteService
 from meresco.lucene.fieldregistry import FieldRegistry
 
-from .dctofieldslist import DcToFieldsList
+
 from .dcfields import DcFields
 from .metaparttofieldslist import MetaToFieldsList
 from .normdoctofieldslist import NormdocToFieldsList
@@ -89,8 +89,7 @@ NAMESPACEMAP = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco-
 })
 
 
-
-LUCENE_VM = getJVM()
+# LUCENE_VM = getJVM()
 
 def untokenizedFieldname(fieldname):
     return UNTOKENIZED_PREFIX + fieldname
@@ -99,9 +98,9 @@ UNQUALIFIED_TERM_FIELDS = [('__all__', 1.0)]
 
 drilldownFields = [
     # def __init__(self, name, hierarchical=False, multiValued=True, indexFieldName=None):
-    DrilldownField(untokenizedFieldname('meta:repositorygroupid')), # Was: 'repositorygroup_id'
-    DrilldownField(untokenizedFieldname('meta:collection')), # was: 'collection'
-    DrilldownField(untokenizedFieldname('pubtype')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdwijnen automagic: Nergens meer te vinden...
+    DrilldownField(untokenizedFieldname('meta_repositorygroupid')), # Was: 'repositorygroup_id'
+    DrilldownField(untokenizedFieldname('meta_collection')), # was: 'collection'
+    DrilldownField(untokenizedFieldname('genre')), # Dit WAS 'genre': Genre lijkt een 'reserved' keyword: Zowel veldnaam als waarden verdwijnen automagic: Nergens meer te vinden...
     DrilldownField(untokenizedFieldname('access')),
     DrilldownField(untokenizedFieldname('dd_year')),
     DrilldownField(untokenizedFieldname('status')),
@@ -120,10 +119,10 @@ drilldownFields = [
 
 # Add any non-drilldown untokenized fields:
 untokenizedFieldnames = [f.name for f in drilldownFields] + [
-    untokenizedFieldname('oai:id'), # Was: 'oai_identifier'
-    untokenizedFieldname('meta:repositoryid'), # Was:
+    untokenizedFieldname('oai_id'), # Was: 'oai_identifier'
+    untokenizedFieldname('meta_repositoryid'), # Was:
     untokenizedFieldname('fundingid'), # Was funding_id
-    untokenizedFieldname('dare:id'), #Was: dare_identifier
+    untokenizedFieldname('dare_id'), #Was: dare_identifier
     untokenizedFieldname('publicationid'), # Was: publication_identifier
     untokenizedFieldname('mutatiedatum'),
     untokenizedFieldname('dateissued'),
@@ -142,6 +141,7 @@ DEFAULT_CORE = 'narcis'
 def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, luceneserverPort):
 
     fieldRegistry = FieldRegistry(drilldownFields=drilldownFields)
+    # print "POSTDICT:", defaultLuceneSettings.clone(fieldRegistry=fieldRegistry).asPostDict()
     luceneIndex = be((Lucene(
             host='127.0.0.1',
             port=luceneserverPort,
@@ -152,47 +152,51 @@ def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, luceneserve
     ))
     return luceneIndex
 
-def readerMain(readerReactor, statePath, port, defaultLuceneSettings, luceneserverPort):
-    apacheLogStream = stdout
+# def readerMain(readerReactor, statePath, port, defaultLuceneSettings, luceneserverPort):
+#     apacheLogStream = stdout
 
-    http11Request = be(
-        (HttpRequest1_1(),
-            (SocketPool(reactor=readerReactor, unusedTimeout=5, limits=dict(totalSize=100, destinationSize=10)),),
-        )
-    )
-    luceneIndex = luceneAndReaderConfig(defaultLuceneSettings.clone(readonly=True), http11Request, luceneserverPort)
+#     http11Request = be(
+#         (HttpRequest1_1(),
+#             (SocketPool(reactor=readerReactor, unusedTimeout=5, limits=dict(totalSize=100, destinationSize=10)),),
+#         )
+#     )
+#     luceneIndex = luceneAndReaderConfig(defaultLuceneSettings.clone(readonly=True), http11Request, luceneserverPort)
 
-    return \
-    (Observable(),
-        # (DebugPrompt(reactor=readerReactor, port=port+1, globals=locals()),),
-        (ObservableHttpServer(reactor=readerReactor, port=port),
-            (LogCollector(),
-                (ApacheLogWriter(apacheLogStream),),
-                (HandleRequestLog(),
-                    (BasicHttpHandler(),
-                        (PathFilter('/lucene'),
-                            (LuceneRemoteService(reactor=readerReactor),
-                                (AdapterToLuceneQuery(
-                                        defaultCore=DEFAULT_CORE,
-                                        coreConverters={
-                                            DEFAULT_CORE: QueryExpressionToLuceneQueryDict(UNQUALIFIED_TERM_FIELDS, luceneSettings=luceneIndex.settings),
-                                        }
-                                    ),
-                                    (MultiLucene(host='localhost', port=luceneserverPort, defaultCore=DEFAULT_CORE),
-                                        (luceneIndex,),
-                                        (http11Request,),
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    )
+# # Om een dummy response te genereren: https://github.com/seecr/weightless-core/blob/master/weightless/examples/httpserver.py
+#     return \
+#     (Observable(),
+#         # (DebugPrompt(reactor=readerReactor, port=port+1, globals=locals()),),
+#         (ObservableHttpServer(reactor=readerReactor, port=port),
+#             (LogCollector(),
+#                 (ApacheLogWriter(apacheLogStream),),
+#                 (HandleRequestLog(),
+#                     (BasicHttpHandler(),
+#                         (PathFilter('/lucene'),
+#                             (LuceneRemoteService(reactor=readerReactor),
+#                                 (AdapterToLuceneQuery(
+#                                         defaultCore=DEFAULT_CORE,
+#                                         coreConverters={
+#                                             DEFAULT_CORE: QueryExpressionToLuceneQueryDict(UNQUALIFIED_TERM_FIELDS, luceneSettings=luceneIndex.settings),
+#                                         }
+#                                     ),
+#                                     # (LogComponent("MULTILUCENE"),),
+#                                     # [MULTILUCENE] executeComposedQuery(*(), **{'query': ComposedQuery{'resultsFrom': 'narcis', '_drilldownQueries': {}, '_sortKeys': [], '_stop': 10, '_filterQueries': {}, '_rankQueries': {}, '_queries': {'narcis': {'boost': 1.0, 'terms': [{'field': '__all__', 'value': u'0000'}, {'field': '__all__', 'value': u'0002'}, {'field': '__all__', 'value': u'4703'}, {'field': '__all__', 'value': u'3788'}], 'type': 'PhraseQuery'}}, '_facets': {}, '_otherCoreFacetFilters': {}, 'cores': ['narcis'], '_unites': [], '_start': 0, '_matches': {}}})
+#                                     (MultiLucene(host='127.0.0.1', port=luceneserverPort, defaultCore=DEFAULT_CORE),
+#                                         (luceneIndex,),
+#                                         (http11Request,),
+#                                     )
+#                                 )
+#                             )
+#                         )
+#                     )
+#                 )
+#             )
+#         )
+#     )
 
 
-def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserverPort, gatewayPort, quickCommit=False):
+# def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserverPort, gatewayPort, quickCommit=False):
+def writerMain(writerReactor, statePath, luceneserverPort, gatewayPort, quickCommit=False):
     # apacheLogStream = stdout
 
     http11Request = be(
@@ -221,7 +225,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
         path='/oaix',
         metadataPrefix=NORMALISED_DOC_NAME,
         workingDirectory=join(statePath, 'harvesterstate', 'gateway'),
-        userAgentAddition='index',
+        userAgentAddition='idx-server',
         xWait=True,
         name='index',
         autoCommit=False)
@@ -240,12 +244,12 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
         )
     )
 
-    readerServer = readerMain(
-        readerReactor=readerReactor,
-        statePath=statePath,
-        port=readerPort,
-        defaultLuceneSettings=defaultLuceneSettings,
-        luceneserverPort=luceneserverPort)
+    # readerServer = readerMain(
+    #     readerReactor=readerReactor,
+    #     statePath=statePath,
+    #     port=readerPort,
+    #     defaultLuceneSettings=defaultLuceneSettings,
+    #     luceneserverPort=luceneserverPort)
 
     writerServer = \
     (Observable(),
@@ -297,7 +301,7 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
                                                     #rewriteIdentifier=(lambda idee: idee.split(':', 1)[-1]) # meresco:record:1' => 'record:1'
                                                 ),
                                                 # (LogComponent("FIELDS TO LUCENE_WRITER"),), # [LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': 'dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'StringField', 'name': 'untokenized.dc:identifier', 'value': 'http://meresco.com?record=1'}, {'type': 'TextField', 'name': '__all__', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': 'dc:description', 'value': 'This is an example program about Search with Meresco'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': 'dc:title', 'value': 'Example Program 1'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:creator', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': 'Seecr'}, {'type': 'TextField', 'name': 'dc:publisher', 'value': 'Seecr'}, {'type': 'TextField', 'name': '__all__', 'value': '2016'}, {'type': 'TextField', 'name': 'dc:date', 'value': '2016'}, {'path': ['2016'], 'type': 'FacetField', 'name': 'untokenized.dc:date'}, {'type': 'TextField', 'name': '__all__', 'value': 'Example'}, {'type': 'TextField', 'name': 'dc:type', 'value': 'Example'}, {'type': 'TextField', 'name': '__all__', 'value': 'Search'}, {'type': 'TextField', 'name': 'dc:subject', 'value': 'Search'}, {'path': ['Search'], 'type': 'FacetField', 'name': 'untokenized.dc:subject'}, {'type': 'TextField', 'name': '__all__', 'value': 'en'}, {'type': 'TextField', 'name': 'dc:language', 'value': 'en'}, {'type': 'TextField', 'name': '__all__', 'value': 'Open Source'}, {'type': 'TextField', 'name': 'dc:rights', 'value': 'Open Source'}], 'identifier': 'meresco:record:1'})
-                                                    # [####LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:id', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'olddata'}, {'type': 'TextField', 'name': 'meta:set', 'value': 'olddata'}, {'type': 'TextField', 'name': '__all__', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': 'meta:baseurl', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:repositoryGroupId', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'nl_didl'}, {'type': 'TextField', 'name': 'meta:metadataPrefix', 'value': 'nl_didl'}, {'type': 'TextField', 'name': '__all__', 'value': 'publication'}, {'type': 'TextField', 'name': 'meta:collection', 'value': 'publication'}, {'path': ['publication'], 'type': 'FacetField', 'name': 'untokenized.meta:collection'}], 'identifier': 'knaw:record:3'})
+                                                    # [####LUCENE_WRITER] addDocument(*(), **{'fields': [{'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:id', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'olddata'}, {'type': 'TextField', 'name': 'meta:set', 'value': 'olddata'}, {'type': 'TextField', 'name': '__all__', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': 'meta:baseurl', 'value': 'http://oai.knaw.nl/oai'}, {'type': 'TextField', 'name': '__all__', 'value': 'knaw'}, {'type': 'TextField', 'name': 'meta:repositoryGroupId', 'value': 'knaw'}, {'type': 'TextField', 'name': '__all__', 'value': 'nl_didl'}, {'type': 'TextField', 'name': 'meta:metadataPrefix', 'value': 'nl_didl'}, {'type': 'TextField', 'name': '__all__', 'value': 'publication'}, {'type': 'TextField', 'name': 'meta_collection', 'value': 'publication'}, {'path': ['publication'], 'type': 'FacetField', 'name': 'untokenized.meta_collection'}], 'identifier': 'knaw:record:3'})
                                                 (luceneWriter,),
                                                 # ),
                                             )
@@ -314,7 +318,8 @@ def writerMain(writerReactor, readerReactor, readerPort, statePath, luceneserver
             )
         )
     )
-    return readerServer, writerServer
+    # return readerServer, writerServer
+    return writerServer
 
 
 def startServer(port, stateDir, luceneserverPort, gatewayPort, quickCommit=False, **ignored):
@@ -324,26 +329,27 @@ def startServer(port, stateDir, luceneserverPort, gatewayPort, quickCommit=False
 
     statePath = abspath(stateDir)
     writerReactor = Reactor()
-    readerReactor = Reactor()
+    # readerReactor = Reactor()
 
-    reader, writer = writerMain(
+    # reader, writer = writerMain(
+    writer = writerMain(
             writerReactor=writerReactor,
-            readerReactor=readerReactor,
-            readerPort=port,
+            # readerReactor=readerReactor,
+            # readerPort=port,
             statePath=statePath,
             luceneserverPort=luceneserverPort,
             gatewayPort=gatewayPort,
             quickCommit=quickCommit,
         )
 
-    readerServer = be(reader)
+    # readerServer = be(reader)
     writerServer = be(writer)
 
     # Attaches reader to Lucene thread:
-    def startReader():
-        LUCENE_VM.attachCurrentThread()
-        consume(readerServer.once.observer_init())
-        readerReactor.loop()
+    # def startReader():
+    #     LUCENE_VM.attachCurrentThread()
+    #     consume(readerServer.once.observer_init())
+    #     readerReactor.loop()
 
     # Start writer in main (this) thread:
     consume(writerServer.once.observer_init())
@@ -351,9 +357,9 @@ def startServer(port, stateDir, luceneserverPort, gatewayPort, quickCommit=False
     registerShutdownHandler(statePath=statePath, server=writerServer, reactor=writerReactor, shutdownMustSucceed=False)
 
     # Start reader in separate/own thread:
-    tReader = Thread(target=startReader)
-    tReader.setDaemon(True)
-    tReader.start()
+    # tReader = Thread(target=startReader)
+    # tReader.setDaemon(True)
+    # tReader.start()
 
     print "Ready to rumble at port %s" % port
     stdout.flush()

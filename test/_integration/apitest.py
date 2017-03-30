@@ -75,7 +75,7 @@ class ApiTest(IntegrationTestCase):
     def testSruIndex(self):
         self.assertSruQuery(2, '__all__ = "Seecr"')
         self.assertSruQuery(2, 'title = program')
-        self.assertSruQuery(3, 'untokenized.oai:id exact "record:1"')
+        self.assertSruQuery(3, 'untokenized.oai_id exact "record:1"')
         self.assertSruQuery(3, 'untokenized.dd_year exact "2016"')
         self.assertSruQuery(1, 'untokenized.nids exact "info:eu-repo/dai/nl/29806278"')
         self.assertSruQuery(1, 'coverage = Europe')
@@ -89,7 +89,7 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(4, '"info:eu-repo/dai/nl/071792279"')
         self.assertSruQuery(1, '"OND1272024"')
         self.assertSruQuery(1, '"ORG1236141"')
-        self.assertSruQuery(1, 'untokenized.oai:id exact "ORG1236141"')
+        self.assertSruQuery(1, 'untokenized.oai_id exact "ORG1236141"')
         self.assertSruQuery(1, '"1937-1632-REL"')
         self.assertSruQuery(3, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/282797"')
         self.assertSruQuery(1, '"Veenendaal"')
@@ -130,13 +130,13 @@ class ApiTest(IntegrationTestCase):
 
     def testSruQueryWithMultipleDrilldown(self):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
-        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta:collection:0,meta:repositorygroupid:0,access:0,pubtype:0"})
+        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0"})
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         self.assertEqual([('openAccess', '5'), ('closedAccess', '3')], drilldown)
 
-        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="pubtype"]/drilldown:item')
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1')], drilldown)
 
@@ -169,15 +169,13 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(set(['publication','openaire','oa_publication','ec_fundedresources','thesis','dataset']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testRSS(self):
-        #TODO: sortering testen.
-        # body = self._doQuery({'query':'is', 'querylabel':'MyLabel', 'preflang': 'en', 'sortKeys': 'untokenized.oai_identifier,,0'}, path="/rss") #, 'x-rss-profile':'narcis': deprecated
-        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.oai:id,,0', startRecord='5'))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.dateissued,,0', startRecord='3'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
-        self.assertEquals(3, len(items))
+        self.assertEquals(8, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual(set(['Appositie en de interne struktuur van de NP', 'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate','Example Program 1']), set(xpath(body, "//item/title/text()")))
-        self.assertEqual(set(['This collection contains results  of Work Package 2 "Hazard Identification" of project RAIN (" Risk Analysis of Infrastructure Networks in response to extreme weather"). Pan-European gridded data sets of the probability of occurrence of river floods, coastal floods, heavy precipitation, windstorms,', "This is an example program about Search with Meresco", "FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang"]), set(xpath(body, "//item/description/text()")))
+        self.assertEqual(set(['Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate']), set(xpath(body, "//item/title/text()")))
+        self.assertEqual(set(['FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'This collection contains results  of Work Package 2 "Hazard Identification" of project RAIN (" Risk Analysis of Infrastructure Networks in response to extreme weather"). Pan-European gridded data sets of the probability of occurrence of river floods, coastal floods, heavy precipitation, windstorms,']), set(xpath(body, "//item/description/text()")))
         self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
 
     def testDcToLong(self):
@@ -368,7 +366,7 @@ class ApiTest(IntegrationTestCase):
      
     def testLog(self):
         header, body = getRequest(self.apiPort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
-        self.assertEqual('"Example Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
+        self.assertEqual('"SRU Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
 
     def assertSruQuery(self, numberOfRecords, query, printout=False):
         response = self.doSruQuery(**{'query':query, "recordSchema": "knaw_short", "x-recordSchema": "header"}) # , 'maximumRecords': '1'

@@ -58,11 +58,9 @@ class Rss(Observable):
         self._link = link
         self._antiUnaryClause = antiUnaryClause
         self._sortKeys = sruArgs.get('sortKeys', None)
-        # self._maximumRecords = sruArgs.get('maximumRecords', 10)
 
-        # DANS properties:
+        # Added DANS properties:
         self._supportedLanguages = supportedLanguages # First index is default language
-        self._sortKeys = sruArgs.get('sortKeys', None)
         self._max_maximumRecords = max_maximumRecords
         self._maximumRecords = self._max_maximumRecords if sruArgs.get('maximumRecords', 20) > self._max_maximumRecords else sruArgs.get('maximumRecords', 20)
         self._startRecord = 1
@@ -73,7 +71,7 @@ class Rss(Observable):
     def handleRequest(self, RequestURI='', **kwargs):
         yield httputils.okRss
         yield """<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>"""
-        # yield """<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>"""
+
         try:
             Scheme, Netloc, Path, Query, Fragment = urlsplit(RequestURI)
             arguments = parse_qs(Query)
@@ -81,7 +79,7 @@ class Rss(Observable):
             sortBy, sortDescending = None, None
             if sortKeys:
                 sortBy, ignored, sortDescending = sortKeys.split(',')
-                sortDescending = sortDescending == '1'
+                sortDescending = sortDescending == '0'
 
             # Set Language:
             prefLanguage = arguments.get('preflang', [self._supportedLanguages[0]])[0]

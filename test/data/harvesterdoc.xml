@@ -1,0 +1,35 @@
+<document xmlns="http://meresco.org/namespace/harvester/document"><part name="record">&lt;record xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+            &lt;header xmlns="http://www.openarchives.org/OAI/2.0/"&gt;&lt;identifier&gt;record:1&lt;/identifier&gt;&lt;datestamp&gt;2008-12-15T14:08:34Z&lt;/datestamp&gt;&lt;/header&gt;
+            &lt;metadata xmlns="http://www.openarchives.org/OAI/2.0/"&gt;&lt;ns0:md_original xmlns:ns0="http://dans.knaw.nl/narcis/normalized"&gt;
+            &lt;oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/      http://www.openarchives.org/OAI/2.0/oai_dc.xsd"&gt;
+            &lt;dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;http://meresco.com?record=1&lt;/dc:identifier&gt;
+            &lt;dc:description xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;This is an example program about Search with Meresco&lt;/dc:description&gt;
+            &lt;dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Example Program 1&lt;/dc:title&gt;
+            &lt;dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Seecr&lt;/dc:creator&gt;
+            &lt;dc:publisher xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Seecr&lt;/dc:publisher&gt;
+            &lt;dc:date xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;tweeduizendzestien&lt;/dc:date&gt;
+            &lt;dc:date xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;2016&lt;/dc:date&gt;
+            &lt;dc:type xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Example &amp;amp; 1&lt;/dc:type&gt;
+            &lt;dc:subject xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;Search&lt;/dc:subject&gt;
+            &lt;dc:language xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;en&lt;/dc:language&gt;
+            &lt;dc:rights xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;restrictedAccess&lt;/dc:rights&gt;
+            &lt;/oai_dc:dc&gt;&lt;/ns0:md_original&gt;&lt;ns0:normalized xmlns:ns0="http://dans.knaw.nl/narcis/normalized"&gt;&lt;knaw_long xmlns="http://www.knaw.nl/narcis/1.0/long/" version="1.0"&gt;&lt;wcpcollection&gt;publication&lt;/wcpcollection&gt;&lt;modificationDate&gt;2008-12-15T14:08:34Z&lt;/modificationDate&gt;&lt;humanStartPage&gt;http://meresco.com?record=1&lt;/humanStartPage&gt;&lt;accessRights&gt;restrictedAccess&lt;/accessRights&gt;&lt;metadata&gt;&lt;titleInfo&gt;&lt;title&gt;Example Program 1&lt;/title&gt;&lt;/titleInfo&gt;&lt;titleInfo xml:lang="en"&gt;&lt;title&gt;Example Program 1&lt;/title&gt;&lt;/titleInfo&gt;&lt;name&gt;&lt;type&gt;personal&lt;/type&gt;&lt;unstructured&gt;Seecr&lt;/unstructured&gt;&lt;mcRoleTerm&gt;aut&lt;/mcRoleTerm&gt;&lt;/name&gt;&lt;publisher&gt;Seecr&lt;/publisher&gt;&lt;subject&gt;&lt;topic&gt;Search&lt;/topic&gt;&lt;/subject&gt;&lt;abstract&gt;This is an example program about Search with Meresco&lt;/abstract&gt;&lt;dateIssued&gt;&lt;parsed&gt;2016&lt;/parsed&gt;&lt;unParsed&gt;2016&lt;/unParsed&gt;&lt;/dateIssued&gt;&lt;language&gt;en&lt;/language&gt;&lt;/metadata&gt;&lt;/knaw_long&gt;&lt;/ns0:normalized&gt;&lt;/metadata&gt;
+            &lt;/record&gt;</part>
+            <part name="meta">&lt;meta xmlns="http://meresco.org/namespace/harvester/meta"&gt;
+                &lt;upload&gt;
+                    &lt;id&gt;meresco:record:1&lt;/id&gt;
+                &lt;/upload&gt;
+                &lt;record&gt;
+                    &lt;id&gt;record:1&lt;/id&gt;
+                    &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;               
+                &lt;/record&gt;
+                &lt;repository&gt;
+                    &lt;id&gt;meresco&lt;/id&gt;
+                    &lt;set&gt;pubs:oa&lt;/set&gt;
+                    &lt;baseurl&gt;http://depot.seecr.nl/cgi/oai2&lt;/baseurl&gt;
+                    &lt;repositoryGroupId&gt;seecr&lt;/repositoryGroupId&gt;
+                    &lt;metadataPrefix&gt;oai_dc&lt;/metadataPrefix&gt;
+                    &lt;collection&gt;publication&lt;/collection&gt;
+                &lt;/repository&gt;
+            &lt;/meta&gt;</part>
+        </document>
