@@ -49,7 +49,7 @@ class SruSlaveTest(IntegrationTestCase):
     def testSruQuery(self):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
-        self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('11', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set([
             'Example Program 1',
             'Example Program 2',
@@ -116,7 +116,7 @@ class SruSlaveTest(IntegrationTestCase):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
         response = self.doSruQuery(**{"query": '*', 'maximumRecords': '1', "x-term-drilldown": "dd_cat:0"})
         # print "DD body:", etree.tostring(response)
-        self.assertEqual('10', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('11', xpathFirst(response, '//srw:numberOfRecords/text()'))
         # self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
@@ -134,7 +134,7 @@ class SruSlaveTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('openAccess', '4'), ('closedAccess', '3')], drilldown)
+        self.assertEqual([('openAccess', '5'), ('closedAccess', '3')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -150,9 +150,9 @@ class SruSlaveTest(IntegrationTestCase):
         header, body = getRequest(self.sruslavePort, '/rss', dict(query="*", querylabel='MyWorkerLabel', sortKeys='untokenized.dateissued,,1'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
-        self.assertEquals(10, len(items))
+        self.assertEquals(11, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual(['1993-01-01', '2004-06-30', '2014', '2016', '2016', '2016'], xpath(body, "//item/pubDate/text()"))
+        self.assertEqual(['1993-01-01', '2004-06-30', '2014', '2016', '2016-01-31', '2016-05-05'], xpath(body, "//item/pubDate/text()"))
         self.assertEqual('MyWorkerLabel', xpathFirst(body, '//channel/title/text()'))
 
 
