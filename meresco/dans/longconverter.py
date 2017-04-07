@@ -799,19 +799,15 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getTopic(self, e_subject, topics):  
         for topic in topics:
-            etree.SubElement(e_subject, "topic").text = topic.strip()
+            e_topic = etree.SubElement(e_subject, "topic")
+            etree.SubElement(e_topic, "topicValue").text = topic.strip()
 
     def _getDataciteTopic(self, e_subject, topics):  
         for topic in topics:
             e_topic = etree.SubElement(e_subject, "topic")
-            e_topic.text = topic.text.strip()
-            subjectScheme = topic.attrib.get('subjectScheme')
-            self._getSubjectScheme(e_topic, subjectScheme)
-
-    def _getSubjectScheme(self, e_topic, subjectScheme):  
-        if subjectScheme and subjectScheme.lower() in ("audience", "abr-periode", "abr-complex", "narcis-classification"):
-            etree.SubElement(e_topic, "subjectScheme").text = subjectScheme
-
+            etree.SubElement(e_topic, "topicValue").text = topic.text.strip()
+            if (topic.attrib.get('subjectScheme')):
+            	etree.SubElement(e_topic, "subjectScheme").text = topic.attrib.get('subjectScheme')
 
     def _getAbstract(self, lxmlNode, e_longmetadata): # TODO: Check metadataformat logic
         abstracts = [[],[]] #wrapper for max 2 abstract strings -> [('NL', leeg, !='EN') OF DC], ['EN' only].        
@@ -1063,7 +1059,7 @@ class NormaliseOaiRecord(UiaConverter):
                             e_geoLocationBox = etree.SubElement(e_geoLocation, "geoLocationBox")
                             etree.SubElement(e_geoLocationBox, "northBoundLatitude").text = northBoundLatitude[0]
                             etree.SubElement(e_geoLocationBox, "eastBoundLongitude").text = eastBoundLongitude[0]
-                            etree.SubElement(e_geoLocationBox, "northBoundLatitude").text = northBoundLatitude[0]
+                            etree.SubElement(e_geoLocationBox, "southBoundLatitude").text = southBoundLatitude[0]
                             etree.SubElement(e_geoLocationBox, "westBoundLongitude").text = westBoundLongitude[0]
 
 ################### Helper methods #########################
