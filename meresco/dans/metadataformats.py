@@ -18,7 +18,7 @@ class MetadataFormat():
     DIDLM36 = 'didl_mods36'
     DIDLDC = 'didl_dc'
     OAIDC = 'oai_dc'
-    DATACITE = 'datacite4'
+    DATACITE = 'datacite'
     ORG = 'org'
     PROJ = 'proj'
     PRS = 'prs'
@@ -31,24 +31,24 @@ class MetadataFormat():
             if int(lxmlNode.xpath("count(//mods:mods)", namespaces=Namespaces.NAMESPACEMAP)) >= 1: # Check for MODS container.
                 # Found MODS: Check op aanwezigheid rdf namespace, to differentiate between known versions:
                 if lxmlNode.xpath("boolean(count(//rdf:*))", namespaces=Namespaces.NAMESPACEMAP):
-                    md_format = DIDLM30
+                    md_format = MetadataFormat.DIDLM30
                 else:
-                    md_format = DIDLM23
+                    md_format = MetadataFormat.DIDLM23
             elif int(lxmlNode.xpath("count(//oai_dc:dc)", namespaces=Namespaces.NAMESPACEMAP)) == 1: # Check for OAI_DC container.
-                md_format = DIDLDC
+                md_format = MetadataFormat.DIDLDC
             
         elif int(lxmlNode.xpath("count(//mods:mods)", namespaces=Namespaces.NAMESPACEMAP)) >= 1: # Full MODS (MODS only)
-            md_format =DIDLM36
+            md_format = MetadataFormat.DIDLM36
         elif lxmlNode.xpath("boolean(count(//oai_dc:dc))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = OAIDC
+            md_format = MetadataFormat.OAIDC
         elif lxmlNode.xpath("boolean(count(//org:organisatie))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = ORG # NOD organization
+            md_format = MetadataFormat.ORG # NOD organization
         elif lxmlNode.xpath("boolean(count(//proj:activiteit))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = PROJ # NOD project
+            md_format = MetadataFormat.PROJ # NOD project
         elif lxmlNode.xpath("boolean(count(//prs:persoon))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = PRS # NOD Person
+            md_format = MetadataFormat.PRS # NOD Person
         elif lxmlNode.xpath("boolean(count(//datacite:resource))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS or ORE was found, check for DATACITE:
-            md_format = DATACITE
+            md_format = MetadataFormat.DATACITE
         
         if md_format == None:
             raise ValidateException("No known EduStandaard format was found in the metadata for uploadid: %s! This record cannot be processed." % (uploadId))
@@ -65,33 +65,32 @@ class MetadataFormat():
         return self._namespace
 
     def isDC(self):
-        return self._format in (OAIDC, DIDLDC)
+        return self._format in (MetadataFormat.OAIDC, MetadataFormat.DIDLDC)
         
     def isOaiDC(self):
-        return self._format == OAIDC
+        return self._format == MetadataFormat.OAIDC
         
     def isDidlDC(self):
-        return self._format == DIDLDC
+        return self._format == MetadataFormat.DIDLDC
         
     def isMods(self):
-        return self._format in (DIDLM23, DIDLM30, DIDLM36)
+        return self._format in (MetadataFormat.DIDLM23, MetadataFormat.DIDLM30, MetadataFormat.DIDLM36)
 
     def isMods3(self):
-        return self._format in (DIDLM30, DIDLM36)
+        return self._format in (MetadataFormat.DIDLM30, MetadataFormat.DIDLM36)
 
     def isDatacite(self):
-        return self._format == DATACITE
+        return self._format == MetadataFormat.DATACITE
 
     def isNOD(self):
-        return self._format in (ORG, PROJ, PRS)
+        return self._format in (MetadataFormat.ORG, MetadataFormat.PROJ, MetadataFormat.PRS)
 
     def isOrganisation(self):
-        return self._format == ORG
+        return self._format == MetadataFormat.ORG
 
     def isProject(self):
-        return self._format == PROJ
+        return self._format == MetadataFormat.PROJ
 
     def isPerson(self):
-        return self._format == PRS
-
+        return self._format == MetadataFormat.PRS
 
