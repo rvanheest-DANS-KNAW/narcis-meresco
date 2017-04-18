@@ -16,7 +16,7 @@ SITEMAP_PROXY_DIR = '/home/meresco/www/sitemaps'
 #SITEMAP_PROXY_DIR = 'sitemaps'
 ### ! Local / Testing properties ######
 
-SITEMAP_TEMP_DIR = 'sitemaps_temp'
+SITEMAP_TEMP_DIR = '/home/meresco/sitemapper/sitemaps_temp'
 
 MULTI_LANGUAL = ['person', 'organisation', 'research']
 # Order does matter:
@@ -25,10 +25,10 @@ BDB_NAMES = WCP_COLLECTIONS + ['gscholar']
 
 collection_prio_map = dict(zip(WCP_COLLECTIONS, ["1.0", "1.0", "1.0", "1.0", "1.0"]))
 LANGUAGE = ['en', 'nl']
-BDB_DIR = 'berkeleydb'
+BDB_DIR = '/home/meresco/sitemapper/berkeleydb'
 DB_DELIMIT = '#@'
 
-LOG_FILENAME = 'log/sitemapper.log'
+LOG_FILENAME = '/home/meresco/sitemapper/log/sitemapper.log'
 MAX_LOGSIZE = 10485760
 
 END_SITEMAP = '''</urlset>'''
