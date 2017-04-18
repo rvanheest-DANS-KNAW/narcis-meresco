@@ -11,6 +11,17 @@ from meresco.dans.namespacemapping import Namespaces
 
 
 class MetadataFormat():
+    """Determines EduStandaard metadata format from LxmlNode"""
+    
+    DIDLM23 = 'didl_mods231'
+    DIDLM30 = 'didl_mods30'    
+    DIDLM36 = 'didl_mods36'
+    DIDLDC = 'didl_dc'
+    OAIDC = 'oai_dc'
+    DATACITE = 'datacite4'
+    ORG = 'org'
+    PROJ = 'proj'
+    PRS = 'prs'
     
     def __init__(self, lxmlNode, uploadId):
         
@@ -20,24 +31,24 @@ class MetadataFormat():
             if int(lxmlNode.xpath("count(//mods:mods)", namespaces=Namespaces.NAMESPACEMAP)) >= 1: # Check for MODS container.
                 # Found MODS: Check op aanwezigheid rdf namespace, to differentiate between known versions:
                 if lxmlNode.xpath("boolean(count(//rdf:*))", namespaces=Namespaces.NAMESPACEMAP):
-                    md_format = 'didl_mods30'
+                    md_format = DIDLM30
                 else:
-                    md_format = 'didl_mods231'
+                    md_format = DIDLM23
             elif int(lxmlNode.xpath("count(//oai_dc:dc)", namespaces=Namespaces.NAMESPACEMAP)) == 1: # Check for OAI_DC container.
-                md_format = 'didl_dc'
+                md_format = DIDLDC
             
         elif int(lxmlNode.xpath("count(//mods:mods)", namespaces=Namespaces.NAMESPACEMAP)) >= 1: # Full MODS (MODS only)
-            md_format ='didl_mods36'
+            md_format =DIDLM36
         elif lxmlNode.xpath("boolean(count(//oai_dc:dc))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = 'oai_dc'
+            md_format = OAIDC
         elif lxmlNode.xpath("boolean(count(//org:organisatie))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = 'org' # NOD organization
+            md_format = ORG # NOD organization
         elif lxmlNode.xpath("boolean(count(//proj:activiteit))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = 'proj' # NOD project
+            md_format = PROJ # NOD project
         elif lxmlNode.xpath("boolean(count(//prs:persoon))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS was found, check for plain DC:
-            md_format = 'prs' # NOD Person
+            md_format = PRS # NOD Person
         elif lxmlNode.xpath("boolean(count(//datacite:resource))", namespaces=Namespaces.NAMESPACEMAP): # No DIDL, nor MODS or ORE was found, check for DATACITE:
-            md_format = 'datacite'
+            md_format = DATACITE
         
         if md_format == None:
             raise ValidateException("No known EduStandaard format was found in the metadata for uploadid: %s! This record cannot be processed." % (uploadId))
@@ -50,36 +61,37 @@ class MetadataFormat():
         return self._format            
             
     def getNamespace(self):
+        """Maps MD_FORMAT to metadatanamespace. May be used in OAI provenance."""
         return self._namespace
 
     def isDC(self):
-        return self._format in ('oai_dc', 'didl_dc')
+        return self._format in (OAIDC, DIDLDC)
         
     def isOaiDC(self):
-        return self._format =='oai_dc'
+        return self._format == OAIDC
         
     def isDidlDC(self):
-        return self._format =='didl_dc'
+        return self._format == DIDLDC
         
     def isMods(self):
-        return self._format in ('didl_mods231', 'didl_mods30', 'didl_mods36')
+        return self._format in (DIDLM23, DIDLM30, DIDLM36)
 
     def isMods3(self):
-        return self._format in ('didl_mods30', 'didl_mods36')
+        return self._format in (DIDLM30, DIDLM36)
 
     def isDatacite(self):
-        return self._format == 'datacite'
+        return self._format == DATACITE
 
     def isNOD(self):
-        return self._format in ('org', 'proj', 'prs')
+        return self._format in (ORG, PROJ, PRS)
 
     def isOrganisation(self):
-        return self._format == 'org'
+        return self._format == ORG
 
     def isProject(self):
-        return self._format == 'proj'
+        return self._format == PROJ
 
     def isPerson(self):
-        return self._format == 'prs'
+        return self._format == PRS
 
 
