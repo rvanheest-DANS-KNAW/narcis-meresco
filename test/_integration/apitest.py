@@ -138,7 +138,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1')], drilldown)
+        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):
@@ -303,6 +303,7 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(**{'query': 'urn:nbn:nl:ui:13-jsk-7ek', 'recordSchema':'knaw_long'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
         self.assertEqual('urn:nbn:nl:ui:13-jsk-7ek', testNamespaces.xpathFirst(response, '//long:persistentIdentifier/text()'))
+        self.assertEqual('doi:10.17026/dans-zqm-htb9', testNamespaces.xpathFirst(response, '//long:humanStartPage/text()'))
         self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
         self.assertEqual('Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam.', testNamespaces.xpathFirst(response, '//long:metadata/long:titleInfo/long:title/text()')[0:65])
         self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:type/text()'))
@@ -311,19 +312,19 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('Elizabeth', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:given/text()'))
         self.assertEqual('cre', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:mcRoleTerm/text()'))
         self.assertEqual('ctb', testNamespaces.xpathFirst(response, '//long:metadata/long:name[5]/long:mcRoleTerm/text()'))
-        self.assertEqual('0000-0001-5000-0007', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:nameIdentifier[@type="ORCID"]/text()'))
+        self.assertEqual('0000-0001-5000-0007', testNamespaces.xpathFirst(response, '//long:metadata/long:name/long:nameIdentifier[@type="orcid"]/text()'))
         self.assertEqual('Groningen Institute of Archaeology, University of Groningen', testNamespaces.xpathFirst(response, '//long:metadata/long:name[1]/long:affiliation/text()'))
         self.assertEqual('Jacobs en Burnier, archeologisch projectbureau', testNamespaces.xpathFirst(response, '//long:metadata/long:publisher/text()'))
-        self.assertEqual('Archaeology', testNamespaces.xpathFirst(response, '//long:metadata/long:subject/long:topic/long:topicValue/text()'))
+        self.assertEqual('Archaeology', testNamespaces.xpathFirst(response, '//long:metadata/long:subject/long:topic[long:subjectScheme/text() = "NARCIS-classification"]/long:topicValue/text()'))
         self.assertEqual('OPGRAVING', testNamespaces.xpathFirst(response, '//long:metadata/long:subject[@xml:lang="en"]/long:topic/long:topicValue/text()'))
-        self.assertEqual('NARCIS-classification', testNamespaces.xpathFirst(response, '//long:metadata/long:subject[not(@xml:lang)]/long:topic/long:subjectScheme/text()'))
+        self.assertEqual('ABR-complex', testNamespaces.xpathFirst(response, '//long:metadata/long:subject[not(@xml:lang)]/long:topic/long:subjectScheme/text()'))
         self.assertEqual('Abstract van dit document', testNamespaces.xpathFirst(response, '//long:metadata/long:abstract/text()'))
         self.assertEqual('2009-9-4', testNamespaces.xpathFirst(response, '//long:metadata/long:dateSubmitted/long:unParsed/text()'))
         self.assertEqual('2009-09-04', testNamespaces.xpathFirst(response, '//long:metadata/long:dateSubmitted/long:parsed/text()'))
         self.assertEqual('2009-11-24', testNamespaces.xpathFirst(response, '//long:metadata/long:dateAvailable/long:parsed/text()'))
-        self.assertEqual('10.17026/dans-zqm-htb9', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="DOI"]/text()'))
-        self.assertEqual('Dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/text()'))
-        self.assertEqual('European Commission', testNamespaces.xpathFirst(response, '//long:metadata/long:funder/text()'))
+        self.assertEqual('urn:nbn:nl:ui:13-jsk-7ek', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="urn"]/text()'))
+        self.assertEqual('dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/@generaltype'))
+        self.assertEqual('European Commission', testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements//long:grantAgreement/long:funder/text()'))
         self.assertEqual('nl', testNamespaces.xpathFirst(response, '//long:metadata/long:language/text()'))
         self.assertEqual('19 p.', testNamespaces.xpathFirst(response, '//long:metadata/long:format/text()'))
         self.assertEqual('Matthijs Tinxgracht 16', testNamespaces.xpathFirst(response, '//long:metadata/long:geoLocations/long:geoLocation[3]/long:geoLocationPlace/text()'))
