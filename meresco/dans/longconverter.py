@@ -58,7 +58,7 @@ LONG_VERSION = '1.0'
 
 dataciteContributorToMarcRelator = {
     'Creator'               : 'cre',
-    'ContactPerson'         : 'mdc',
+    'ContactPerson'         : 'sec',
     'DataCollector'         : 'col',
     'DataCurator'           : 'cur',
     'DataManager'           : 'dtm',
