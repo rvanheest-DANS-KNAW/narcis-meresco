@@ -167,6 +167,7 @@ class NormdocToFieldsList(Observable):
         self._verbose = verbose
         self._truncate_chars = truncate_chars
         self._fieldslist = []
+        self._wcp_collection = None
 
     def add(self, lxmlNode, **kwargs):
         
@@ -180,6 +181,7 @@ class NormdocToFieldsList(Observable):
         wcp_collection = e_metapart.xpath('/meta:meta/meta:repository/meta:collection/text()', namespaces=namespacesmap)
         if not wcp_collection:
             raise ValidateException("Collection is missing from metapart! Please add collection in WCP.")
+        self._wcp_collection = wcp_collection[0]
          
         # print "lxml metapart:", tostring(e_metapart)
 
@@ -192,13 +194,13 @@ class NormdocToFieldsList(Observable):
             if self._verbose: print 'addField:', field.upper(), "-->", e_metapart.xpath(xpad, namespaces=namespacesmap)[0]
 
         record = None
-        if wcp_collection[0] in WCPNODCOLLECTION:
+        if self._wcp_collection in WCPNODCOLLECTION:
             record = e_recordpart.xpath('//prs:persoon | //prj:activiteit | //org:organisatie', namespaces=namespacesmap)
         else:
             record = e_recordpart.xpath('//norm:normalized/long:knaw_long', namespaces=namespacesmap)
         self._fillFieldslist(record[0], '')
 
-        self._addAuthorsAndNamesFields(record[0], wcp_collection[0])
+        self._addAuthorsAndNamesFields(record[0])
         
         for field, xpad in fieldNamesXpathMap.iteritems():
             self._findAndAddToFieldslist(record[0], field, xpad)
@@ -218,8 +220,8 @@ class NormdocToFieldsList(Observable):
         value = aNode.text
         # send addField message
         if value and value.strip() and fieldnamesMapping.has_key(fieldname):
-            # Map all accessRights other than 'openAccess' to 'closedAccess' into the index:
-            if fieldname == 'knaw_long.accessRights' and value.strip().lower() not in (NormaliseOaiRecord.ACCESS_LEVELS[0].lower(), NormaliseOaiRecord.ACCESS_LEVELS[2].lower()):
+            # Map all accessRights other than 'openAccess' to 'closedAccess' into the index for NON-dataset collections:
+            if fieldname == 'knaw_long.accessRights' and self._wcp_collection != WCPEDUCOLLECTION[1] and value.strip().lower() not in (NormaliseOaiRecord.ACCESS_LEVELS[0].lower(), NormaliseOaiRecord.ACCESS_LEVELS[2].lower()):
                 if self._verbose: print 'Changing', value, 'to', NormaliseOaiRecord.ACCESS_LEVELS[2]
                 value = NormaliseOaiRecord.ACCESS_LEVELS[2]
             self._fieldslist.append((fieldnamesMapping.get(fieldname), value.strip().replace('\n', '')))
@@ -409,13 +411,13 @@ class NormdocToFieldsList(Observable):
 
 
 
-    def _addAuthorsAndNamesFields(self, lxmlNode, wcpcollection):
+    def _addAuthorsAndNamesFields(self, lxmlNode):
 
         authors = [] # i.e.: Messineo, Maria;Bennis, prof.dr. H.J.
         names = [] # i.e.: Maastricht Universiteit;Messineo, Maria;Bal, M.P.;Bennis, prof.dr. H.J.
         ds_creators = [] # Beta: List of dataset creators, which will be sent to the index for drilldown(!)
 
-        if wcpcollection in WCPEDUCOLLECTION:
+        if self._wcp_collection in WCPEDUCOLLECTION:
             # LONG ONLY:
             pubnames = lxmlNode.xpath('//long:metadata/long:name', namespaces=namespacesmap)
             for name in pubnames:
@@ -450,7 +452,7 @@ class NormdocToFieldsList(Observable):
                         nidFieldname = 'nids_aut'
 
                         #BETA functionality: Add dataset creators for dataset creators drilldown:  collection == 'dataset' and
-                        if wcpcollection == 'dataset':
+                        if self._wcp_collection == 'dataset':
                             if roleterm[0].lower() == 'cre' and (family or given): #We're NOT interested in unstractured/displayForm labels here...
                                 ds_creators.append(', '.join(fg_naam))
                 if len(nids) > 0:
@@ -469,7 +471,7 @@ class NormdocToFieldsList(Observable):
                                 if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
 
         # NOD_PRS:
-        elif wcpcollection == 'person':
+        elif self._wcp_collection == 'person':
             prs_name = lxmlNode.xpath('//prs:persoon/prs:fullName/text()', namespaces=namespacesmap)
             if prs_name:
                 names.append(prs_name[0])
@@ -497,14 +499,14 @@ class NormdocToFieldsList(Observable):
                             if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
 
 
-        elif wcpcollection == 'organisation':
+        elif self._wcp_collection == 'organisation':
             # NOD_ORG: (naam_en + naam_nl)
             org_names = lxmlNode.xpath('//org:organisatie/org:*[local-name()="naam_nl" or local-name()="naam_en"]/text()', namespaces=namespacesmap)
             for org_name in org_names:
                 names.append(org_name)
 
 
-        elif wcpcollection == 'research':
+        elif self._wcp_collection == 'research':
             # NOD_ACT: (fullnames + dais)
             act_persons = lxmlNode.xpath('//prj:activiteit/prj:person', namespaces=namespacesmap)
             for act_person in act_persons:

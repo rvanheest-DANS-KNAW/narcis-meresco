@@ -121,12 +121,23 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        # print 'DD:', drilldown
         self.assertEqual([('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
 
         # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         # drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         # self.assertEqual([('Search', '1'), ('Programming', '1')], drilldown)
+
+    def testSruQueryWithMultipleDrilldownDataCite(self):
+        response = self.doSruQuery(**{"query": 'untokenized.meta_collection exact "dataset"', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0"})
+        # print "DD body:", etree.tostring(response)
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
+        drilldown = [(i.text, i.attrib['count']) for i in ddItems]
+        self.assertEqual([('openAccess', '1'), ('embargoedAccess', '1')], drilldown)
+
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="meta_repositorygroupid"]/drilldown:item')
+        drilldown = [(i.text, i.attrib['count']) for i in ddItems]
+        self.assertEqual([('4tu', '1'), ('easy', '1')], drilldown)
+
 
     def testSruQueryWithMultipleDrilldown(self):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
@@ -134,7 +145,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('openAccess', '5'), ('closedAccess', '3')], drilldown)
+        self.assertEqual([('openAccess', '4'), ('closedAccess', '3'), ('embargoedAccess', '1')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -304,7 +315,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
         self.assertEqual('urn:nbn:nl:ui:13-jsk-7ek', testNamespaces.xpathFirst(response, '//long:persistentIdentifier/text()'))
         self.assertEqual('doi:10.17026/dans-zqm-htb9', testNamespaces.xpathFirst(response, '//long:humanStartPage/text()'))
-        self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
+        self.assertEqual('embargoedAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
         self.assertEqual('Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam.', testNamespaces.xpathFirst(response, '//long:metadata/long:titleInfo/long:title/text()')[0:65])
         self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:type/text()'))
         self.assertEqual('Miller, Elizabeth', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:unstructured/text()'))

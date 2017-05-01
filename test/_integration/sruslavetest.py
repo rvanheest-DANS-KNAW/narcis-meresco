@@ -136,7 +136,7 @@ class SruSlaveTest(IntegrationTestCase):
         # print "DD body:", etree.tostring(response)
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('openAccess', '5'), ('closedAccess', '3')], drilldown)
+        self.assertEqual([('openAccess', '4'), ('closedAccess', '3'), ('embargoedAccess', '1')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]

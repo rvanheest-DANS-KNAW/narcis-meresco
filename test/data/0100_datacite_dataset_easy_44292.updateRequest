@@ -88,7 +88,7 @@
                 &lt;format&gt;19 p.&lt;/format&gt;
             &lt;/formats&gt;
             &lt;rightsList&gt;
-                &lt;rights&gt;info:eu-repo/semantics/openAccess&lt;/rights&gt;
+                &lt;rights&gt;info:eu-repo/semantics/embargoedAccess&lt;/rights&gt;
                 &lt;rights&gt;Creative Commons Attribution 3.0 Germany&lt;/rights&gt;
                 &lt;rights rightsURI=&quot;info:eu-repo/semantics&quot;&gt;restrictedAccess&lt;/rights&gt;
             &lt;/rightsList&gt;

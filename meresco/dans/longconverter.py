@@ -568,12 +568,9 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getAccessRights(self, lxmlNode, e_longRoot):
         # Let op: Het aantal objectFiles dient bij aanroep reeds bekend te zijn in _getObjectFiles().
-        # All formats different from DIDL3.0: No way to determine AccessRights (yet).
+        # All formats different from DIDL3.0 or DataCite: No way to determine AccessRights.
         # In this case, accessRights SHOULD be available from the metaPart (stack), if not, we will default to 'openAccess'
         accessRight = NormaliseOaiRecord.ACCESS_LEVELS[0] # default 'openAccess'
-
-        # MD_FORMAT = ['oai_dc', 'didl_dc', 'didl_mods231', 'didl_mods30', 'didl_mods36', 'org', 'ond', 'prs']
-        # SURFSHARE_FORMAT = ['oai_dc', 'didl_dc', 'didl_mmods', 'didl_mods231', 'didl_mods30', 'ore_rem']
         
         #Check for DC: See if any valid dc:rights element is available, if not AccessLevel is available from the requestscope (CA-mapper)
         if self._metadataformat.isOaiDC():
