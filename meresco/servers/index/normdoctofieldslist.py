@@ -134,7 +134,7 @@ MetaFieldNamesToXpath = {
 
 
 fieldNamesXpathMap = {
-    'subject'        : "//*[local-name()='topic' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from Long:
+    'subject'        : "//*[local-name()='topicValue' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from Long:
     'leeropdracht'   : "//*[local-name()='leeropdracht_en' or local-name()='leeropdracht_nl']/text()", # Leeropdracht from personrecord
     'nids'           : "//long:relatedItem//long:nameIdentifier/text()", # All nid's: also from relatedItems
     'abstract'       : "//long:metadata/long:abstract[not (@xml:lang)]/text()", # 'abstract' field from KNAWLONG.
@@ -147,7 +147,8 @@ fieldNamesXpathMap = {
     'dd_prices'      : "//prs:persoon/prs:prices/prs:price/text()",
     'dd_werkzaamheid': "//prs:persoon/prs:jobs/prs:job",
     'titulatuur'     : "//prs:persoon/prs:titulatuur/text()",
-    'dd_cat'         : "//*[local-name()='category' and (@code)]", # Alle category elementen met attribuut 'code=', zonder namespace...(staan in zowel PRS als ORG...)
+    'dd_cat'         : "//*[local-name()='category' and (@code)]", # Alle category elementen met attribuut 'code=' = NARCIS-Classification. (staan in zowel PRS als ORG)
+    'dd_cat_datacite': "//*[local-name()='topicValue' and (@code)]", # Alle topicValue elementen met attribuut 'code=' = NARCIS-Classification. (staan in datacite)
     'dd_thesis'      : "//prj:dissertatie/text()", #Promotie onderzoeken.
     'dd_institute'   : "//org:organisatie/@code",
     'dd_os'          : "//org:organisatie/@code", # Onderzoekschool
@@ -280,17 +281,17 @@ class NormdocToFieldsList(Observable):
             for price in results:
                 if self._verbose: print 'addField:', fieldName.upper(), price.strip().replace('\n', ''), "--->", self._getPriceNameForDrilldown( price.strip().replace('\n', '') )
                 self._fieldslist.append((fieldName, self._getPriceNameForDrilldown( price.strip().replace('\n', '') )))
-        elif fieldName == 'dd_cat':
+        elif fieldName == 'dd_cat' or fieldName == 'dd_cat_datacite': # Looking for NARCIS Classification here!
             for category in results:
                 class6 = self._getCodeFromCategory( category )
                 # Add the catagory itself:
-                if self._verbose: print 'addField:', fieldName.upper(), "-->", class6
-                self._fieldslist.append((fieldName, class6))
+                if self._verbose: print 'addField:', 'dd_cat'.upper(), "-->", class6
+                self._fieldslist.append(('dd_cat', class6))
                 # Add the parent catagories:
                 for index, char in enumerate(class6[::-1]):
                     if char!='0' and index < 4:
-                        if self._verbose: print 'addField:', fieldName.upper(), "-->", class6[:5-index].ljust(6, '0')
-                        self._fieldslist.append((fieldName, class6[:5-index].ljust(6, '0')))
+                        if self._verbose: print 'addField:', 'dd_cat'.upper(), "-->", class6[:5-index].ljust(6, '0')
+                        self._fieldslist.append(('dd_cat', class6[:5-index].ljust(6, '0')))
         elif fieldName == 'titulatuur': #'Prof.dr.ing.' persons should be found searching 'prof' only!?
             subtitles = results[0].split('.')
             if self._verbose: print 'addField:', fieldName.upper(), "-->", results[0]

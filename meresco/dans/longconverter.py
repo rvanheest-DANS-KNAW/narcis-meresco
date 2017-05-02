@@ -58,7 +58,7 @@ LONG_VERSION = '1.0'
 
 dataciteContributorToMarcRelator = {
     'Creator'               : 'cre',
-    'ContactPerson'         : 'sec',
+    'ContactPerson'         : 'mdc',
     'DataCollector'         : 'col',
     'DataCurator'           : 'cur',
     'DataManager'           : 'dtm',
@@ -876,9 +876,15 @@ class NormaliseOaiRecord(UiaConverter):
     def _getDataciteTopic(self, e_subject, topics):  
         for topic in topics:
             e_topic = etree.SubElement(e_subject, "topic")
-            etree.SubElement(e_topic, "topicValue").text = topic.text.strip()
+            e_topicval = etree.SubElement(e_topic, "topicValue")
+            e_topicval.text = topic.text.strip()
+
             if (topic.attrib.get('subjectScheme')):
                 etree.SubElement(e_topic, "subjectScheme").text = topic.attrib.get('subjectScheme')
+            if (topic.attrib.get('valueURI')):
+                if (topic.attrib.get('subjectScheme')) and 'narcis' in topic.attrib.get('subjectScheme').lower(): #Add @code if NARCIS classification:
+                    e_topicval.attrib['code'] = topic.attrib.get('valueURI')[-6:]
+                e_topicval.attrib['valueURI'] = topic.attrib.get('valueURI')
 
     def _getAbstract(self, lxmlNode, e_longmetadata):
         abstracts = [[],[]] #wrapper for max 2 abstract strings -> [('NL', leeg, !='EN') OF DC], ['EN' only].        
