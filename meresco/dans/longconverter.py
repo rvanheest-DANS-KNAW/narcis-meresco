@@ -762,11 +762,19 @@ class NormaliseOaiRecord(UiaConverter):
         else:
             etree.SubElement(e_name_type, 'mcRoleTerm').text = 'ctb' # cbt = contributor
             
-        if len(nameIdentifier) > 0: # Transfer all identifiers found:             
-            e_nid = etree.SubElement(e_name_type, 'nameIdentifier')
-            e_nid.text = nameIdentifier[0]
-            if len(nameIdentifierType) > 0:
-                e_nid.attrib['type'] = nameIdentifierType[0].lower()
+        # if len(nameIdentifier) > 0: # Transfer all identifiers found:
+        #     e_nid = etree.SubElement(e_name_type, 'nameIdentifier')
+        #     e_nid.text = nameIdentifier[0]
+        #     if len(nameIdentifierType) > 0:
+        #         e_nid.attrib['type'] = nameIdentifierType[0].lower()
+
+        if len(nameIdentifier) > 0 and len(nameIdentifierType) > 0: # Transfer identifier found:
+            if nameIdentifierType[0].lower() in supportedNids or 'dai' in nameIdentifierType[0].lower():
+                nameId = NameIdentifierFactory.factory(nameIdentifierType[0], nameIdentifier[0])
+                if nameId.is_valid():
+                    etree.SubElement(e_name_type, "nameIdentifier", type=nameId.get_name()).text = nameIdentifier[0]
+
+
         if len(affiliation) > 0:
             etree.SubElement(e_name_type, 'affiliation').text = affiliation[0]
 
@@ -875,6 +883,7 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getDataciteTopic(self, e_subject, topics):  
         for topic in topics:
+            if not topic.text: continue
             e_topic = etree.SubElement(e_subject, "topic")
             e_topicval = etree.SubElement(e_topic, "topicValue")
             e_topicval.text = topic.text.strip()
@@ -882,7 +891,7 @@ class NormaliseOaiRecord(UiaConverter):
             if (topic.attrib.get('subjectScheme')):
                 etree.SubElement(e_topic, "subjectScheme").text = topic.attrib.get('subjectScheme')
             if (topic.attrib.get('valueURI')):
-                if (topic.attrib.get('subjectScheme')) and 'narcis' in topic.attrib.get('subjectScheme').lower(): #Add @code if NARCIS classification:
+                if (topic.attrib.get('subjectScheme')) and 'narcis' in topic.attrib.get('subjectScheme').lower() and topic.attrib.get('valueURI')[-5:].isdigit(): #Add @code if NARCIS classification AND valid i.e: should end with at least 5 digits
                     e_topicval.attrib['code'] = topic.attrib.get('valueURI')[-6:]
                 e_topicval.attrib['valueURI'] = topic.attrib.get('valueURI')
 

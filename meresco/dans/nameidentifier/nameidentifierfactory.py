@@ -12,7 +12,7 @@ class NameIdentifierFactory(object):
     def factory(type, baseval):
         baseval = baseval.strip().replace('\n', '')
         # return eval(type + "("+baseval+")")
-        if type.strip().lower() == "dai" or type.lower() == "dai-nl": return Dai(baseval)
+        if type.strip().lower() == "dai" or type.lower() == "dai-nl" or 'dai' in type: return Dai(baseval)
         if type.strip().lower() == "orcid": return Orcid(baseval)
         if type.strip().lower() == "isni": return Isni(baseval)
         if type.strip().lower() == "rid": return Rid(baseval)
