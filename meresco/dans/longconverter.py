@@ -730,6 +730,7 @@ class NormaliseOaiRecord(UiaConverter):
                 nameIdentifierType = creator.xpath('self::datacite:creator/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
                 affiliation = creator.xpath('self::datacite:creator/datacite:affiliation/text()', namespaces=namespacesmap)
                 self._nameParts(e_longmetadata, creatorName, givenName, familyName, ['Creator'], nameIdentifier, nameIdentifierType, affiliation)
+                
             contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
             for contributor in contributors:
                 creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
@@ -743,38 +744,33 @@ class NormaliseOaiRecord(UiaConverter):
                 
 
     def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", contributorType="", nameIdentifier="", nameIdentifierType="", affiliation=""):
-        e_name_type = etree.SubElement(e_longmetadata, 'name')
-        etree.SubElement(e_name_type, 'type').text = 'personal'
-        if len(name) > 0:
-            etree.SubElement(e_name_type, 'unstructured').text = name[0]
-        if len(familyName) > 0:
-            etree.SubElement(e_name_type, 'family').text = familyName[0]
-        if len(givenName) > 0:
-            etree.SubElement(e_name_type, 'given').text = givenName[0]
-        if len(contributorType) > 0:
-            marcRelator = dataciteContributorToMarcRelator.get(contributorType[0])
-            if marcRelator and len(marcRelator) > 0:
-                etree.SubElement(e_name_type, 'mcRoleTerm').text = marcRelator
+        # Do not create an name element if no name is available:
+        if len(name) > 0 or len(familyName) > 0 or len(givenName) > 0:
+            e_name_type = etree.SubElement(e_longmetadata, 'name')
+            etree.SubElement(e_name_type, 'type').text = 'personal'
+            if len(name) > 0:
+                etree.SubElement(e_name_type, 'unstructured').text = name[0]
+            if len(familyName) > 0:
+                etree.SubElement(e_name_type, 'family').text = familyName[0]
+            if len(givenName) > 0:
+                etree.SubElement(e_name_type, 'given').text = givenName[0]
+            if len(contributorType) > 0:
+                marcRelator = dataciteContributorToMarcRelator.get(contributorType[0])
+                if marcRelator and len(marcRelator) > 0:
+                    etree.SubElement(e_name_type, 'mcRoleTerm').text = marcRelator
+                else:
+                    etree.SubElement(e_name_type, 'mcRoleTerm').text = 'ctb' # cbt = contributor
             else:
                 etree.SubElement(e_name_type, 'mcRoleTerm').text = 'ctb' # cbt = contributor
-        else:
-            etree.SubElement(e_name_type, 'mcRoleTerm').text = 'ctb' # cbt = contributor
-            
-        # if len(nameIdentifier) > 0: # Transfer all identifiers found:
-        #     e_nid = etree.SubElement(e_name_type, 'nameIdentifier')
-        #     e_nid.text = nameIdentifier[0]
-        #     if len(nameIdentifierType) > 0:
-        #         e_nid.attrib['type'] = nameIdentifierType[0].lower()
 
-        if len(nameIdentifier) > 0 and len(nameIdentifierType) > 0: # Transfer identifier found:
-            if nameIdentifierType[0].lower() in supportedNids or 'dai' in nameIdentifierType[0].lower():
-                nameId = NameIdentifierFactory.factory(nameIdentifierType[0], nameIdentifier[0])
-                if nameId.is_valid():
-                    etree.SubElement(e_name_type, "nameIdentifier", type=nameId.get_name()).text = nameIdentifier[0]
-
-
-        if len(affiliation) > 0:
-            etree.SubElement(e_name_type, 'affiliation').text = affiliation[0]
+            if len(nameIdentifier) > 0 and len(nameIdentifierType) > 0: # Transfer identifier found:
+                if nameIdentifierType[0].lower() in supportedNids or 'dai' in nameIdentifierType[0].lower():
+                    nameId = NameIdentifierFactory.factory(nameIdentifierType[0], nameIdentifier[0])
+                    if nameId.is_valid():
+                        etree.SubElement(e_name_type, "nameIdentifier", type=nameId.get_name()).text = nameIdentifier[0]
+    
+            if len(affiliation) > 0:
+                etree.SubElement(e_name_type, 'affiliation').text = affiliation[0]
 
 
     def _getRightsDescription(self, lxmlNode, e_longmetadata):
