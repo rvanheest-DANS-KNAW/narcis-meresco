@@ -498,12 +498,10 @@ class NormaliseOaiRecord(UiaConverter):
             for pi in pis:
                 api_type = pi.xpath('self::datacite:relatedIdentifier/@relatedIdentifierType', namespaces=namespacesmap)
                 api = pi.xpath('self::datacite:relatedIdentifier/text()', namespaces=namespacesmap)
-                #create new element like MODS: <identifier type="doi">doi:10.1006/jmbi.1995.0238</identifier>
-                e_altPi = etree.SubElement(e_longRoot, "related_identifier")
-                e_altPi.text = api[0]
-                if len(api_type) > 0:
-                    e_altPi.attrib['type'] = api_type[0].lower()
-                    
+                if len(api) > 0 and len(api_type) > 0: #create new element like MODS: <identifier type="doi">doi:10.1006/jmbi.1995.0238</identifier>                    
+                    etree.SubElement(e_longRoot, "related_identifier", type=api_type[0].lower()).text = api[0]
+
+
     def _getObjectFiles(self, lxmlNode, e_longRoot):
         e_objectFiles = None
         if self._metadataformat.isMods(): #FULLMODS only!
