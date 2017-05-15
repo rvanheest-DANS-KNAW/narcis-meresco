@@ -35,7 +35,7 @@ END_SITEMAP = '''</urlset>'''
 END_SITEMAP_IDX = '''</sitemapindex>'''
 START_SITEMAP = '''<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'''
 START_SITEMAP_IDX = '''<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'''
-STATICPAGES = '''<sitemap><loc>http://www.narcis.nl/sitemap_staticpages.xml</loc><lastmod>2015-08-10T14:22:22Z</lastmod></sitemap>'''
+STATICPAGES = '''<sitemap><loc>https://www.narcis.nl/sitemap_staticpages.xml</loc><lastmod>2015-08-10T14:22:22Z</lastmod></sitemap>'''
 
 ms_logger = logging.getLogger('SitemapLogger')
 ms_logger.setLevel(logging.INFO)
@@ -147,11 +147,11 @@ def sm_item2xml(str_items, collectie):
 
     if collectie in MULTI_LANGUAL:
         return '''  <url>
-        <loc>http://www.narcis.nl/%(collection)s/RecordID/%(oai_id)s/Language/nl</loc>
+        <loc>https://www.narcis.nl/%(collection)s/RecordID/%(oai_id)s/Language/nl</loc>
         <lastmod>%(last_mod)s</lastmod>
         <priority>%(prio)s</priority>
     </url>\n    <url>
-        <loc>http://www.narcis.nl/%(collection)s/RecordID/%(oai_id)s/Language/en</loc>
+        <loc>https://www.narcis.nl/%(collection)s/RecordID/%(oai_id)s/Language/en</loc>
         <lastmod>%(last_mod)s</lastmod>
         <priority>%(prio)s</priority>
     </url>\n''' % {
@@ -161,7 +161,7 @@ def sm_item2xml(str_items, collectie):
             'prio': item_list[2]}
     else:
         return '''  <url>
-        <loc>http://www.narcis.nl/%(collection)s/RecordID/%(oai_id)s</loc>
+        <loc>https://www.narcis.nl/%(collection)s/RecordID/%(oai_id)s</loc>
         <lastmod>%(last_mod)s</lastmod>
         <priority>%(prio)s</priority>
     </url>\n''' % {
@@ -173,7 +173,7 @@ def sm_item2xml(str_items, collectie):
 
 def idx_fname2xml(sm_filename):
     return '''<sitemap>
-    <loc>http://www.narcis.nl/%s</loc>
+    <loc>https://www.narcis.nl/%s</loc>
     <lastmod>%s</lastmod>
 </sitemap>\n''' % (sm_filename, datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%SZ'))
 
