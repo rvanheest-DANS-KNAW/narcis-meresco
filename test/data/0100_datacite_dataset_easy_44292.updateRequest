@@ -46,8 +46,17 @@
                 &lt;subject xml:lang=&quot;en&quot;&gt;OPGRAVING&lt;/subject&gt;
                 &lt;subject subjectScheme=&quot;ABR-complex&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Nederzetting, onbepaald (NX)&lt;/subject&gt;
                 &lt;subject subjectScheme=&quot;NARCIS-classification&quot; schemeURI=&quot;http://www.narcis.nl/classification&quot; valueURI=&quot;http://www.narcis.nl/classfication/D37000&quot;&gt;Archaeology&lt;/subject&gt;
-                &lt;subject subjectScheme=&quot;NARCIS-classification&quot; schemeURI=&quot;http://www.narcis.nl/classification&quot; valueURI=&quot;http://www.narcis.nl/classfication/&quot; xml:lang=&quot;&quot;&gt;dummy&lt;/subject&gt;                
-                &lt;subject subjectScheme=&quot;ABR-periode&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Nieuwe tijd: 1500 - heden (NT)&lt;/subject&gt;                
+                &lt;subject subjectScheme=&quot;NARCIS-classification&quot; schemeURI=&quot;http://www.narcis.nl/classification&quot; valueURI=&quot;http://www.narcis.nl/classfication/&quot; xml:lang=&quot;&quot;&gt;dummy&lt;/subject&gt;
+
+
+                &lt;subject subjectScheme=&quot;ABR-complex&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Nederzetting - Stad (NS)&lt;/subject&gt;
+                &lt;subject subjectScheme=&quot;ABR-complex&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Religie - Klooster(complex) (RKLO)&lt;/subject&gt;
+                &lt;subject subjectScheme=&quot;ABR-periode&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Middeleeuwen laat B: 1250 - 1500 nC (LMEB)&lt;/subject&gt;
+                &lt;subject subjectScheme=&quot;ABR-periode&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Nieuwe tijd: 1500 - heden (NT)&lt;/subject&gt;
+
+                &lt;subject subjectScheme=&quot;ABR-periode&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Nieuwe tijd: 1500 - heden (NT)&lt;/subject&gt;
+
+
             &lt;/subjects&gt;
             &lt;contributors&gt;
                 &lt;contributor contributorType=&quot;RightsHolder&quot;&gt;
@@ -74,6 +83,7 @@
                 &lt;date dateType=&quot;Submitted&quot;&gt;2009-9-4&lt;/date&gt;
                 &lt;date dateType=&quot;Created&quot;&gt;2008&lt;/date&gt;
                 &lt;date dateType=&quot;Available&quot;&gt;2009-11-24&lt;/date&gt;
+                &lt;date dateType=&quot;Issued&quot;&gt;2014-05-17&lt;/date&gt;
             &lt;/dates&gt;
             &lt;language&gt;nl&lt;/language&gt;
             &lt;resourceType resourceTypeGeneral=&quot;Dataset&quot;&gt;Dataset en zo&lt;/resourceType&gt;

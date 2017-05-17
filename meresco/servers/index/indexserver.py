@@ -114,6 +114,8 @@ drilldownFields = [
     DrilldownField(untokenizedFieldname('dd_os')),
     DrilldownField(untokenizedFieldname('dd_cre')),
     DrilldownField(untokenizedFieldname('dd_fin')),
+    DrilldownField(untokenizedFieldname('dd_abrprd')),
+    DrilldownField(untokenizedFieldname('dd_abrcmplx')),
     # DrilldownField(untokenizedFieldname('blaat'), hierarchical=False),   
 ]
 

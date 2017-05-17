@@ -69,6 +69,9 @@ UNQUALIFIED_TERMS = ''  #'__all__'
 # RegEx to find dd_price field value's (price's name, without year and prefix 'NWO'):
 priceRegex = compile('NWO\\s{0,1}\\-\\s{0,1}(\\w*?)\\s[1-2]{1}[0-9]{3}.*?')
 
+# ABR-code regex for DateCite@EASY-DANS
+abrRegex = compile(r'^.*\((.*?)\)$')
+
 # MarcrelatorRoleTerms which are considered "authors":
 marcrelatorAuthorRoles = ['aut','dis','pta','rev','ctb','cre','prg','edt']
 
@@ -86,7 +89,6 @@ Coll = enum(PUB='publication', DAT='dataset', ORG='organisation', PRJ='research'
 # print "DATA:", Collection.DAT
 
 
-
 def removeNamespace(tagName):
     return '}' in tagName and tagName.split('}')[1] or tagName
 
@@ -96,37 +98,35 @@ def getNamespace(tagName):
 
 # Een simpele mapping van velden die 'slechts' hernoemt dienen te worden, voordat ze de index in verwdijnen.
 # Voor (samengestelde) velden die nog een (inhoudelijke) bewerking nodig hebben moet Xpath gebruikt worden.
-# TODO: alle index field names met ergens 'identifier' zijn hernoemt naar 'id'...
 fieldnamesMapping = {
-    'knaw_long.metadata.dateIssued.parsed'      : 'dateissued',
-    'knaw_long.metadata.genre'                  : 'genre',
-    'knaw_long.metadata.publisher'              : 'publisher',
-    'knaw_long.metadata.language'               : 'language',
-    'knaw_long.metadata.coverage'               : 'coverage',
-    'knaw_long.metadata.format'                 : 'format',
-    'knaw_long.metadata.relatedItem.placeTerm'       : UNQUALIFIED_TERMS, # __all__
-    'knaw_long.metadata.relatedItem.titleInfo.title' : UNQUALIFIED_TERMS, # __all__
-    'knaw_long.metadata.relatedItem.publisher'       : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.genre'                               : 'genre',
+    'knaw_long.metadata.publisher'                           : 'publisher',
+    'knaw_long.metadata.language'                            : 'language',
+    'knaw_long.metadata.coverage'                            : 'coverage',
+    'knaw_long.metadata.format'                              : 'format',
+    'knaw_long.metadata.relatedItem.placeTerm'               : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.relatedItem.titleInfo.title'         : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.relatedItem.publisher'               : UNQUALIFIED_TERMS, # __all__
     'knaw_long.metadata.grantAgreements.grantAgreement.code' : 'fundingid',
-    'knaw_long.accessRights'                    : 'access',
-    'knaw_long.persistentIdentifier'            : 'persistentid',
-    'knaw_long.humanStartPage'            : 'humanstartpage',
-    'organisatie.acroniem'             : 'acroniem',
-    'organisatie.taak_en'              : 'abstract_en',
-    'organisatie.taak_nl'              : 'abstract',
-    'organisatie.categories.category.term' : 'category_term',
-    'activiteit.summary_nl'            : 'abstract',
-    'activiteit.summary_en'            : 'abstract_en',
-    'activiteit.title_en'              : 'title_en',
-    'activiteit.title_nl'              : 'title',
-    'activiteit.status'                : 'status',
-    'persoon.titulatuur_achter'        : 'titulatuur_achter',
-    'persoon.categories.category.term' : 'category_term',
+    'knaw_long.accessRights'                                 : 'access',
+    'knaw_long.persistentIdentifier'                         : 'persistentid',
+    'knaw_long.humanStartPage'                               : 'humanstartpage',
+    'organisatie.acroniem'                                   : 'acroniem',
+    'organisatie.taak_en'                                    : 'abstract_en',
+    'organisatie.taak_nl'                                    : 'abstract',
+    'organisatie.categories.category.term'                   : 'category_term',
+    'activiteit.summary_nl'                                  : 'abstract',
+    'activiteit.summary_en'                                  : 'abstract_en',
+    'activiteit.title_en'                                    : 'title_en',
+    'activiteit.title_nl'                                    : 'title',
+    'activiteit.status'                                      : 'status',
+    'persoon.titulatuur_achter'                              : 'titulatuur_achter',
+    'persoon.categories.category.term'                       : 'category_term',
     }
 
 MetaFieldNamesToXpath = {
-    'oai_id'        : '/meta:meta/meta:record/meta:id/text()',
-    'dare_id'       : '/meta:meta/meta:record/meta:id/text()',
+    'oai_id'                : '/meta:meta/meta:record/meta:id/text()',
+    'dare_id'               : '/meta:meta/meta:record/meta:id/text()',
     'meta_repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
     'meta_repositorygroupid': '/meta:meta/meta:repository/meta:repositoryGroupId/text()',
     'meta_collection'       : '/meta:meta/meta:repository/meta:collection/text()',
@@ -156,6 +156,8 @@ fieldNamesXpathMap = {
     'dd_fin'         : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
     'publicationid'  : "//long:publication_identifier/text()", # TODO: Bestaat dit veld in LONG??? MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
     'pidref'         : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
+    'dd_abrprd'      : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", # 
+    'dd_abrcmplx'    : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", # 
     }
 
 
@@ -175,7 +177,6 @@ class NormdocToFieldsList(Observable):
         self._fieldslist = [] # reset list
         # hier komt een compleet meresco:document binnen als LXMLnode:
         # uploadid = kwargs['identifier']
-        # print '###', kwargs['identifier'], '###'
 
         # Get meta, header and metadata part(='long') from the normdoc:
         e_metapart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="meta"]/text()', namespaces=namespacesmap)[0])
@@ -183,11 +184,8 @@ class NormdocToFieldsList(Observable):
         if not wcp_collection:
             raise ValidateException("Collection is missing from metapart! Please add collection in WCP.")
         self._wcp_collection = wcp_collection[0]
-         
-        # print "lxml metapart:", tostring(e_metapart)
 
         e_recordpart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="record"]/text()', namespaces=namespacesmap)[0])
-        # print "lxml recordpart:", tostring(e_recordpart)
 
         # Add known metapart fields for all records: 
         for field, xpad in MetaFieldNamesToXpath.iteritems():
@@ -199,14 +197,14 @@ class NormdocToFieldsList(Observable):
             record = e_recordpart.xpath('//prs:persoon | //prj:activiteit | //org:organisatie', namespaces=namespacesmap)
         else:
             record = e_recordpart.xpath('//norm:normalized/long:knaw_long', namespaces=namespacesmap)
-        self._fillFieldslist(record[0], '')
 
+        self._fillFieldslist(record[0], '') # Add fiels by path in xml.
         self._addAuthorsAndNamesFields(record[0])
         
-        for field, xpad in fieldNamesXpathMap.iteritems():
+        for field, xpad in fieldNamesXpathMap.iteritems(): # Add fields by xPath
             self._findAndAddToFieldslist(record[0], field, xpad)
 
-        # Ready filling, now call add method:
+        # Ready filling fieldslist, now call add method:
         yield self.all.add(fieldslist=self._fieldslist, **kwargs)
 
 
@@ -227,8 +225,6 @@ class NormdocToFieldsList(Observable):
                 value = NormaliseOaiRecord.ACCESS_LEVELS[2]
             self._fieldslist.append((fieldnamesMapping.get(fieldname), value.strip().replace('\n', '')))
             if self._verbose: print 'addField:', fieldnamesMapping.get(fieldname).upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
-            #Old dare-id for resolving old record pages:
-            # if fieldname == 'header.identifier': self.do.addField(name='dare-identifier', value=value.strip().replace('\n', '').replace('.', '').replace(':', '').replace('/', '').replace('&', ''))
         elif value and value.strip() and fieldname=='persoon.fullName': # uit NOD_PRS
             self._fieldslist.append(('title', value.strip().replace('\n', '')))
             self._fieldslist.append(('title_en', value.strip().replace('\n', '')))
@@ -258,25 +254,22 @@ class NormdocToFieldsList(Observable):
     def _findAndAddToFieldslist(self, lxmlNode, fieldName, xpath):
         # Adds fieldnames and values to the fieldslist list.
         results = lxmlNode.xpath(xpath, namespaces=namespacesmap)
-        if not results:
+        if not results and not fieldName == 'dd_year': # dd_year is a special case: it depends on 2 xpaths, not just this one result.
             return
-        # elif fieldName == 'nids':
-        #     # Unfortunately tokenizing DAIs goes wrong: 'nl/071791013' will be added to the index instead of '071791013', so searching on postfix ('071791013') is not possible.
-        #     # Problem seems to be some 'intelligent' escaping (StandardTokenizer), since a dai like 'info:eu-repo/dai/nl/lettershereinsteadofnumbers' is tokenized correctly / allows for searching on postfix ('lettershereinsteadofnumbers')??
-        #     # Escaping '/' with '\' doesn't do the job: one cannot search for a 'complete' DAI anymore, but postfix search OK...
-        #     # So we add the postfix separately: addField:'info:eu-repo/dai/nl/15081968' and addField:'15081968', so we can find them either way.
-        #     for dai in results:
-        #         nameId = Dai(dai.replace('\n', ''))
-        #         if nameId.is_valid():
-        #             if self._verbose: print 'addField:', fieldName.upper(), "-->", nameId.get_id()
-        #             self._fieldslist.append((fieldName, nameId.get_id()))
-        #             for variant in nameId.getTypedVariants():
-        #                 self._fieldslist.append(( '', variant ))
-        #                 if self._verbose: print 'addField:',  "__all__ -->", variant
         elif fieldName == 'dd_year':
-            if self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') ) is not None: # 201 returns None, however it is a valid year, but not wanted for drilldown.
-                if self._verbose: print 'addField:', fieldName.upper(), results[0].strip().replace('\n', ''), "--->", self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )
-                self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( results[0].strip().replace('\n', '') )))
+            dateIssued = None # we do not know yet.
+            # Year facet: Results from knaw_long/dateIssued or knaw_long/dateAvailable, dateAvailable takes precedence over dateIssued (DataCite)
+            if len(results) > 0: dateIssued = results[0].strip().replace('\n', '')
+            dateAvailable = lxmlNode.xpath("//long:metadata/long:dateAvailable/long:parsed/text()", namespaces=namespacesmap)
+            if len(dateAvailable) > 0:
+                dateIssued = dateAvailable[0].strip().replace('\n', '')
+            if self._getYearGroupForDrilldown( dateIssued ) is not None: # 201 returns None, however it is a valid year, but not wanted for drilldown.
+                if self._verbose: print 'addField:', fieldName.upper(), dateIssued, "--->", self._getYearGroupForDrilldown( dateIssued )
+                self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( dateIssued )))
+            # Also add value to sortfield "dateissued" if a value available:
+            if dateIssued:
+                if self._verbose: print 'addField:', "DATEISSUED", "-->", dateIssued
+                self._fieldslist.append(("dateissued", dateIssued))
         elif fieldName == 'dd_prices':
             for price in results:
                 if self._verbose: print 'addField:', fieldName.upper(), price.strip().replace('\n', ''), "--->", self._getPriceNameForDrilldown( price.strip().replace('\n', '') )
@@ -315,11 +308,6 @@ class NormdocToFieldsList(Observable):
         elif fieldName == 'dd_thesis' and results[0].lower() in ['true', '1']:
             if self._verbose: print 'addField:', fieldName.upper(), "-->", results[0].lower()
             self._fieldslist.append((fieldName, 'true'))
-            # Replaced to generic elif@bottom ;-)
-            # elif fieldName == 'publication_identifier': #results are all <publication_identifier> tags from mods root, as well as mods/related_item.
-            #     for pid in results:
-            #         if self._verbose: print 'addField:', fieldName.upper(), "-->", pid
-            #         self.do.addField(name=fieldName, value=pid)
         elif fieldName == 'dd_institute': #Harrema code from an organisation. =Bovenliggend instituut: exactly 1
             dd_inst = self._getInstForDD(results[0])
             if (dd_inst):
@@ -342,6 +330,15 @@ class NormdocToFieldsList(Observable):
             if (dd_inst):
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
                 self._fieldslist.append((fieldName, dd_inst))
+        elif fieldName in ('dd_abrprd', 'dd_abrcmplx'):
+            for abr_label in results:
+                m = abrRegex.match(abr_label)
+                if m:
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", m.group(1).upper()
+                    self._fieldslist.append((fieldName, m.group(1).upper()))
+
+            # if not self._verbose: print 'addField:', fieldName.upper(), "-->", results[0]
+            # self._fieldslist.append((fieldName, results[0]))
         elif fieldName in ('coverage', 'format', 'publication_identifier'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result

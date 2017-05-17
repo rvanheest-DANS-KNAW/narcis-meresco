@@ -45,9 +45,12 @@ class ShortConverter(Converter):
 
     def _convert(self, lxmlNode):
 
-        e_root = deepcopy(lxmlNode).getroot() # We need a deepcopy; otherwise we'll modify the lxmlnode by reference!!
-        # assert knawlong format:
-        if namespacesmap['long'] in e_root.nsmap.values(): # Check if long is available.
+        e_root = deepcopy(lxmlNode).getroot() # We need a deepcopy; otherwise we'll modify the lxmlnode by reference.
+        if namespacesmap['long'] in e_root.nsmap.values(): # Assert knaw_long is available.
+            hasDateAvailable = False
+            dateAvailable = lxmlNode.xpath("/long:knaw_long/long:metadata/long:dateAvailable", namespaces=namespacesmap)
+            if len(dateAvailable) > 0:
+                hasDateAvailable = True
             for child in e_root.iterchildren():
                 if child.tag != namespacesmap.curieToTag('long:accessRights') \
                     and child.tag != namespacesmap.curieToTag('long:metadata'):
@@ -59,16 +62,19 @@ class ShortConverter(Converter):
                         and metadatakind.tag != namespacesmap.curieToTag('long:genre') \
                         and metadatakind.tag != namespacesmap.curieToTag('long:abstract') \
                         and metadatakind.tag != namespacesmap.curieToTag('long:dateIssued') \
+                        and metadatakind.tag != namespacesmap.curieToTag('long:dateAvailable') \
                         and metadatakind.tag != namespacesmap.curieToTag('long:hostCitation') \
                         and metadatakind.tag != namespacesmap.curieToTag('long:status') \
                         and metadatakind.tag != namespacesmap.curieToTag('long:penvoerder') \
                         and metadatakind.tag != namespacesmap.curieToTag('long:locatie'):
                             child.remove(metadatakind)
+                        if metadatakind.tag == namespacesmap.curieToTag('long:dateIssued') and hasDateAvailable == True:
+                            child.remove(metadatakind)
                         if metadatakind.tag == namespacesmap.curieToTag('long:abstract'):
                             if metadatakind.text != None: metadatakind.text = self._smarttruncate(metadatakind.text) # , ' (...)' [:self._truncate_chars]
             try:
                 returnxml = etree.tostring(e_root, pretty_print=True, encoding='utf-8').replace(namespacesmap['long'], namespacesmap['short'])
-                returnxml = returnxml.replace('<knaw_long ', '<knaw_short ').replace('</knaw_long>', '</knaw_short>')
+                returnxml = returnxml.replace('<knaw_long ', '<knaw_short ').replace('</knaw_long>', '</knaw_short>').replace('<dateAvailable>', '<dateIssued>').replace('</dateAvailable>', '</dateIssued>')
                 parser = etree.XMLParser(remove_blank_text=True)
 #               print etree.tostring(parse(StringIO(returnxml), parser), pretty_print=True)
                 return parse(StringIO(returnxml), parser)

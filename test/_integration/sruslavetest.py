@@ -130,7 +130,7 @@ class SruSlaveTest(IntegrationTestCase):
 
     def testSruQueryWithMultipleDrilldown(self):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
-        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0"})
+        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0,dd_abrprd:0,dd_abrcmplx:0"})
         # response = self.doSruQuery(**{"query": 'untokenized.meta_collection exact "publication"', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0"})
         
         # print "DD body:", etree.tostring(response)
@@ -141,6 +141,10 @@ class SruSlaveTest(IntegrationTestCase):
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1')], drilldown)
+
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_abrcmplx"]/drilldown:item')
+        drilldown = [(i.text, i.attrib['count']) for i in ddItems]
+        self.assertEqual([('NX', '1'), ('NS', '1'), ('RKLO', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):
@@ -154,7 +158,7 @@ class SruSlaveTest(IntegrationTestCase):
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(11, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual(['1993-01-01', '2004-06-30', '2014', '2016', '2016-01-31', '2016-05-05'], xpath(body, "//item/pubDate/text()"))
+        self.assertEqual(['1993-01-01', '2004-06-30', '2009-11-24', '2014', '2016', '2016-01-31', '2016-05-05'], xpath(body, "//item/pubDate/text()"))
         self.assertEqual('MyWorkerLabel', xpathFirst(body, '//channel/title/text()'))
 
 

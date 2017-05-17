@@ -344,7 +344,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('5.04757305', testNamespaces.xpathFirst(response, '//long:metadata/long:geoLocations/long:geoLocation[3]/long:geoLocationPoint/long:pointLatitude/text()'))
         self.assertEqual('51.69204992', testNamespaces.xpathFirst(response, '//long:metadata/long:geoLocations/long:geoLocation[4]/long:geoLocationBox/long:northBoundLatitude/text()'))
         self.assertEqual(5, len(testNamespaces.xpath(response, '//long:metadata/long:name')))
-        self.assertEqual(4, len(testNamespaces.xpath(response, '//long:metadata/long:subject[not(@xml:lang)]/long:topic')))
+        self.assertEqual(8, len(testNamespaces.xpath(response, '//long:metadata/long:subject[not(@xml:lang)]/long:topic')))
         self.assertEqual(2, len(testNamespaces.xpath(response, '//long:metadata/long:abstract')))
         self.assertEqual(4, len(testNamespaces.xpath(response, '//long:metadata/long:geoLocations/long:geoLocation')))
 
