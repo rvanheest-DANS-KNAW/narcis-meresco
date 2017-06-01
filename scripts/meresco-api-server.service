@@ -1,0 +1,17 @@
+[Unit]
+Description=Meresco API Server
+Requires=meresco-lucene-server.service
+Wants=meresco-gateway-server.service
+After=meresco-lucene-server.service meresco-gateway-server.service
+
+
+[Service]
+User=meresco
+ExecStart=/home/meresco/meresco/narcisindex/bin/start-api --port=8004 --lucenePort=8001 --gatewayPort=8000 --stateDir=/data/meresco/api
+Restart=on-failure
+
+
+[Install]
+WantedBy=multi-user.target
+
+

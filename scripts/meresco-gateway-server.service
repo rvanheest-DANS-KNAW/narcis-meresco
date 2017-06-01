@@ -1,0 +1,11 @@
+[Unit]
+Description=Meresco Gateway Server
+ConditionHost=!s1narcis01.dans.knaw.nl
+
+[Service]
+User=meresco
+ExecStart=/home/meresco/meresco/narcisindex/bin/start-gateway --port=8000 --stateDir=/data/meresco/gateway
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

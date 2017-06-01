@@ -1,0 +1,10 @@
+[Unit]
+Description=Meresco Harvester Internal Server
+
+[Service]
+User=harvester
+ExecStart=/usr/bin/meresco-harvester-internal-server --port=8888 --dataPath=/var/lib/python-meresco-harvester/data --logPath=/var/lib/python-meresco-harvester/log --statePath=/var/lib/python-meresco-harvester/state --harvesterStatusUrl=https://tmeresco21.dans.knaw.nl/page/showHarvesterStatus/show
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=Meresco Indexing Server
+ConditionHost=!s1narcis01.dans.knaw.nl
+Requires=meresco-lucene-server.service
+Wants=meresco-gateway-server.service
+After=meresco-lucene-server.service meresco-gateway-server.service
+
+
+[Service]
+User=meresco
+ExecStart=/home/meresco/meresco/narcisindex/bin/start-index --port=8002 --luceneserverPort=8001 --gatewayPort=8000 --stateDir=/data/meresco/index
+Restart=on-failure
+
+
+[Install]
+WantedBy=multi-user.target
