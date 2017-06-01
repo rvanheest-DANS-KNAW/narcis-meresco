@@ -1,7 +1,7 @@
 [Unit]
 Description=Meresco API Server
-Requires=meresco-lucene-server.service meresco-apislave-server.service
-Wants=meresco-gateway-server.service
+Requires=meresco-lucene-server.service
+Wants=meresco-gateway-server.service meresco-apislave-server.service
 After=meresco-lucene-server.service meresco-gateway-server.service
 
 
