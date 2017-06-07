@@ -1,0 +1,14 @@
+[Unit]
+Description=Meresco Harvester NARCIS domain
+ConditionHost=!s1narcis01.dans.knaw.nl
+Wants=meresco-gateway-server.service
+After=meresco-gateway-server.service
+
+[Service]
+User=harvester
+ExecStart=/usr/bin/meresco-harvester --set-process-timeout=240 --concurrency=3 --domain=narcis --runOnce
+Restart=always
+RestartSec=900
+
+[Install]
+WantedBy=multi-user.target
