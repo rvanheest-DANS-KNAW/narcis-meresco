@@ -8,7 +8,7 @@ After=meresco-gateway-server.service
 User=harvester
 ExecStart=/usr/bin/meresco-harvester --set-process-timeout=240 --concurrency=3 --domain=narcis --runOnce
 Restart=always
-RestartSec=900
+RestartSec=300
 
 [Install]
 WantedBy=multi-user.target
