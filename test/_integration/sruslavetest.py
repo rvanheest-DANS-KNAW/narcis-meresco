@@ -129,11 +129,10 @@ class SruSlaveTest(IntegrationTestCase):
         # self.assertEqual([('Search', '1'), ('Programming', '1')], drilldown)
 
     def testSruQueryWithMultipleDrilldown(self):
-        # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
-        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0,dd_abrprd:0,dd_abrcmplx:0"})
-        # response = self.doSruQuery(**{"query": 'untokenized.meta_collection exact "publication"', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0"})
         
+        response = self.doSruQuery(**{"query": '*', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0,dd_abrprd:0,dd_abrcmplx:0"})
         # print "DD body:", etree.tostring(response)
+        
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         self.assertEqual([('openAccess', '4'), ('closedAccess', '3'), ('embargoedAccess', '1')], drilldown)
@@ -144,7 +143,11 @@ class SruSlaveTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_abrcmplx"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('NX', '1'), ('NS', '1'), ('RKLO', '1')], drilldown)
+        self.assertEqual([('NX', '1'), ('N', '1'), ('NS', '1'), ('RKLO', '1'), ('R', '1')], drilldown)
+
+        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_abrprd"]/drilldown:item')
+        drilldown = [(i.text, i.attrib['count']) for i in ddItems]
+        self.assertEqual([('LMEB', '1'), ('LME', '1'), ('XME', '1'), ('NT', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):

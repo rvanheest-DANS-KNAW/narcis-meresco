@@ -330,15 +330,24 @@ class NormdocToFieldsList(Observable):
             if (dd_inst):
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", dd_inst
                 self._fieldslist.append((fieldName, dd_inst))
-        elif fieldName in ('dd_abrprd', 'dd_abrcmplx'):
+        elif fieldName == 'dd_abrprd': # Looking for ABR-periods hierarchy
             for abr_label in results:
                 m = abrRegex.match(abr_label)
                 if m:
-                    if self._verbose: print 'addField:', fieldName.upper(), "-->", m.group(1).upper()
-                    self._fieldslist.append((fieldName, m.group(1).upper()))
-
-            # if not self._verbose: print 'addField:', fieldName.upper(), "-->", results[0]
-            # self._fieldslist.append((fieldName, results[0]))
+                    for periode in self._getABRperiodeBranch(m.group(1).upper()):
+                        if self._verbose: print 'addField:', fieldName.upper(), "-->", periode
+                        self._fieldslist.append((fieldName, periode))
+        elif fieldName == 'dd_abrcmplx': # Looking for ABR-complex types hierarchy
+            # for category in results:
+            for abr_label in results:
+                m = abrRegex.match(abr_label)
+                if m:
+                    abr_code = m.group(1).upper()
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code
+                    self._fieldslist.append((fieldName, abr_code))
+                    if abr_code[:1] in ('E','G','I','N','R','V'): # Also add the parent:
+                        if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code[:1]
+                        self._fieldslist.append((fieldName, abr_code[:1]))
         elif fieldName in ('coverage', 'format', 'publication_identifier'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
@@ -358,6 +367,25 @@ class NormdocToFieldsList(Observable):
             else:
                 return str(YYYY)[:3]+'0' # per decennium category (between 1900 and the seventies)
         return
+
+    '''retourneerd een lijst met alle classificaties tot de bovenste'''
+    def _getABRperiodeBranch(self, code):
+        branch = []
+        if code.startswith(('LME','VME','ROM','PALEO','NT','NEO','MESO','IJZ','BRONS')):
+            if code.endswith(('A','B','C','D')):
+                branch.append(code)
+                code= code[:-1]
+            if code.endswith(('L','M','V','E')):
+                branch.append(code)
+                code= code[:-1]
+            if code in ('LM','VM'):
+                branch.append('XME')
+            else:
+                branch.append(code)
+        elif code in ('XXX','XME'):
+            branch.append(code)
+        return branch
+
 
     # returns the prices/grants category, used for drilldown: veni, vidi, vici, etc.
     def _getPriceNameForDrilldown(self, price_string):
