@@ -375,7 +375,7 @@ class NormdocToFieldsList(Observable):
             if code.endswith(('A','B','C','D')):
                 branch.append(code)
                 code= code[:-1]
-            if code.endswith(('L','M','V','E')):
+            if code.endswith(('L','M','V','E')) and not code == "ROM":
                 branch.append(code)
                 code= code[:-1]
             if code in ('LM','VM'):
