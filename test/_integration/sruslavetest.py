@@ -93,6 +93,9 @@ class SruSlaveTest(IntegrationTestCase):
         self.assertSruQuery(1, '"1937-1632-REL"')
         self.assertSruQuery(3, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/282797"')
         self.assertSruQuery(1, '"Veenendaal"')
+        self.assertSruQuery(1, '"OpenAIRE"')
+        self.assertSruQuery(1, '"Nederzetting"')
+
 
 
     def testPublIdentifier(self):

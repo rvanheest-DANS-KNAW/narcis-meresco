@@ -99,29 +99,37 @@ def getNamespace(tagName):
 # Een simpele mapping van velden die 'slechts' hernoemt dienen te worden, voordat ze de index in verwdijnen.
 # Voor (samengestelde) velden die nog een (inhoudelijke) bewerking nodig hebben moet Xpath gebruikt worden.
 fieldnamesMapping = {
-    'knaw_long.metadata.genre'                               : 'genre',
-    'knaw_long.metadata.publisher'                           : 'publisher',
-    'knaw_long.metadata.language'                            : 'language',
-    'knaw_long.metadata.coverage'                            : 'coverage',
-    'knaw_long.metadata.format'                              : 'format',
-    'knaw_long.metadata.relatedItem.placeTerm'               : UNQUALIFIED_TERMS, # __all__
-    'knaw_long.metadata.relatedItem.titleInfo.title'         : UNQUALIFIED_TERMS, # __all__
-    'knaw_long.metadata.relatedItem.publisher'               : UNQUALIFIED_TERMS, # __all__
-    'knaw_long.metadata.grantAgreements.grantAgreement.code' : 'fundingid',
-    'knaw_long.accessRights'                                 : 'access',
-    'knaw_long.persistentIdentifier'                         : 'persistentid',
-    'knaw_long.humanStartPage'                               : 'humanstartpage',
-    'organisatie.acroniem'                                   : 'acroniem',
-    'organisatie.taak_en'                                    : 'abstract_en',
-    'organisatie.taak_nl'                                    : 'abstract',
-    'organisatie.categories.category.term'                   : 'category_term',
-    'activiteit.summary_nl'                                  : 'abstract',
-    'activiteit.summary_en'                                  : 'abstract_en',
-    'activiteit.title_en'                                    : 'title_en',
-    'activiteit.title_nl'                                    : 'title',
-    'activiteit.status'                                      : 'status',
-    'persoon.titulatuur_achter'                              : 'titulatuur_achter',
-    'persoon.categories.category.term'                       : 'category_term',
+    'knaw_long.metadata.genre'                                          : 'genre',
+    'knaw_long.metadata.publisher'                                      : 'publisher',
+    'knaw_long.metadata.language'                                       : 'language',
+    'knaw_long.metadata.coverage'                                       : 'coverage',
+    'knaw_long.metadata.format'                                         : 'format',
+    'knaw_long.metadata.relatedItem.placeTerm'                          : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.relatedItem.titleInfo.title'                    : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.relatedItem.publisher'                          : UNQUALIFIED_TERMS, # __all__
+    'knaw_long.metadata.grantAgreements.grantAgreement.code'            : 'fundingid',
+    'knaw_long.metadata.grantAgreements.grantAgreement.title'           : UNQUALIFIED_TERMS,
+    'knaw_long.metadata.grantAgreements.grantAgreement.funder'          : UNQUALIFIED_TERMS,
+    'knaw_long.metadata.grantAgreements.grantAgreement.description'     : UNQUALIFIED_TERMS,
+    'knaw_long.metadata.geoLocations.geoLocation.geoLocationPlace'      : UNQUALIFIED_TERMS,
+    'knaw_long.metadata.typeOfResource'                                 : UNQUALIFIED_TERMS,
+    'knaw_long.metadata.rightsDescription'                              : UNQUALIFIED_TERMS,
+    'knaw_long.accessRights'                                            : 'access',
+    'knaw_long.persistentIdentifier'                                    : 'persistentid',
+    'knaw_long.humanStartPage'                                          : 'humanstartpage',
+    'knaw_long.metadata.grantAgreements.grantAgreement.funderIdentifier': 'relatedid',
+    'knaw_long.metadata.related_identifier'                             : 'relatedid',        
+    'organisatie.acroniem'                                              : 'acroniem',
+    'organisatie.taak_en'                                               : 'abstract_en',
+    'organisatie.taak_nl'                                               : 'abstract',
+    'organisatie.categories.category.term'                              : 'category_term',
+    'activiteit.summary_nl'                                             : 'abstract',
+    'activiteit.summary_en'                                             : 'abstract_en',
+    'activiteit.title_en'                                               : 'title_en',
+    'activiteit.title_nl'                                               : 'title',
+    'activiteit.status'                                                 : 'status',
+    'persoon.titulatuur_achter'                                         : 'titulatuur_achter',
+    'persoon.categories.category.term'                                  : 'category_term',
     }
 
 MetaFieldNamesToXpath = {
@@ -154,12 +162,11 @@ fieldNamesXpathMap = {
     'dd_os'          : "//org:organisatie/@code", # Onderzoekschool
     'dd_penv'        : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
     'dd_fin'         : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
-    'publicationid'  : "//long:publication_identifier/text()", # TODO: Bestaat dit veld in LONG??? MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
+    'publicationid'  : "//long:publication_identifier/text()", # MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
     'pidref'         : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
     'dd_abrprd'      : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", # 
     'dd_abrcmplx'    : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", # 
     }
-
 
 
 
@@ -348,10 +355,10 @@ class NormdocToFieldsList(Observable):
                     if abr_code[:1] in ('E','G','I','N','R','V'): # Also add the parent:
                         if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code[:1]
                         self._fieldslist.append((fieldName, abr_code[:1]))
-        elif fieldName in ('coverage', 'format', 'publication_identifier'):
+        elif fieldName in ('coverage', 'format', 'publicationid'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
-                self._fieldslist.append((fieldName, result))               
+                self._fieldslist.append((fieldName, result))
         else:  # All other remaining results are joined with a space:
             self._fieldslist.append((fieldName, ' '.join(results).replace('\n', ''))) 
             if self._verbose: print 'adddField:', fieldName.upper(), "-->", ' '.join(results).replace('\n', '')[:self._truncate_chars]
@@ -393,8 +400,6 @@ class NormdocToFieldsList(Observable):
             m = priceRegex.match(price_string.strip())
             if m:
                 return m.group(1).lower().strip()
-        #for pricename in ['veni','vidi','vici','spinoza']:
-        #    if price_string and price_string.strip() and price_string.lower().find(pricename) >= 0: return pricename
         return
 
     # returns the category code for drilldown use. 
@@ -482,7 +487,6 @@ class NormdocToFieldsList(Observable):
                             if roleterm[0].lower() == 'cre' and (family or given): #We're NOT interested in unstractured/displayForm labels here...
                                 ds_creators.append(', '.join(fg_naam))
                 if len(nids) > 0:
-                    # print "Aantal name nameIdentifiers (pub):", len(nids)
                     for nid in nids:
                         nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
                         if nameId.is_valid():
@@ -555,10 +559,10 @@ class NormdocToFieldsList(Observable):
 
         # Add fields to the fieldslist:
         for author in authors:
-            if self._verbose: print 'addField:', 'authors'.upper(), "-->", author.replace('\n', '')[:MAX_CHAR]
+            if self._verbose: print 'addField:', 'authors'.upper(), "-->", author.replace('\n', '')
             self._fieldslist.append(('authors', author.replace('\n', '')))
         for name in names:
-            if self._verbose: print 'addField:', 'names'.upper(), "-->", name.replace('\n', '')[:MAX_CHAR]
+            if self._verbose: print 'addField:', 'names'.upper(), "-->", name.replace('\n', '')
             self._fieldslist.append(('names', name.replace('\n', '')))
 
 # Incoming:

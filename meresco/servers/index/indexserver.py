@@ -122,7 +122,7 @@ drilldownFields = [
 # Add any non-drilldown untokenized fields:
 untokenizedFieldnames = [f.name for f in drilldownFields] + [
     untokenizedFieldname('oai_id'), # Was: 'oai_identifier'
-    untokenizedFieldname('meta_repositoryid'), # Was:
+    untokenizedFieldname('meta_repositoryid'),
     untokenizedFieldname('fundingid'), # Was funding_id
     untokenizedFieldname('dare_id'), #Was: dare_identifier
     untokenizedFieldname('publicationid'), # Was: publication_identifier
@@ -136,6 +136,7 @@ untokenizedFieldnames = [f.name for f in drilldownFields] + [
     untokenizedFieldname('sort_title'),
     untokenizedFieldname('pidref'), # new in m4.
     untokenizedFieldname('humanstartpage'), # new in m4.
+    untokenizedFieldname('relatedid'), # M4: All identifiers related somehow to this record
 ]
 
 DEFAULT_CORE = 'narcis'
