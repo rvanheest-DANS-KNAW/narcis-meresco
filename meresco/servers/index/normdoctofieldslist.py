@@ -142,30 +142,33 @@ MetaFieldNamesToXpath = {
 
 
 fieldNamesXpathMap = {
-    'subject'        : "//*[local-name()='topicValue' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from Long:
-    'leeropdracht'   : "//*[local-name()='leeropdracht_en' or local-name()='leeropdracht_nl']/text()", # Leeropdracht from personrecord
-    'nids'           : "//long:relatedItem//long:nameIdentifier/text()", # All nid's: also from relatedItems
-    'abstract'       : "//long:metadata/long:abstract[not (@xml:lang)]/text()", # 'abstract' field from KNAWLONG.
-    'abstract_en'    : "//long:metadata/long:abstract[@xml:lang='en']/text()", # 'abstract_en' field from KNAWLONG.
-    'title'          : "//long:metadata/long:titleInfo[not (@xml:lang)]/long:*/text()", #'title'+'subtitle' field from KNAWLONG.
-    'title_en'       : "//long:metadata/long:titleInfo[@xml:lang='en']/long:*/text()", #'title_en'+'subtitle field from KNAWLONG.
-    'dd_year'        : "//long:metadata/long:dateIssued/long:parsed/text()", # Parsed (normalized) datefield from KNAWLONG.
-    'coverage'       : "//long:metadata/long:coverage/text()", # 'coverage' field from KNAWLONG.
-    'format'         : "//long:metadata/long:format/text()", # 'format' field from KNAWLONG.
-    'dd_prices'      : "//prs:persoon/prs:prices/prs:price/text()",
-    'dd_werkzaamheid': "//prs:persoon/prs:jobs/prs:job",
-    'titulatuur'     : "//prs:persoon/prs:titulatuur/text()",
-    'dd_cat'         : "//*[local-name()='category' and (@code)]", # Alle category elementen met attribuut 'code=' = NARCIS-Classification. (staan in zowel PRS als ORG)
-    'dd_cat_datacite': "//*[local-name()='topicValue' and (@code)]", # Alle topicValue elementen met attribuut 'code=' = NARCIS-Classification. (staan in datacite)
-    'dd_thesis'      : "//prj:dissertatie/text()", #Promotie onderzoeken.
-    'dd_institute'   : "//org:organisatie/@code",
-    'dd_os'          : "//org:organisatie/@code", # Onderzoekschool
-    'dd_penv'        : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
-    'dd_fin'         : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
-    'publicationid'  : "//long:publication_identifier/text()", # MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
-    'pidref'         : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
-    'dd_abrprd'      : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", # 
-    'dd_abrcmplx'    : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", # 
+    'subject'           : "//*[local-name()='topicValue' or local-name()='expertise_nl' or local-name()='expertise_en']/text()", # Expertise from personrecord or topics from Long:
+    'leeropdracht'      : "//*[local-name()='leeropdracht_en' or local-name()='leeropdracht_nl']/text()", # Leeropdracht from personrecord
+    'nids'              : "//long:relatedItem//long:nameIdentifier/text()", # All nid's: also from relatedItems
+    'abstract'          : "//long:metadata/long:abstract[not (@xml:lang)]/text()", # 'abstract' field from KNAWLONG.
+    'abstract_en'       : "//long:metadata/long:abstract[@xml:lang='en']/text()", # 'abstract_en' field from KNAWLONG.
+    'title'             : "//long:metadata/long:titleInfo[not (@xml:lang)]/long:*/text()", #'title'+'subtitle' field from KNAWLONG.
+    'title_en'          : "//long:metadata/long:titleInfo[@xml:lang='en']/long:*/text()", #'title_en'+'subtitle field from KNAWLONG.
+    'dd_year'           : "//long:metadata/long:dateIssued/long:parsed/text()", # Parsed (normalized) datefield from KNAWLONG.
+    'coverage'          : "//long:metadata/long:coverage/text()", # 'coverage' field from KNAWLONG.
+    'format'            : "//long:metadata/long:format/text()", # 'format' field from KNAWLONG.
+    'dd_prices'         : "//prs:persoon/prs:prices/prs:price/text()",
+    'dd_werkzaamheid'   : "//prs:persoon/prs:jobs/prs:job",
+    'titulatuur'        : "//prs:persoon/prs:titulatuur/text()",
+    'dd_cat'            : "//*[local-name()='category' and (@code)]", # Alle category elementen met attribuut 'code=' = NARCIS-Classification. (staan in zowel PRS als ORG)
+    'dd_cat_datacite'   : "//*[local-name()='topicValue' and (@code)]", # Alle topicValue elementen met attribuut 'code=' = NARCIS-Classification. (staan in datacite)
+    'dd_thesis'         : "//prj:dissertatie/text()", #Promotie onderzoeken.
+    'dd_institute'      : "//org:organisatie/@code",
+    'dd_os'             : "//org:organisatie/@code", # Onderzoekschool
+    'dd_penv'           : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
+    'dd_fin'            : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
+    'publicationid'     : "//long:publication_identifier/text()", # MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
+    'pidref'            : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
+    'dd_abrprd'         : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", #
+    'dd_abrcmplx'       : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", #
+    'dd_format'         : "//long:metadata/long:format/text()",
+    'dd_typeofresource' : "//long:metadata/long:typeOfResource/text()",
+    'topic'             : "//long:metadata/long:subject/long:topic",
     }
 
 
@@ -355,10 +358,20 @@ class NormdocToFieldsList(Observable):
                     if abr_code[:1] in ('E','G','I','N','R','V'): # Also add the parent:
                         if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code[:1]
                         self._fieldslist.append((fieldName, abr_code[:1]))
-        elif fieldName in ('coverage', 'format', 'publicationid'):
+        elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
                 self._fieldslist.append((fieldName, result))
+        elif fieldName == 'topic':
+            for topic in results:
+                scheme = topic.xpath("self::long:topic/long:subjectScheme/text()",namespaces=namespacesmap)
+                # only subjects without a scheme are included in the subject-facet
+                if len(scheme) == 0:
+                    topicValue = topic.xpath("self::long:topic/long:topicValue/text()", namespaces=namespacesmap)
+                    if len(topicValue) > 0:
+                    	subject = topicValue[0]
+                        if self._verbose: print 'addField:', "SUBJECT", "-->", subject
+                        self._fieldslist.append(("dd_subject", subject))
         else:  # All other remaining results are joined with a space:
             self._fieldslist.append((fieldName, ' '.join(results).replace('\n', ''))) 
             if self._verbose: print 'adddField:', fieldName.upper(), "-->", ' '.join(results).replace('\n', '')[:self._truncate_chars]
