@@ -168,7 +168,7 @@ fieldNamesXpathMap = {
     'dd_abrcmplx'       : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", #
     'dd_format'         : "//long:metadata/long:format/text()",
     'dd_typeofresource' : "//long:metadata/long:typeOfResource/text()",
-    'topic'             : "//long:metadata/long:subject/long:topic",
+    'dd_subject'        : "//long:metadata/long:subject/long:topic[not (long:subjectScheme/text())]/long:topicValue/text()",
     }
 
 
@@ -358,20 +358,10 @@ class NormdocToFieldsList(Observable):
                     if abr_code[:1] in ('E','G','I','N','R','V'): # Also add the parent:
                         if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code[:1]
                         self._fieldslist.append((fieldName, abr_code[:1]))
-        elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource'):
+        elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
                 self._fieldslist.append((fieldName, result))
-        elif fieldName == 'topic':
-            for topic in results:
-                scheme = topic.xpath("self::long:topic/long:subjectScheme/text()",namespaces=namespacesmap)
-                # only subjects without a scheme are included in the subject-facet
-                if len(scheme) == 0:
-                    topicValue = topic.xpath("self::long:topic/long:topicValue/text()", namespaces=namespacesmap)
-                    if len(topicValue) > 0:
-                    	subject = topicValue[0]
-                        if self._verbose: print 'addField:', "SUBJECT", "-->", subject
-                        self._fieldslist.append(("dd_subject", subject))
         else:  # All other remaining results are joined with a space:
             self._fieldslist.append((fieldName, ' '.join(results).replace('\n', ''))) 
             if self._verbose: print 'adddField:', fieldName.upper(), "-->", ' '.join(results).replace('\n', '')[:self._truncate_chars]
