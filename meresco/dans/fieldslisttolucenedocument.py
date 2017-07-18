@@ -50,12 +50,18 @@ class FieldsListToLuceneDocument(Observable):
     def _addFieldToLuceneDocument(self, fieldname, value, fields):
         if self._fieldRegistry.isDrilldownField(fieldname):
             lvalue = value
-            if isinstance(lvalue, basestring):
+            if isinstance(lvalue, str):
                 lvalue = [str(lvalue)]
-            lvalue = [v[:MAX_STRING_LENGTH] for v in lvalue]
-            fields.append(self._fieldRegistry.createFacetField(fieldname, lvalue))
+                lvalue = [v[:MAX_STRING_LENGTH] for v in lvalue]
+            elif isinstance(lvalue, unicode):
+                lvalue = [str(self._truncateUTF8length(lvalue))]
+            fields.append(self._fieldRegistry.createFacetField(fieldname, lvalue))            
         if self._fieldRegistry.isIndexField(fieldname):
             field = self._fieldRegistry.createField(fieldname, value)
             fields.append(field)
 
-MAX_STRING_LENGTH = 256
+    def _truncateUTF8length(self, unicodeStr):
+        return unicode(unicodeStr.encode("utf-8")[:MAX_STRING_LENGTH], "utf-8", errors="ignore")
+
+
+MAX_STRING_LENGTH = 100 #256
