@@ -6,7 +6,7 @@ After=meresco-gateway-server.service
 
 [Service]
 User=harvester
-ExecStart=/usr/bin/meresco-harvester --set-process-timeout=3600 --concurrency=3 --domain=narcis --runOnce
+ExecStart=/usr/bin/meresco-harvester --set-process-timeout=3600 --concurrency=2 --domain=narcis --runOnce
 Restart=always
 RestartSec=300
 
