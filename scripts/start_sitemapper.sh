@@ -24,8 +24,8 @@ fi
 LANG=en_US.UTF-8
 export LANG
 
-# START sitemapper on production only. NOT on slaves (s1 and s2)!
-STARTMAPPER=tmeresco2*
+# START sitemapper on slave only, NOT on production.
+STARTMAPPER=s1narcis*
 
 if [[ "$HOSTNAME" == ${STARTMAPPER} ]]
     then
@@ -39,3 +39,6 @@ if [[ "$HOSTNAME" == ${STARTMAPPER} ]]
     else echo "Not starting sitemapper, host: "$HOSTNAME" is not: "${STARTMAPPER}
 fi
 # End starting sitemapper
+
+#Crontab:
+#@reboot . /etc/profile; /home/meresco/sitemapper/start_sitemapper.sh > cron_start_sitemapper.log 2>&1
