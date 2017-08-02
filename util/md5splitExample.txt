@@ -1,8 +1,8 @@
-[meresco@tgharvester21 gharvester]$ python
-Python 2.6.6 (r266:84292, May 27 2013, 05:35:12) 
-[GCC 4.4.7 20120313 (Red Hat 4.4.7-3)] on linux2
+[meresco@tnarcis01 narcisindex]$ python
+Python 2.7.5 (default, Aug  2 2016, 04:20:16) 
+[GCC 4.8.5 20150623 (Red Hat 4.8.5-4)] on linux2
 Type "help", "copyright", "credits" or "license" for more information.
->>> from meresco_server.storagesplit import md5Split, md5Join, MD5JoinError
->>> id = ('tue:oai:library.tue.nl:692605','metadata')
+>>> from meresco.dans.storagesplit import md5Split, md5Join, MD5JoinError
+>>> id = ('ut:oai:ris.utwente.nl:publications/9ad28b28-a652-4f14-ba51-cdf73e732224','metadata')
 >>> print md5Split(id)
-['tue', 'ff', 'fa', 'oai:library.tue.nl:692605', 'metadata']
+['ut', '0f', '6f', 'oai:ris.utwente.nl:publications/9ad28b28-a652-4f14-ba51-cdf73e732224', 'metadata']
