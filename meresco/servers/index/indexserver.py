@@ -116,9 +116,9 @@ drilldownFields = [
     DrilldownField(untokenizedFieldname('dd_fin')),
     DrilldownField(untokenizedFieldname('dd_abrprd')),
     DrilldownField(untokenizedFieldname('dd_abrcmplx')),
-    DrilldownField(untokenizedFieldname('dd_format')),
-    DrilldownField(untokenizedFieldname('dd_typeofresource')),
-    DrilldownField(untokenizedFieldname('dd_subject')),
+    #DrilldownField(untokenizedFieldname('dd_format')),
+    #DrilldownField(untokenizedFieldname('dd_typeofresource')),
+    #DrilldownField(untokenizedFieldname('dd_subject')),
     # DrilldownField(untokenizedFieldname('blaat'), hierarchical=False),
 ]
 

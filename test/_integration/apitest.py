@@ -31,7 +31,6 @@ from lxml import etree
 
 # TODO: create UnitTestCase for o.a. writeDelete / unDelete
 # TODO: SRU-throttle mogelijkheden uitzoeken.
-# TODO: ReIndexer
 
 testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/OAI/2.0/branding/',
     'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
@@ -77,9 +76,6 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(2, 'title = program')
         self.assertSruQuery(3, 'untokenized.oai_id exact "record:1"')
         self.assertSruQuery(3, 'untokenized.dd_year exact "2016"')
-        self.assertSruQuery(2, 'untokenized.dd_format exact "image/jpeg"')
-        self.assertSruQuery(1, 'untokenized.dd_typeofresource exact "Dataset/Dataset en zo"')
-        self.assertSruQuery(1, 'untokenized.dd_subject exact "Thunderstorms"')
         self.assertSruQuery(1, 'untokenized.nids exact "info:eu-repo/dai/nl/29806278"')
         self.assertSruQuery(1, 'coverage = Europe')
         self.assertSruQuery(2, 'format = "application/pdf"')
