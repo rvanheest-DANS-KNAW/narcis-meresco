@@ -1,9 +1,8 @@
 [Unit]
 Description=Meresco API Server
-Requires=meresco-lucene-server.service
-Wants=meresco-gateway-server.service meresco-apislave-server.service
+Wants=meresco-lucene-server.service meresco-gateway-server.service meresco-apislave-server.service
 After=meresco-lucene-server.service meresco-gateway-server.service
-
+ConditionHost=!s1narcis01.dans.knaw.nl
 
 [Service]
 User=meresco
@@ -13,5 +12,3 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-
-

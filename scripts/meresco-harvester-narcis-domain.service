@@ -1,7 +1,6 @@
 [Unit]
 Description=Meresco Harvester NARCIS domain
 ConditionHost=!s1narcis01.dans.knaw.nl
-Wants=meresco-gateway-server.service
 After=meresco-gateway-server.service
 
 [Service]

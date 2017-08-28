@@ -1,0 +1,12 @@
+[Unit]
+Description=Meresco API-slave Server 2
+After=meresco-lucene-server.service meresco-lucene-server.service
+ConditionHost=s1narcis01.dans.knaw.nl
+
+[Service]
+User=meresco
+ExecStart=/home/meresco/meresco/narcisindex/bin/start-sruslave --port=8004 --lucenePort=8001 --stateDir=/data/meresco/api
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
