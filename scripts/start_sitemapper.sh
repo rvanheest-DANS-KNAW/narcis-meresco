@@ -24,7 +24,7 @@ fi
 LANG=en_US.UTF-8
 export LANG
 
-# START sitemapper on slave only, NOT on production.
+# START sitemapper on production only, NOT on worker/slave.
 STARTMAPPER=narcis*
 
 if [[ "$HOSTNAME" == ${STARTMAPPER} ]]
