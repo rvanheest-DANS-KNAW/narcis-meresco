@@ -175,10 +175,6 @@ class SruSlaveTest(IntegrationTestCase):
         self.assertEqual('MyWorkerLabel', xpathFirst(body, '//channel/title/text()'))
 
 
-    def testLog(self):
-        header, body = getRequest(self.sruslavePort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
-        self.assertEqual('"SRU Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
-
     def assertSruQuery(self, numberOfRecords, query, printout=False):
         response = self.doSruQuery(**{'query':query, "recordSchema": "knaw_short", "x-recordSchema": "header"}) # , 'maximumRecords': '1'
         if printout: print "SruQuery response:", etree.tostring(response, pretty_print = True, encoding='utf-8')
