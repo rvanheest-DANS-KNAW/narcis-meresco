@@ -31,7 +31,6 @@ from lxml import etree
 
 # TODO: create UnitTestCase for o.a. writeDelete / unDelete
 # TODO: SRU-throttle mogelijkheden uitzoeken.
-# TODO: ReIndexer
 
 testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/OAI/2.0/branding/',
     'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
@@ -151,14 +150,6 @@ class SruSlaveTest(IntegrationTestCase):
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_abrprd"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         self.assertEqual([('LMEB', '1'), ('LME', '1'), ('XME', '1'), ('NT', '1')], drilldown)
-
-        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_typeofresource"]/drilldown:item')
-        drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('text', '3'), ('Dataset/Dataset en zo', '1')], drilldown)
-
-        ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_subject"]/drilldown:item')
-        drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('Search', '1'), ('Programming', '1'), ('Precipitation', '1'), ('Hail', '1'), ('Storms', '1'), ('Floods', '1'), ('Earth system modelling', '1'), ('Winter weather', '1'), ('Climate', '1'), ('Thunderstorms', '1'), ('Climate change', '1'), ('Forest Fires', '1'), ('This is the subject', '1'), ('freight', '1'), ('intermodal', '1'), ('rail', '1'), ('terminals', '1'), ('shunting', '1'), ('hub-and-spoke', '1'), ('In english please.', '1'), ('Geneeskunde', '1'), ('glucocorticoid', '1'), ('dexamethasone', '1'), ('cellular hypertrophy', '1'), ('contractile proteins', '1'), ('OPGRAVING', '1'), (u'\u0433\u043e\u0440\u043e\u0434\u0441\u043a\u0438\u0435 \u0440\u0430\u0439\u043e\u043d\u044b; \u044d\u043a\u043e\u043b\u043e\u0433\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u0441\u0435\u0442\u0438; \u0437\u0435\u043b\u0435\u043d\u0430\u044f \u0438\u043d\u0444\u0440\u0430\u0441\u0442', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):

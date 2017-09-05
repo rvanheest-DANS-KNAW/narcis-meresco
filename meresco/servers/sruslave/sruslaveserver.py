@@ -1,27 +1,23 @@
 #-*- coding: utf-8 -*-
 ## begin license ##
 #
-# Drents Archief beoogt het Drents erfgoed centraal beschikbaar te stellen.
-#
 # Copyright (C) 2012-2016 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
-# Copyright (C) 2015-2016 Drents Archief http://www.drentsarchief.nl
-# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
+# Copyright (C) Data Archiving and Networked Services (DANS) http://dans.knaw.nl
 #
-# This file is part of "Drents Archief"
+# This file is part of "NARCIS Index"
 #
-# "Drents Archief" is free software; you can redistribute it and/or modify
+# "NARCIS Index" is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# "Drents Archief" is distributed in the hope that it will be useful,
+# "NARCIS Index" is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with "Drents Archief"; if not, write to the Free Software
+# along with "NARCIS Index"; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 ## end license ##
@@ -52,11 +48,9 @@ from meresco.lucene.converttocomposedquery import ConvertToComposedQuery
 ####### start lucene integration #############
 from meresco.lucene import Lucene, MultiLucene, UNTOKENIZED_PREFIX, SORTED_PREFIX
 from meresco.lucene.adaptertolucenequery import AdapterToLuceneQuery
-# from meresco.lucene.remote import LuceneRemoteService
 from meresco.lucene.fieldregistry import FieldRegistry
 from meresco.lucene import LuceneSettings, DrilldownField#, FieldsListToLuceneDocument
 from weightless.http import HttpRequest1_1, SocketPool
-# from meresco.lucene.lucenecommit import LuceneCommit
 from meresco.lucene.queryexpressiontolucenequerydict import QueryExpressionToLuceneQueryDict
 ####### end lucene integration #############
 
@@ -72,7 +66,6 @@ from meresco.dans.shortconverter import ShortConverter
 from meresco.dans.oai_dcconverter import DcConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
 
-# from meresco.dans.oaiprovenance import OaiProvenance
 from meresco.xml import namespaces
 
 from storage.storageadapter import StorageAdapter
@@ -118,10 +111,6 @@ def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, lucenePort)
 
 
 def main(reactor, port, statePath, lucenePort, **ignored):
-    apacheLogStream = sys.stdout
-
-    # xsltPath = join(join(dirname(dirname(dirname(abspath(__file__)))), 'xslt'), 'MODS3-5_DC_XSLT1-0.xsl')
-    # print "xsltPath:", xsltPath
 
 
 ######## START Lucene Integration ###############################################################
@@ -129,8 +118,6 @@ def main(reactor, port, statePath, lucenePort, **ignored):
         commitTimeout=30,
         readonly=True,)
     
-    # readerReactor = Reactor() # Do we need a new one OR the existing 'reactor'???
-    # readerReactor = reactor
     
     http11Request = be(
         (HttpRequest1_1(),
@@ -158,15 +145,7 @@ def main(reactor, port, statePath, lucenePort, **ignored):
 ######## END Lucene Integration ###############################################################
 
 
-
-    # def sortFieldRename(name):
-    #     if not name.startswith('__'):
-    #         name = SORTED_PREFIX + name
-    #     return name
-
-    fieldnameRewrites = {
-#         UNTOKENIZED_PREFIX+'genre': UNTOKENIZED_PREFIX+'dc:genre',
-    }
+    fieldnameRewrites = {}
 
     def fieldnameRewrite(name):
         return fieldnameRewrites.get(name, name)
@@ -188,11 +167,6 @@ def main(reactor, port, statePath, lucenePort, **ignored):
     storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME])
 
 
-    # oaiJazz = OaiJazz(join(statePath, 'oai'))
-    # oaiJazz.updateMetadataFormat(DEFAULT_PARTNAME, None, None)
-    # def updateMetadataFormat(self, prefix, schema, namespace):
-    # self._prefixes[prefix] = (schema, namespace)
-
     # Wat doet dit?
     cqlClauseConverters = [
         RenameFieldForExact(
@@ -206,19 +180,6 @@ def main(reactor, port, statePath, lucenePort, **ignored):
     ]
 
 
-
-    # # Post commit naar storage en ??
-    # scheduledCommitPeriodicCall = be(
-    #     (PeriodicCall(reactor, message='commit', name='Scheduled commit', initialSchedule=Schedule(period=1 if quickCommit else 300), schedule=Schedule(period=1)),
-    #         (AllToDo(),
-    #             (LogComponent("PeriodicCall"),), # commit(*(), **{})
-    #             (storage,),
-    #             (periodicGateWayDownload,),
-    #         )
-    #     )
-    # )
-
-    directoryLog = DirectoryLog(join(statePath, 'log'), extension='-sru-worker.log') ## Dit Zorgt voor de rotering. Door verschillende DirectoryLog's aan te maken kan je aparte dirs loggen. Nu logging allemaal indezelfde file ... 
 
     executeQueryHelix = \
         (FilterMessages(allowed=['executeQuery']),
@@ -234,68 +195,48 @@ def main(reactor, port, statePath, lucenePort, **ignored):
 
     return \
     (Observable(),
-        # (scheduledCommitPeriodicCall,),
-        # (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
         
         (ObservableHttpServer(reactor, port, compressResponse=True),
-            (LogCollector(),
-                (ApacheLogWriter(apacheLogStream),),
-                # (QueryLogWriter.forHttpArguments(
-                #         log=directoryLog,
-                #         scopeNames=('http-scope',)
-                #     ),
-                # ),
-                (QueryLogWriter(log=directoryLog, scopeNames=('sru-scope',)),),
-                (Deproxy(),
-                    (HandleRequestLog(),
-                        (BasicHttpHandler(),
-                            (PathFilter(['/sru']),
-                                (LogCollectorScope('sru-scope'),
-                                    (SruParser(
-                                            host='sru.narcis.nl',
-                                            port=80,
-                                            defaultRecordSchema='knaw_short',
-                                            defaultRecordPacking='xml'),
-                                        (SruLimitStartRecord(limitBeyond=4000),
-                                            (SruHandler(
-                                                    includeQueryTimes=False,
-                                                    extraXParameters=[],
-                                                    enableCollectLog=True), #2017-03-24T12:00:33Z 127.0.0.1 3.5K 0.019s - /sru OF (TRUE): 2017-03-24T11:58:53Z 127.0.0.1 2.3K 0.004s 1hits /sru maximumRecords=10&operation=searchRetrieve&query=untokenized.dd_year+exact+%221993%22&recordPacking=xml&recordSchema=knaw_short&startRecord=1&version=1.2
-                                                (SruTermDrilldown(),),
-                                                executeQueryHelix,
-                                                (StorageAdapter(),
-                                                    (storage,)
-                                                )
-                                            )
-                                        )
-                                    )
+            (BasicHttpHandler(),
+                (PathFilter(['/sru']),
+                    (SruParser(
+                            host='sru.narcis.nl',
+                            port=80,
+                            defaultRecordSchema='knaw_short',
+                            defaultRecordPacking='xml'),
+                        (SruLimitStartRecord(limitBeyond=4000),
+                            (SruHandler(
+                                    includeQueryTimes=False,
+                                    extraXParameters=[],
+                                    enableCollectLog=False), #2017-03-24T12:00:33Z 127.0.0.1 3.5K 0.019s - /sru OF (TRUE): 2017-03-24T11:58:53Z 127.0.0.1 2.3K 0.004s 1hits /sru maximumRecords=10&operation=searchRetrieve&query=untokenized.dd_year+exact+%221993%22&recordPacking=xml&recordSchema=knaw_short&startRecord=1&version=1.2
+                                (SruTermDrilldown(),),
+                                executeQueryHelix,
+                                (StorageAdapter(),
+                                    (storage,)
                                 )
+                            )
+                        )
+                    )
+                ),
+                (PathFilter('/rss'),
+                    (Rss(   supportedLanguages = ['nl','en'], # defaults to first, if requested language is not available or supplied.
+                            title = {'nl':'NARCIS', 'en':'NARCIS'},
+                            description = {'nl':'NARCIS: De toegang tot de Nederlandse wetenschapsinformatie', 'en':'NARCIS: The gateway to Dutch scientific information'},
+                            link = {'nl':'http://www.narcis.nl/?Language=nl', 'en':'http://www.narcis.nl/?Language=en'},
+                            maximumRecords = 20),
+                        executeQueryHelix,
+                        (RssItem(
+                                nsMap=NAMESPACEMAP,                                            
+                                title = ('knaw_short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
+                                description = ('knaw_short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
+                                pubdate = ('knaw_short', '//short:dateIssued/short:parsed/text()'),
+                                linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',                                
+                                wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
+                                oai_identifier = ('meta', '//meta:record/meta:id/text()'),
+                                language = ('Dummy: Language is auto provided by the calling RSS component, but needs to be present to serve the linkTemplate.')
                             ),
-                            (PathFilter('/rss'),
-                                (Rss(   supportedLanguages = ['nl','en'], # defaults to first, if requested language is not available or supplied.
-                                        title = {'nl':'NARCIS', 'en':'NARCIS'},
-                                        description = {'nl':'NARCIS: De toegang tot de Nederlandse wetenschapsinformatie', 'en':'NARCIS: The gateway to Dutch scientific information'},
-                                        link = {'nl':'http://www.narcis.nl/?Language=nl', 'en':'http://www.narcis.nl/?Language=en'},
-                                        maximumRecords = 20),
-                                    executeQueryHelix,
-                                    (RssItem(
-                                            nsMap=NAMESPACEMAP,                                            
-                                            title = ('knaw_short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
-                                            description = ('knaw_short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
-                                            pubdate = ('knaw_short', '//short:dateIssued/short:parsed/text()'),
-                                            linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',                                
-                                            wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
-                                            oai_identifier = ('meta', '//meta:record/meta:id/text()'),
-                                            language = ('Dummy: Language is auto provided by the calling RSS component, but needs to be present to serve the linkTemplate.')
-                                        ),
-                                        (StorageAdapter(),
-                                            (storage,)
-                                        )
-                                    )
-                                )
-                            ),
-                            (PathFilter('/log'),
-                                (LogFileServer(name="SRU Queries", log=directoryLog, basepath='/log'),)
+                            (StorageAdapter(),
+                                (storage,)
                             )
                         )
                     )
@@ -310,8 +251,6 @@ def startServer(port, stateDir, lucenePort, **kwargs):
     reactor = Reactor()
     statePath = abspath(stateDir)
 
-    #main
-    # reactor, port, statePath, lucenePort, **ignored
     dna = main(
         reactor=reactor,
         port=port,
@@ -319,7 +258,6 @@ def startServer(port, stateDir, lucenePort, **kwargs):
         lucenePort=lucenePort,
         **kwargs
     )
-    #/main
 
     server = be(dna)
     consume(server.once.observer_init())

@@ -2,7 +2,7 @@
 ==========================
 
 Authors       |DANS-KNAW 
-:------------- | :-------------
+------------- | -------------
 Organization  |[DANS-KNAW][1]
 Copyright     |2010 by Seek You Too
 Copyright     |2011-2016 by Seecr (Seek You Too B.V.)
@@ -20,3 +20,4 @@ Meresco 4 Suite backend for [NARCIS Portal](https://www.narcis.nl), including Ap
 
 Documentation
 =============
+

@@ -1,7 +1,6 @@
 [Unit]
 Description=Meresco Lucene Server
 
-
 [Service]
 User=meresco
 ExecStart=/home/meresco/meresco/narcisindex/bin/start-lucene-server --core=narcis --port=8001 --stateDir=/data/meresco/lucene

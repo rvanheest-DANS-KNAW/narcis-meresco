@@ -166,9 +166,9 @@ fieldNamesXpathMap = {
     'pidref'            : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
     'dd_abrprd'         : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", #
     'dd_abrcmplx'       : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", #
-    'dd_format'         : "//long:metadata/long:format/text()",
-    'dd_typeofresource' : "//long:metadata/long:typeOfResource/text()",
-    'dd_subject'        : "//long:metadata/long:subject/long:topic[not (long:subjectScheme/text())]/long:topicValue/text()",
+    # 'dd_format'         : "//long:metadata/long:format/text()",
+    # 'dd_typeofresource' : "//long:metadata/long:typeOfResource/text()",
+    # 'dd_subject'        : "//long:metadata/long:subject/long:topic[not (long:subjectScheme/text())]/long:topicValue/text()",
     }
 
 

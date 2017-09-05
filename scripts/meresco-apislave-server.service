@@ -1,8 +1,6 @@
 [Unit]
 Description=Meresco API-slave Server
-Requires=meresco-lucene-server.service
-After=meresco-lucene-server.service
-
+After=meresco-lucene-server.service meresco-lucene-server.service
 
 [Service]
 User=meresco
@@ -12,4 +10,3 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-
