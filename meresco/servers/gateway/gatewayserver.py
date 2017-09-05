@@ -55,12 +55,11 @@ from storage.storagecomponent import HashDistributeStrategy, DefaultStrategy
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.metapartconverter import AddMetadataNamespace
 from meresco.dans.longconverter import NormaliseOaiRecord
-# from meresco.dans.writedeleted import WriteTombstone, ResurrectTombstone
+
 
 NORMALISED_DOC_NAME = 'normdoc'
 
 def main(reactor, port, statePath, **ignored):
-    apacheLogStream = stdout
 
     oaiSuspendRegister = SuspendRegister()
     oaiJazz = be((OaiJazz(join(statePath, 'oai')),
@@ -94,66 +93,51 @@ def main(reactor, port, statePath, **ignored):
         # (scheduledCommitPeriodicCall,),
         # (DebugPrompt(reactor=reactor, port=port+1, globals=locals()),),
         (ObservableHttpServer(reactor=reactor, port=port),
-            (LogCollector(),
-                (ApacheLogWriter(apacheLogStream),),
-                (Deproxy(), # Switches IP adress from proxy to client IP. (x-forwarded-for header)
-                    (HandleRequestLog(),
-                        (BasicHttpHandler(),
-                            (IpFilter(allowedIps=['127.0.0.1']),
-                                (PathFilter('/oaix', excluding=['/oaix/info']),
-                                    (OaiPmh(repositoryName='Gateway',
-                                            adminEmail='ab@narcis.nl',
-                                            supportXWait=True,
-                                            batchSize=2000 # Override default batch size of 200.
-                                        ),
-                                        (oaiJazz,),
-                                        (oaiSuspendRegister,),
-                                        (StorageAdapter(),
-                                            (storeComponent,),
-                                        ),
-                                    )
-                                ),
-                                (PathFilter('/oaix/info'),
-                                    (OaiInfo(reactor=reactor, oaiPath='/oai'),
-                                        (oaiJazz,),
-                                    )
-                                ),
+            (BasicHttpHandler(),
+                (IpFilter(allowedIps=['127.0.0.1']),
+                    (PathFilter('/oaix', excluding=['/oaix/info']),
+                        (OaiPmh(repositoryName='Gateway',
+                                adminEmail='ab@narcis.nl',
+                                supportXWait=True,
+                                batchSize=2000 # Override default batch size of 200.
                             ),
-                            (PathFilter('/update'),
-                                (SruRecordUpdate(sendRecordData=False, logErrors=True,),
-                                    (FilterMessages(allowed=['delete']),
-                                        (storeComponent,),
-                                        (oaiJazz,),
-                                        # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
-                                        # (WriteTombstone(),
-                                        #     (storeComponent,),
-                                        # )
-                                    ),
-                                    (FilterMessages(allowed=['add']),
+                            (oaiJazz,),
+                            (oaiSuspendRegister,),
+                            (StorageAdapter(),
+                                (storeComponent,),
+                            ),
+                        )
+                    ),
+                    (PathFilter('/oaix/info'),
+                        (OaiInfo(reactor=reactor, oaiPath='/oai'),
+                            (oaiJazz,),
+                        )
+                    ),
+                ),
+                (PathFilter('/update'),
+                    (SruRecordUpdate(sendRecordData=False, logErrors=True,),
+                        (FilterMessages(allowed=['delete']),
+                            (storeComponent,),
+                            (oaiJazz,),
+                        ),
+                        (FilterMessages(allowed=['add']),
 
-                                        # Does not work? See comments in component...
-                                        # (AddMetadataFormat(fromKwarg="lxmlNode", name='md_format'),
-                                        #     (LogComponent("AddMetadataFormat"),),
-                                        # ),
-                                        (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
-                                            # (LogComponent("TO LONG CONVERTER:"),),
-                                            (AddMetadataNamespace(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds metadataNamespace to meta part in the message.
-                                                (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts. Raises ValidationException if no 'known' metadataformat 
-                                                    (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
-                                                        (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
-                                                            (storeComponent,), # Store converted/renamed part.
-                                                        )
-                                                    )
-                                                ),
-                                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[NORMALISED_DOC_NAME]),
-                                                    (oaiJazz,),
-                                                ),
+                            # Does not work? See comments in component...
+                            # (AddMetadataFormat(fromKwarg="lxmlNode", name='md_format'),
+                            #     (LogComponent("AddMetadataFormat"),),
+                            # ),
+                            (XmlXPath(['srw:recordData/*'], fromKwarg='lxmlNode'), # Stuurt IEDERE matching node in een nieuw bericht door.
+                                # (LogComponent("TO LONG CONVERTER:"),),
+                                (AddMetadataNamespace(dateformat="%Y-%m-%dT%H:%M:%SZ", fromKwarg='lxmlNode'), # Adds metadataNamespace to meta part in the message.
+                                    (NormaliseOaiRecord(fromKwarg='lxmlNode'), # Normalises record to: long & original parts. Raises ValidationException if no 'known' metadataformat 
+                                        (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data', pretty_print=False),
+                                            (RewritePartname(NORMALISED_DOC_NAME), # Rename converted part.
+                                                (storeComponent,), # Store converted/renamed part.
                                             )
-
-                                        ),
-                                        # (ResurrectTombstone(),
-                                        #     (storeComponent,),
-                                        # )                                            
+                                        )
+                                    ),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[NORMALISED_DOC_NAME]),
+                                        (oaiJazz,),
                                     )
                                 )
                             )
