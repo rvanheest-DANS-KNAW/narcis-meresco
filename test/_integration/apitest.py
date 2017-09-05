@@ -376,9 +376,6 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('PRS1242583', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="nod-prs"]/text()'))
         self.assertEqual(4, len(testNamespaces.xpath(response, '//short:metadata/short:name/short:nameIdentifier')))
      
-    def testLog(self):
-        header, body = getRequest(self.apiPort, '/log/', parse=False) # yy-mm-dd-query.log is op moment van testen nog niet aanwezig/gepurged/flushed...
-        self.assertEqual('"SRU Queries" Logging', list(htmlXPath('//head/title/text()', body))[0])
 
     def assertSruQuery(self, numberOfRecords, query, printout=False):
         response = self.doSruQuery(**{'query':query, "recordSchema": "knaw_short", "x-recordSchema": "header"}) # , 'maximumRecords': '1'
