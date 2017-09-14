@@ -9,7 +9,6 @@ from bsddb import btopen
 STORAGE_DIR = '/data/meresco/api/store/'
 MAX_FILE_ENTRIES = 20000 # LETOP: dit dient een even getal te zijn (i.v.m. MultiLangual collections count)!!
 SITEMAP_PROXY_DIR = '/var/www/narcis/sitemaps'
-SITEMAP_IDX_DIR = '/var/www/narcis'
 SITEMAP_TEMP_DIR = '/home/meresco/sitemapper/sitemaps_temp'
 BDB_DIR = '/home/meresco/sitemapper/berkeleydb'
 LOG_FILENAME = '/home/meresco/sitemapper/log/sitemapper.log'
@@ -18,7 +17,6 @@ LOG_FILENAME = '/home/meresco/sitemapper/log/sitemapper.log'
 # STORAGE_DIR = 'storage'
 # MAX_FILE_ENTRIES = 2000  # LETOP: dit dient een even getal te zijn (i.v.m. MultiLangual collections)!!
 # SITEMAP_PROXY_DIR = 'varwww/sitemaps'
-# SITEMAP_IDX_DIR = 'varwww'
 # SITEMAP_TEMP_DIR = 'sitemaps_temp'
 # BDB_DIR = 'berkeleydb'
 # LOG_FILENAME = 'log/sitemapper.log'
@@ -40,7 +38,7 @@ END_SITEMAP = '''</urlset>'''
 END_SITEMAP_IDX = '''</sitemapindex>'''
 START_SITEMAP = '''<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'''
 START_SITEMAP_IDX = '''<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'''
-STATICPAGES = '''<sitemap><loc>https://www.narcis.nl/sitemaps/sitemap_staticpages.xml</loc><lastmod>2015-08-10T14:22:22Z</lastmod></sitemap>'''
+STATICPAGES = '''<sitemap><loc>https://www.narcis.nl/sitemap_staticpages.xml</loc><lastmod>2015-08-10T14:22:22Z</lastmod></sitemap>'''
 
 ms_logger = logging.getLogger('SitemapLogger')
 ms_logger.setLevel(logging.INFO)
@@ -177,7 +175,7 @@ def sm_item2xml(str_items, collectie):
 
 def idx_fname2xml(sm_filename):
     return '''<sitemap>
-    <loc>https://www.narcis.nl/sitemaps/%s</loc>
+    <loc>https://www.narcis.nl/%s</loc>
     <lastmod>%s</lastmod>
 </sitemap>\n''' % (sm_filename, datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%SZ'))
 
@@ -272,12 +270,8 @@ ms_logger.info('Finished generating sitemaps in temp-dir.')
 
 ms_logger.info('Copying all newly created sitemaps from temp-dir to narcis portal sitemaps dir.')
 
-for smapfile in glob.iglob(os.path.join(SITEMAP_TEMP_DIR, "*.gz")):
+for smapfile in glob.iglob(os.path.join(SITEMAP_TEMP_DIR, "*.*")):
      shutil.copy(smapfile, SITEMAP_PROXY_DIR)
-
-for smapfile in glob.iglob(os.path.join(SITEMAP_TEMP_DIR, "*.xml")):
-     shutil.copy(smapfile, SITEMAP_IDX_DIR)
-
 
 ms_logger.info('End time: %s' % datetime.datetime.now())
 ms_logger.info('### Ready: Finished generating sitemaps. ###')
