@@ -276,7 +276,8 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, None, None)
+    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/") # def updateMetadataFormat(self, prefix, schema, namespace):
+    # oaiJazz.updateMetadataFormat("knaw_long", "http://www.narcis.nl/scheme/knaw_long.xsd", "http://www.knaw.nl/narcis/1.0/long/")
 
     # Wat doet dit?
     cqlClauseConverters = [
