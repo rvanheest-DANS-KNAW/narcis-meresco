@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+****************************************************************
+*                            RESEARCH 1.0                                    
+*                                                                               
+*                            October 26, 2017                 
+*****************************************************************
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  targetNamespace="http://www.onderzoekinformatie.nl/nod/act"
+  xmlns:research="http://www.onderzoekinformatie.nl/nod/act">
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+
+  <xs:element name="activiteit">
+    <xs:complexType>
+      <xs:sequence>
+	    <xs:element ref="research:identifier"/>
+	    <xs:element name="title_nl" type="xs:string"/>
+	    <xs:element name="title_en" type="xs:string"/>
+  	    <xs:group   ref="research:summary" />
+	    <xs:element ref="research:status"/>
+	    <xs:group   minOccurs="0" maxOccurs="unbounded" ref="research:institute"/>
+	    <xs:element minOccurs="0" maxOccurs="unbounded" ref="research:person"/>
+	    <xs:element minOccurs="0" name="invoer_datum" type="xs:date"/>
+	    <xs:element name="url" type="xs:anyURI"/>
+	    <xs:element minOccurs="0" ref="research:dissertatie"/>
+	  </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="identifier" type="research:researchID"/>
+  <xs:simpleType name="researchID">
+    <xs:restriction base="xs:string">
+	  <xs:pattern value="OND([0-9]){7}" />
+	</xs:restriction>
+  </xs:simpleType>
+  <xs:group name="summary">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="summary_nl" type="research:summary"/>
+      <xs:element minOccurs="0" name="summary_en" type="research:summary"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:complexType name="summary" mixed="true">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="br" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="status" type="research:status"/>
+  <xs:simpleType name="status">
+    <xs:restriction base="xs:NCName">
+      <xs:enumeration value="C" />
+      <xs:enumeration value="D" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:group name="institute">
+    <xs:choice>
+      <xs:element name="penvoerder" type="research:institute"/>
+      <xs:element name="financier" type="research:institute"/>
+    </xs:choice>
+  </xs:group>
+  <xs:complexType name="institute">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="naam">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute ref="xml:lang"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="code" type="research:organisationyCode" use="required" />
+    <xs:attribute name="instituut_code" type="xs:NCName" use="required" />
+  </xs:complexType>
+  <xs:simpleType name="organisationyCode">
+    <xs:restriction base="xs:string">
+	  <xs:pattern value="ORG([0-9]){7}" />
+	</xs:restriction>
+  </xs:simpleType>  
+  <xs:element name="person">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="fullName" type="xs:string"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="research:nameIdentifier"/>
+        <xs:element minOccurs="0" ref="research:role"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="nameIdentifier">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="type" use="required" type="research:nameIdentifierType"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="nameIdentifierType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="dai-nl" />
+      <xs:enumeration value="orcid" />
+      <xs:enumeration value="isni" />
+      <xs:enumeration value="nod-prs" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="role" type="research:threeLetters"/>
+  <xs:simpleType name="threeLetters">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z][a-zA-Z][a-zA-Z]"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="dissertatie" type="research:dissertatie"/>
+  <xs:simpleType name="dissertatie">
+    <xs:restriction base="xs:string">
+	  <xs:pattern value="true" />
+	</xs:restriction>
+  </xs:simpleType>    
+</xs:schema>
