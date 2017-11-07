@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+****************************************************************
+*                            KNAW_LONG 1.0                                    
+*                                                                               
+*                            October 23, 2017                 
+*****************************************************************
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  targetNamespace="http://www.knaw.nl/narcis/1.0/long/"
+  xmlns:long="http://www.knaw.nl/narcis/1.0/long/">
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  
+  <xs:element name="knaw_long">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="long:wcpcollection"/>
+        <xs:element minOccurs="0" ref="long:modificationDate"/>
+        <xs:element ref="long:humanStartPage"/>
+        <xs:element minOccurs="0" ref="long:persistentIdentifier"/>
+        <xs:element minOccurs="0" ref="long:objectFiles"/>
+        <xs:element ref="long:accessRights"/>
+        <xs:element ref="long:metadata"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="wcpcollection" type="xs:NCName"/>
+  <xs:element name="modificationDate" type="xs:string"/>
+  <xs:element name="humanStartPage" type="xs:anyURI"/>
+  <xs:element name="persistentIdentifier">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:anyURI">
+          <xs:attribute name="ref" type="xs:string"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="objectFiles">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="long:objectFile"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="objectFile">
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="1" ref="long:resource"/>
+        <xs:element minOccurs="0" ref="long:persistentIdentifier"/>
+        <xs:element minOccurs="0" ref="long:embargo"/>
+        <xs:element minOccurs="0" ref="long:description"/>
+        <xs:element minOccurs="0" ref="long:publicationVersion"/>
+        <xs:element minOccurs="0" ref="long:accessRights"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="resource">
+    <xs:complexType>
+      <xs:attribute name="mimeType" type="xs:string"/>
+      <xs:attribute name="ref" type="xs:anyURI"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="mimeType" type="xs:string"/>
+  <xs:element name="embargo" type="xs:string"/>
+  <xs:element name="description" type="xs:string"/>
+  <xs:element name="publicationVersion" type="xs:string"/>
+  <xs:element name="accessRights" type="xs:NCName"/>
+  <xs:element name="metadata">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="long:titleInfo"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:name"/>
+        <xs:element minOccurs="0" ref="long:rightsDescription"/>
+        <xs:element minOccurs="0" ref="long:genre"/>        
+        <xs:element minOccurs="0" ref="long:publisher"/>
+        <xs:element minOccurs="0" ref="long:physicalDescription"/>
+        <xs:element minOccurs="0" maxOccurs="2" ref="long:subject"/>        
+        <xs:element minOccurs="0" maxOccurs="2" ref="long:abstract"/>
+        <xs:group   minOccurs="0" maxOccurs="unbounded" ref="long:date"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:publication_identifier"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:related_identifier"/>
+        <xs:element minOccurs="0" ref="long:language"/>        
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:location_url"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:relatedItem"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:placeTerm"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:coverage"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:format"/>
+        <xs:element minOccurs="0" ref="long:typeOfResource"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:grantAgreements"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:geoLocations"/>
+        <xs:element minOccurs="0" ref="long:hostCitation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="titleInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="long:title"/>
+        <xs:element minOccurs="0" ref="long:subtitle"/>
+      </xs:sequence>
+      <xs:attribute ref="xml:lang"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="title" type="xs:string"/>
+  <xs:element name="subtitle" type="xs:string"/>
+  <xs:element name="name">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="long:type"/>
+        <xs:element minOccurs="0" ref="long:unstructured"/>
+        <xs:element minOccurs="0" ref="long:family"/>
+        <xs:element minOccurs="0" ref="long:given"/>
+        <xs:element minOccurs="0" ref="long:termsOfAddress"/>
+        <xs:element minOccurs="0" ref="long:mcRoleTerm"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:nameIdentifier"/>
+        <xs:element minOccurs="0" ref="long:affiliation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="type" type="xs:NCName"/>
+  <xs:element name="unstructured" type="xs:string"/>
+  <xs:element name="family" type="xs:string"/>
+  <xs:element name="given" type="xs:string"/>
+  <xs:element name="termsOfAddress" type="xs:NCName"/>
+  <xs:element name="mcRoleTerm" type="xs:NCName"/>
+  <xs:element name="nameIdentifier">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="type" use="required" type="long:nameIdentifierType"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="nameIdentifierType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="dai-nl" />
+      <xs:enumeration value="orcid" />
+      <xs:enumeration value="isni" />
+      <xs:enumeration value="nod-prs" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="affiliation" type="xs:string"/>
+  <xs:element name="rightsDescription" type="xs:string"/>
+  <xs:element name="genre" type="xs:NCName"/>
+  <xs:element name="publisher" type="xs:string"/>
+  <xs:element name="physicalDescription" type="xs:string"/>
+  <xs:element name="subject">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:topic"/>
+      </xs:sequence>
+      <xs:attribute ref="xml:lang"/>
+    </xs:complexType>    
+  </xs:element>
+  <xs:element name="topic">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="long:topicValue"/>
+        <xs:element minOccurs="0" ref="long:subjectScheme"/>
+      </xs:sequence>
+    </xs:complexType>    
+  </xs:element>
+  <xs:element name="topicValue">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="code" type="xs:string" />
+          <xs:attribute name="valueURI" type="xs:string" />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="subjectScheme" type="xs:NCName"/>
+  <xs:element name="abstract">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="xml:lang"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="date">
+    <xs:choice>
+      <xs:element name="dateIssued" type="long:dateFormat"/>
+      <xs:element name="dateSubmitted" type="long:dateFormat"/>
+      <xs:element name="dateAccepted" type="long:dateFormat"/>
+      <xs:element name="dateCreated" type="long:dateFormat"/>
+      <xs:element name="dateUpdated" type="long:dateFormat"/>
+      <xs:element name="dateAvailable" type="long:dateFormat"/>
+      <xs:element name="dateCopyrighted" type="long:dateFormat"/>
+      <xs:element name="dateValid" type="long:dateFormat"/>
+      <xs:element name="dateCollected" type="long:dateFormat"/>
+    </xs:choice>
+  </xs:group>
+  <xs:complexType name="dateFormat">
+    <xs:all>
+      <xs:element name="unParsed" type="xs:string"/>
+      <xs:element name="parsed" minOccurs="0" type="xs:NMTOKEN"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:element name="publication_identifier" type="long:identifier"/>
+  <xs:element name="related_identifier" type="long:identifier"/>
+  <xs:complexType name="identifier">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="type" use="required" type="xs:NCName"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="language" type="xs:language"/>
+  <xs:element name="location_url" type="xs:anyURI"/>
+  <xs:element name="relatedItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="long:part"/>
+        <xs:element maxOccurs="unbounded" ref="long:titleInfo"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:publication_identifier"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:name"/>
+        <xs:group   minOccurs="0" maxOccurs="unbounded" ref="long:date"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:placeTerm"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:publisher"/>
+      </xs:sequence>
+      <xs:attribute name="type" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="part">
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="0" name="part" type="xs:string"/>
+        <xs:element minOccurs="0" name="volume" type="xs:string"/>
+        <xs:element minOccurs="0" name="issue" type="xs:string"/>
+        <xs:element minOccurs="0" name="chapter" type="xs:string"/>
+        <xs:element minOccurs="0" name="section" type="xs:string"/>
+        <xs:element minOccurs="0" name="start_page" type="xs:string"/>
+        <xs:element minOccurs="0" name="end_page" type="xs:string"/>
+        <xs:element minOccurs="0" name="total_page" type="xs:string"/>
+        <xs:element minOccurs="0" name="list_page" type="xs:string"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="placeTerm" type="xs:string"/>
+  <xs:element name="typeOfResource">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="generaltype" type="xs:NCName"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="coverage" type="xs:string"/>
+  <xs:element name="format" type="xs:string"/>
+  <xs:element name="grantAgreements">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="grantAgreement" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:all>
+              <xs:element minOccurs="0" name="title" type="xs:string"/>
+              <xs:element minOccurs="0" name="funder" type="xs:string"/>
+              <xs:element minOccurs="0" name="description" type="xs:string"/>
+              <xs:element minOccurs="0" name="code" type="xs:anyURI"/>
+              <xs:element minOccurs="0" ref="long:funderIdentifier"/>
+            </xs:all>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="funderIdentifier">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="type" type="xs:string" use="required"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="geoLocations">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="geoLocation" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:all>
+              <xs:element minOccurs="0" ref="long:geoLocationPlace"/>
+              <xs:element minOccurs="0" ref="long:geoLocationPoint"/>
+              <xs:element minOccurs="0" ref="long:geoLocationBox"/>
+            </xs:all>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="geoLocationPlace" type="xs:string"/>
+  <xs:element name="geoLocationPoint">
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="1" name="pointLongitude" type="long:longitudeType"/>
+        <xs:element minOccurs="1" name="pointLatitude" type="long:latitudeType"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>  
+  <xs:element name="geoLocationBox">
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="1" name="northBoundLatitude" type="long:latitudeType"/>
+        <xs:element minOccurs="1" name="eastBoundLongitude" type="long:longitudeType"/>
+        <xs:element minOccurs="1" name="southBoundLatitude" type="long:latitudeType"/>
+        <xs:element minOccurs="1" name="westBoundLongitude" type="long:longitudeType"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>  
+  <xs:simpleType name="longitudeType">
+    <xs:restriction base="xs:float">
+      <xs:minInclusive value="-180"/>
+      <xs:maxInclusive value="180"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="latitudeType">
+    <xs:restriction base="xs:float">
+      <xs:minInclusive value="-90"/>
+      <xs:maxInclusive value="90"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="hostCitation" type="xs:string"/>
+</xs:schema>

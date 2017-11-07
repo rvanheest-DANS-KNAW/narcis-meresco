@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+****************************************************************
+*                            ORGANISATION 1.0                                    
+*                                                                               
+*                            October 25, 2017                 
+*****************************************************************
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  targetNamespace="http://www.onderzoekinformatie.nl/nod/org"
+  xmlns:organisation="http://www.onderzoekinformatie.nl/nod/org">
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+
+  <xs:element name="organisatie">
+    <xs:complexType>
+      <xs:sequence>
+	    <xs:element name="naam_nl" type="xs:string"/>
+	    <xs:element minOccurs="0" name="naam_en" type="xs:string"/>
+	    <xs:group   ref="organisation:taak"/>
+  	    <xs:element minOccurs="0" name="acroniem" type="xs:string"/>
+  	    <xs:element minOccurs="0" name="locatie" type="xs:string"/>
+	    <xs:element minOccurs="0" name="invoer_datum" type="xs:date"/>
+	    <xs:element name="url" type="xs:anyURI"/>
+	    <xs:element minOccurs="0" ref="organisation:categories"/>
+	  </xs:sequence>
+      <xs:attribute name="code" type="xs:NCName" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:group name="taak">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="taak_nl" type="organisation:taak"/>
+      <xs:element minOccurs="0" name="taak_en" type="organisation:taak"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:complexType name="taak" mixed="true">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="br" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="categories">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="category" >
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="term">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute ref="xml:lang"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="code" type="organisation:categoryCode" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="categoryCode">
+    <xs:restriction base="xs:string">
+	  <xs:pattern value="[ACDE]([0-9]){5}" />
+	</xs:restriction>
+  </xs:simpleType>  
+</xs:schema>
