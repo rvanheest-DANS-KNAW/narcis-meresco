@@ -477,7 +477,9 @@ class NormdocToFieldsList(Observable):
                     names.append(', '.join(fg_naam))
 
                 if affiliation:
-                	self._fieldslist.append(( UNQUALIFIED_TERMS, affiliation[0] ))
+                    self._fieldslist.append(( UNQUALIFIED_TERMS, affiliation[0] ))
+                    if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", affiliation[0]
+                
 
                 # Compose qualified author string and index author/non-author dais:
                 nidFieldname = 'nids_non_aut'
