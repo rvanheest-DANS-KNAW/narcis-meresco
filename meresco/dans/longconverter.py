@@ -905,11 +905,15 @@ class NormaliseOaiRecord(UiaConverter):
             if len(en) > 0: abstracts[1] = abstracts[1] + en
 
         elif self._metadataformat.isDatacite():
-            en = lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[starts-with(@xml:lang, 'en') and @descriptionType='Abstract']/text()", namespaces=namespacesmap)
+            en = lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[starts-with(@xml:lang, 'en') and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
+                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[starts-with(@xml:lang, 'en') and @descriptionType='Other']/text()", namespaces=namespacesmap)
             nl = lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[@xml:lang='nl' and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
                 lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(@xml:lang) and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
                 lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(starts-with(@xml:lang, 'en')) and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
-                en          
+                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[@xml:lang='nl' and @descriptionType='Other']/text()", namespaces=namespacesmap) or \
+                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(@xml:lang) and @descriptionType='Other']/text()", namespaces=namespacesmap) or \
+                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(starts-with(@xml:lang, 'en')) and @descriptionType='Other']/text()", namespaces=namespacesmap) or \
+                en
             if len(nl) > 0: abstracts[0] = abstracts[0] + nl
             if len(en) > 0: abstracts[1] = abstracts[1] + en
 
