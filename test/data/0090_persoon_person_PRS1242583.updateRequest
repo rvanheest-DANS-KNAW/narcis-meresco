@@ -8,7 +8,7 @@
         <srw:recordData><document xmlns="http://meresco.org/namespace/harvester/document"><part name="record">&lt;record xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;            
             &lt;header xmlns="http://www.openarchives.org/OAI/2.0/"&gt;&lt;identifier&gt;PRS1242583&lt;/identifier&gt;&lt;datestamp&gt;1998-12-23&lt;/datestamp&gt;&lt;setSpec&gt;personen&lt;/setSpec&gt;&lt;/header&gt;
             &lt;metadata xmlns="http://www.openarchives.org/OAI/2.0/"&gt;
-            &lt;persoon xmlns=&quot;http://www.onderzoekinformatie.nl/nod/prs&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.onderzoekinformatie.nl/nod/prs https://www.narcis.nl/schemas/person.xsd&quot;&gt;
+            &lt;persoon xmlns=&quot;http://www.onderzoekinformatie.nl/nod/prs&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.onderzoekinformatie.nl/nod/prs https://www.narcis.nl/content/schemas/nod/nod-person-1-1.xsd&quot;&gt;
             &lt;fullName&gt;H.J. Bennis&lt;/fullName&gt;
             &lt;expertise_nl&gt;Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie&lt;/expertise_nl&gt;
             &lt;expertise_en&gt;Microvariation; (Generative) Syntax; Morphosyntax; Syntax-Semantics Interface; Dialectology&lt;/expertise_en&gt;
