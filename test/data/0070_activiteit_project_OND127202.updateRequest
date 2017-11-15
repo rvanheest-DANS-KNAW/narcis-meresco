@@ -8,7 +8,7 @@
         <srw:recordData><document xmlns="http://meresco.org/namespace/harvester/document"><part name="record">&lt;record xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;            
             &lt;header xmlns="http://www.openarchives.org/OAI/2.0/"&gt;&lt;identifier&gt;OND1272024&lt;/identifier&gt;&lt;datestamp&gt;2000-12-13&lt;/datestamp&gt;&lt;setSpec&gt;activiteiten&lt;/setSpec&gt;&lt;/header&gt;
             &lt;metadata xmlns="http://www.openarchives.org/OAI/2.0/"&gt;
-            &lt;activiteit xmlns=&quot;http://www.onderzoekinformatie.nl/nod/act&quot;&gt;
+            &lt;activiteit xmlns=&quot;http://www.onderzoekinformatie.nl/nod/act&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.onderzoekinformatie.nl/nod/act https://www.narcis.nl/content/schemas/nod/nod-research-1-1.xsd&quot; &gt;
             &lt;identifier&gt;OND1272024&lt;/identifier&gt;
             &lt;title_nl&gt;Conditiebepaling PVC&lt;/title_nl&gt;
             &lt;title_en&gt;Condition assessment PVC&lt;/title_en&gt;
