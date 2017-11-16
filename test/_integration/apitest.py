@@ -49,7 +49,6 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
         self.assertEqual('12', xpathFirst(response, '//srw:numberOfRecords/text()'))
-        set_titles = set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()'))
         self.assertEqual({
             'Example Program 1',
             'Example Program 2',
@@ -60,7 +59,7 @@ class ApiTest(IntegrationTestCase):
             'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)',
             'Conditiebepaling PVC',
             'Wetenschapswinkel',
-            'H.J. Bennis'}, set_titles)
+            'H.J. Bennis'}, set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
 
     def testSruQueryWithUntokenized(self):
         response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "knaw_long"})        
