@@ -934,12 +934,12 @@ class NormaliseOaiRecord(UiaConverter):
         # Returns a list of elements on the given xpath with a matching attribute name and where attribute value matches one of the conditions in the conditions list.
         # The list belonging to the first match is returned.
         for condition in conditions:
-            items = node.xpath(xpath + self._attributeExpression(attribute_name, condition) + ("/text()" if text else ""), namespaces=namespacesmap)
+            items = node.xpath(xpath + self._getAttributePredicate(attribute_name, condition) + ("/text()" if text else ""), namespaces=namespacesmap)
             if len(items) > 0:
                 return items
         return []
 
-    def _attributeExpression(self, name, condition):
+    def _getAttributePredicate(self, name, condition):
         if type(condition) is tuple:
             value = condition[1] if len(condition) > 1 else None
             if condition[0] == 'STARTS_WITH':
@@ -948,6 +948,7 @@ class NormaliseOaiRecord(UiaConverter):
                 return "[not(starts-with(@{0}, '{1}'))]".format(name, value)
             elif condition[0] == 'NOT':
                 return "[not(@{0})]".format(name)
+            else: return ""
         else:
             return "[@{0}='{1}']".format(name, condition)
 
