@@ -49,6 +49,7 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
         self.assertEqual('12', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        set_titles = set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()'))
         self.assertEqual({
             'Example Program 1',
             'Example Program 2',
@@ -59,7 +60,7 @@ class ApiTest(IntegrationTestCase):
             'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)',
             'Conditiebepaling PVC',
             'Wetenschapswinkel',
-            'H.J. Bennis'}, set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
+            'H.J. Bennis'}, set_titles)
 
     def testSruQueryWithUntokenized(self):
         response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "knaw_long"})        
@@ -335,7 +336,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('OPGRAVING', testNamespaces.xpathFirst(response, '//long:metadata/long:subject[@xml:lang="en"]/long:topic/long:topicValue/text()'))
         self.assertEqual('ABR-complex', testNamespaces.xpathFirst(response, '//long:metadata/long:subject[not(@xml:lang)]/long:topic/long:subjectScheme/text()'))
         self.assertEqual('Abstract van dit document', testNamespaces.xpathFirst(response, '//long:metadata/long:abstract/text()'))
-        self.assertEqual('Research report', testNamespaces.xpathFirst(response, '//long:metadata/long:abstract[@xml:lang="en"]/text()'))
+        self.assertEqual('Abstract of this document', testNamespaces.xpathFirst(response, '//long:metadata/long:abstract[@xml:lang="en"]/text()'))
         self.assertEqual('2009-9-4', testNamespaces.xpathFirst(response, '//long:metadata/long:dateSubmitted/long:unParsed/text()'))
         self.assertEqual('2009-09-04', testNamespaces.xpathFirst(response, '//long:metadata/long:dateSubmitted/long:parsed/text()'))
         self.assertEqual('2009-11-24', testNamespaces.xpathFirst(response, '//long:metadata/long:dateAvailable/long:parsed/text()'))

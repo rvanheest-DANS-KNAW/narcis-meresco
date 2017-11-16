@@ -107,7 +107,7 @@
             &lt;descriptions&gt;
                 &lt;description descriptionType=&quot;Other&quot;&gt;onderzoeksrapport&lt;/description&gt;
                 &lt;description descriptionType=&quot;Abstract&quot;&gt;Abstract van dit document&lt;/description&gt;
-                &lt;description xml:lang=&quot;en-us&quot; descriptionType=&quot;Other&quot;&gt;Research report&lt;/description&gt;
+                &lt;description xml:lang=&quot;en-us&quot; descriptionType=&quot;Abstract&quot;&gt;Abstract of this document&lt;/description&gt;
             &lt;/descriptions&gt;
             &lt;geoLocations&gt;
                 &lt;geoLocation&gt;

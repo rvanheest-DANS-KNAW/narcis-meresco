@@ -94,6 +94,8 @@ BINDING_DELIMITER = '; '
 # DATACITE Controlled List Values:
 datacite_resourceTypeGeneral = ['Audiovisual','Collection','Dataset','Event','Image','InteractiveResource','Model','PhysicalObject','Service','Software','Sound','Text','Workflow','Other']
 
+# DATACITE Controlled List Description Types:
+datacite_descriptionTypes = ['Abstract','Other','TableOfContents','SeriesInformation','TechnicalInfo','Methods']
 
 # mods:nameIdentifiers that will be processed to long. Other types will be ignored!
 # ORDER does matter!
@@ -905,15 +907,10 @@ class NormaliseOaiRecord(UiaConverter):
             if len(en) > 0: abstracts[1] = abstracts[1] + en
 
         elif self._metadataformat.isDatacite():
-            en = lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[starts-with(@xml:lang, 'en') and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
-                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[starts-with(@xml:lang, 'en') and @descriptionType='Other']/text()", namespaces=namespacesmap)
-            nl = lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[@xml:lang='nl' and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
-                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(@xml:lang) and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
-                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(starts-with(@xml:lang, 'en')) and @descriptionType='Abstract']/text()", namespaces=namespacesmap) or \
-                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[@xml:lang='nl' and @descriptionType='Other']/text()", namespaces=namespacesmap) or \
-                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(@xml:lang) and @descriptionType='Other']/text()", namespaces=namespacesmap) or \
-                lxmlNode.xpath("//datacite:resource/datacite:descriptions/datacite:description[not(starts-with(@xml:lang, 'en')) and @descriptionType='Other']/text()", namespaces=namespacesmap) or \
-                en
+            # Find a list of 'description' elements where attribute 'descriptionType' matches a value in 'datacite_descriptionTypes'
+            descriptions = self._findElementsWithAttributeValue(lxmlNode, '//datacite:resource/datacite:descriptions/datacite:description', 'descriptionType', datacite_descriptionTypes)
+            en = self._getDescription(descriptions, [('STARTS_WITH', 'en')])
+            nl = self._getDescription(descriptions, ['nl', ('NOT',), ('NOT_STARTS_WITH', 'en')]) or en
             if len(nl) > 0: abstracts[0] = abstracts[0] + nl
             if len(en) > 0: abstracts[1] = abstracts[1] + en
 
@@ -925,7 +922,35 @@ class NormaliseOaiRecord(UiaConverter):
             e_abstract.attrib[namespacesmap.curieToTag('xml:lang')] = 'en'
             e_abstract.text = abstracts[1][0].strip()
             
-            
+    def _getDescription(self, descriptions, conditions):
+        # Returns first match of 'description' elements, where 'xml:lang' attribute matches a condition in the list of conditions
+        for condition in conditions:
+            for description in descriptions:
+                desc = self._findElementsWithAttributeValue(description, 'self::datacite:description', 'xml:lang', [condition], text=True)
+                if len(desc) > 0: return desc
+        return []
+
+    def _findElementsWithAttributeValue(self, node, xpath, attribute_name, conditions, text=False):
+        # Returns a list of elements on the given xpath with a matching attribute name and where attribute value matches one of the conditions in the conditions list.
+        # The list belonging to the first match is returned.
+        for condition in conditions:
+            items = node.xpath(xpath + self._attributeExpression(attribute_name, condition) + ("/text()" if text else ""), namespaces=namespacesmap)
+            if len(items) > 0:
+                return items
+        return []
+
+    def _attributeExpression(self, name, condition):
+        if type(condition) is tuple:
+            value = condition[1] if len(condition) > 1 else None
+            if condition[0] == 'STARTS_WITH':
+                return "[starts-with(@{0}, '{1}')]".format(name, value)
+            elif  condition[0] == 'NOT_STARTS_WITH':
+                return "[not(starts-with(@{0}, '{1}'))]".format(name, value)
+            elif condition[0] == 'NOT':
+                return "[not(@{0})]".format(name)
+        else:
+            return "[@{0}='{1}']".format(name, condition)
+
     def _getDates(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
 
         # Return: Normalized date and original unParsed date.
