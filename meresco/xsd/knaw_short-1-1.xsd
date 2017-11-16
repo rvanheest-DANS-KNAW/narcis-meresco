@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+****************************************************************
+*                            KNAW_SHORT 1.1                                    
+*                                                                               
+*                            October 24, 2017                 
+*****************************************************************
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  targetNamespace="http://www.knaw.nl/narcis/1.0/short/"
+  xmlns:short="http://www.knaw.nl/narcis/1.0/short/">
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  
+  <xs:element name="knaw_short">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="short:accessRights"/>
+        <xs:element ref="short:metadata"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="accessRights" type="xs:NCName"/>
+  <xs:element name="metadata">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="short:titleInfo"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="short:name"/>
+        <xs:element minOccurs="0" ref="short:penvoerder"/>
+        <xs:element minOccurs="0" ref="short:genre"/>        
+        <xs:element minOccurs="0" maxOccurs="2" ref="short:abstract"/>
+        <xs:element minOccurs="0" ref="short:locatie"/>
+        <xs:element minOccurs="0" ref="short:status"/>
+        <xs:element minOccurs="0" ref="short:dateIssued"/>
+        <xs:element minOccurs="0" ref="short:hostCitation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="titleInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="short:title"/>
+        <xs:element minOccurs="0" ref="short:subtitle"/>
+      </xs:sequence>
+      <xs:attribute ref="xml:lang"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="title" type="xs:string"/>
+  <xs:element name="subtitle" type="xs:string"/>
+    <xs:element name="name">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="short:type"/>
+        <xs:element minOccurs="0" name="name" type="xs:string"/>
+        <xs:element minOccurs="0" ref="short:unstructured"/>
+        <xs:element minOccurs="0" ref="short:family"/>
+        <xs:element minOccurs="0" ref="short:given"/>
+        <xs:element minOccurs="0" ref="short:termsOfAddress"/>
+        <xs:element minOccurs="0" ref="short:mcRoleTerm"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="short:nameIdentifier"/>
+        <xs:element minOccurs="0" ref="short:affiliation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="type" type="xs:NCName"/>
+  <xs:element name="unstructured" type="xs:string"/>
+  <xs:element name="family" type="xs:string"/>
+  <xs:element name="given" type="xs:string"/>
+  <xs:element name="termsOfAddress" type="xs:NCName"/>
+  <xs:element name="mcRoleTerm" type="xs:NCName"/>
+  <xs:element name="nameIdentifier">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="type" use="required" type="short:nameIdentifierType"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="nameIdentifierType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="dai-nl" />
+      <xs:enumeration value="orcid" />
+      <xs:enumeration value="isni" />
+      <xs:enumeration value="nod-prs" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="affiliation" type="xs:string"/>
+  <xs:element name="penvoerder">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="xml:lang"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="genre" type="xs:NCName"/>
+  <xs:element name="locatie" type="xs:string"/>
+  <xs:element name="status">
+    <xs:simpleType>
+	  <xs:restriction base="xs:NCName">
+	    <xs:enumeration value="C" />
+	    <xs:enumeration value="D" />
+	  </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="abstract">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="xml:lang"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="dateIssued" type="short:dateFormat"/>
+  <xs:element name="dateAvailable" substitutionGroup="short:dateIssued"/>
+  <xs:complexType name="dateFormat">
+    <xs:all>
+      <xs:element name="unParsed" type="xs:string"/>
+      <xs:element name="parsed" minOccurs="0" type="xs:NMTOKEN"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:element name="hostCitation" type="xs:string"/>
+</xs:schema>

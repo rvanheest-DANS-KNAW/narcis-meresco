@@ -461,6 +461,7 @@ class NormdocToFieldsList(Observable):
                 family = name.xpath('self::long:name/long:family/text()', namespaces=namespacesmap)
                 given = name.xpath('self::long:name/long:given/text()', namespaces=namespacesmap)
                 nids = name.xpath('self::long:name/long:nameIdentifier', namespaces=namespacesmap)
+                affiliation = name.xpath('self::long:name/long:affiliation/text()', namespaces=namespacesmap)
                 patroniem = name.xpath('self::long:name/long:termsOfAddress/text()', namespaces=namespacesmap)
                 tiepe = name.xpath('self::long:name/long:type/text()', namespaces=namespacesmap)
                 strdai='' # temp DAI container
@@ -474,6 +475,11 @@ class NormdocToFieldsList(Observable):
                     names.append(unstructured[0])
                 else:
                     names.append(', '.join(fg_naam))
+
+                if affiliation:
+                    self._fieldslist.append(( UNQUALIFIED_TERMS, affiliation[0] ))
+                    if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", affiliation[0]
+                
 
                 # Compose qualified author string and index author/non-author dais:
                 nidFieldname = 'nids_non_aut'
