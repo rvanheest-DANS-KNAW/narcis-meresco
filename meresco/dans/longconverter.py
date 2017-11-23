@@ -29,6 +29,7 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
     
     'dip'     : 'urn:mpeg:mpeg21:2005:01-DIP-NS',
     'dii'     : 'urn:mpeg:mpeg21:2002:01-DII-NS',
+    'xlink'   : 'http://www.w3.org/1999/xlink',
     'dai'     : 'info:eu-repo/dai',
     'gal'     : 'info:eu-repo/grantAgreement',
     'wmp'     : 'http://www.surfgroepen.nl/werkgroepmetadataplus',
@@ -496,13 +497,19 @@ class NormaliseOaiRecord(UiaConverter):
                     
     def _getRelatedIdentifier(self, lxmlNode, e_longRoot):
         if self._metadataformat.isDatacite():
-            pis = lxmlNode.xpath("//datacite:resource/datacite:relatedIdentifiers/datacite:relatedIdentifier", namespaces=namespacesmap)
-            for pi in pis:
-                api_type = pi.xpath('self::datacite:relatedIdentifier/@relatedIdentifierType', namespaces=namespacesmap)
-                api = pi.xpath('self::datacite:relatedIdentifier/text()', namespaces=namespacesmap)
-                if len(api) > 0 and len(api_type) > 0: #create new element like MODS: <identifier type="doi">doi:10.1006/jmbi.1995.0238</identifier>                    
-                    etree.SubElement(e_longRoot, "related_identifier", type=api_type[0].lower()).text = api[0]
-
+            identifiers = lxmlNode.xpath("//datacite:resource/datacite:relatedIdentifiers/datacite:relatedIdentifier", namespaces=namespacesmap)
+            for identifier in identifiers:
+                id_type = identifier.xpath('self::datacite:relatedIdentifier/@relatedIdentifierType', namespaces=namespacesmap)
+                id = identifier.xpath('self::datacite:relatedIdentifier/text()', namespaces=namespacesmap)
+                if len(id) > 0 and len(id_type) > 0: #create new element like MODS: <identifier type="doi">doi:10.1006/jmbi.1995.0238</identifier>                    
+                    etree.SubElement(e_longRoot, "related_identifier", type=id_type[0].lower()).text = id[0]
+        elif self._metadataformat.isMods():
+            identifiers = lxmlNode.xpath("//mods:mods/mods:relateditem", namespaces=namespacesmap)
+            for identifier in identifiers:
+                id_type = identifier.xpath('self::mods:relateditem/@type', namespaces=namespacesmap)
+                id_href = identifier.xpath('self::mods:relateditem/@xlink:href', namespaces=namespacesmap)
+                if len(id_href) > 0 and len(id_type) > 0 and (id_type[0].lower() == 'isreferencedby' or id_type[0].lower() == 'references'):
+                    etree.SubElement(e_longRoot, "related_identifier", type=id_type[0].lower()).text = id_href[0]
 
     def _getObjectFiles(self, lxmlNode, e_longRoot):
         e_objectFiles = None

@@ -302,6 +302,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('1993-01-01', testNamespaces.xpathFirst(response, '//long:metadata/long:dateIssued/long:parsed/text()'))
         self.assertEqual('0010-440MODS', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="issn"]/text()'))
         self.assertEqual('90022333', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="isbn"]/text()'))
+        self.assertEqual('http://repository-acc.ubn.ru.nl/handle/123456789/126651', testNamespaces.xpathFirst(response, '//long:metadata/long:related_identifier/text()'))
         self.assertEqual('http://repository.cwi.nl/search/fullrecord.php?publnr=2271', testNamespaces.xpathFirst(response, '//long:metadata/long:location_url/text()'))
         self.assertEqual('text', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/text()'))
         self.assertEqual('en', testNamespaces.xpathFirst(response, '//long:metadata/long:language/text()'))
