@@ -501,14 +501,14 @@ class NormaliseOaiRecord(UiaConverter):
             for identifier in identifiers:
                 id_type = identifier.xpath('self::datacite:relatedIdentifier/@relatedIdentifierType', namespaces=namespacesmap)
                 id = identifier.xpath('self::datacite:relatedIdentifier/text()', namespaces=namespacesmap)
-                if len(id) > 0 and len(id_type) > 0: #create new element like MODS: <identifier type="doi">doi:10.1006/jmbi.1995.0238</identifier>                    
+                if len(id) > 0 and len(id_type) > 0: #create new element like MODS: <identifier type="doi">doi:10.1006/jmbi.1995.0238</identifier>
                     etree.SubElement(e_longRoot, "related_identifier", type=id_type[0].lower()).text = id[0]
         elif self._metadataformat.isMods():
-            identifiers = lxmlNode.xpath("//mods:mods/mods:relateditem", namespaces=namespacesmap)
-            for identifier in identifiers:
-                id_type = identifier.xpath('self::mods:relateditem/@type', namespaces=namespacesmap)
-                id_href = identifier.xpath('self::mods:relateditem/@xlink:href', namespaces=namespacesmap)
-                if len(id_href) > 0 and len(id_type) > 0 and (id_type[0].lower() == 'isreferencedby' or id_type[0].lower() == 'references'):
+            rel_items = lxmlNode.xpath("//mods:mods/mods:relateditem", namespaces=namespacesmap)
+            for item in rel_items:
+                item_type = item.xpath('self::mods:relateditem/@type', namespaces=namespacesmap)
+                item_href = item.xpath('self::mods:relateditem/@xlink:href', namespaces=namespacesmap)
+                if len(item_href) > 0 and len(item_type) > 0 and item_type[0].lower() in ['isreferencedby', 'references']:
                     etree.SubElement(e_longRoot, "related_identifier", type=id_type[0].lower()).text = id_href[0]
 
     def _getObjectFiles(self, lxmlNode, e_longRoot):
