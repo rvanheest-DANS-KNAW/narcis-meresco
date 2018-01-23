@@ -48,7 +48,7 @@ class ApiTest(IntegrationTestCase):
     def testSruQuery(self):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
-        self.assertEqual('12', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('13', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual({
             'Example Program 1',
             'Example Program 2',
@@ -77,7 +77,7 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(3, 'untokenized.dd_year exact "2016"')
         self.assertSruQuery(1, 'untokenized.nids exact "info:eu-repo/dai/nl/29806278"')
         self.assertSruQuery(1, 'coverage = Europe')
-        self.assertSruQuery(2, 'format = "application/pdf"')
+        self.assertSruQuery(3, 'format = "application/pdf"')
         self.assertSruQuery(2, 'untokenized.nids exact "PRS1242583"')
         self.assertSruQuery(2, 'untokenized.nids exact "http://orcid.org/0000-0002-4703-3788"')
         self.assertSruQuery(2, 'untokenized.nids exact "http://orcid.org/0000-0002-1825-0097"')
@@ -88,14 +88,14 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(1, '"OND1272024"')
         self.assertSruQuery(1, '"ORG1236141"')
         self.assertSruQuery(1, 'untokenized.oai_id exact "ORG1236141"')
-        self.assertSruQuery(1, '"1937-1632-REL"')
+        self.assertSruQuery(1, '"1937-1632"')
         self.assertSruQuery(3, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/282797"')
         self.assertSruQuery(1, '"Veenendaal"')
         self.assertSruQuery(1, '"Groningen Institute of Archaeology, University of Groningen"')
 
 
     def testPublIdentifier(self):
-        response = self.doSruQuery(**{'query':'1937-1632-REL', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
+        response = self.doSruQuery(**{'query':'1937-1632', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
         # print "DD body:", etree.tostring(response)
         #print body.searchRetrieveResponse.records.record.recordData.knaw_long.metadata.relatedItem.publication_identifier
         self.assertEqual('Springer', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:publisher/text()'))
@@ -115,17 +115,20 @@ class ApiTest(IntegrationTestCase):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
         response = self.doSruQuery(**{"query": '*', 'maximumRecords': '1', "x-term-drilldown": "dd_cat:0"})
         # print "DD body:", etree.tostring(response)
-        self.assertEqual('12', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('13', xpathFirst(response, '//srw:numberOfRecords/text()'))
         # self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1'), ('D37000', '1'), ('D30000', '1')], drilldown)
-
+        self.assertEqual([('D37000', '2'), ('D30000', '2'), ('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
 
         # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         # drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         # self.assertEqual([('Search', '1'), ('Programming', '1')], drilldown)
+    def testSruDataCiteDOI(self):
+        response = self.doSruQuery(**{"query": '"10.17026/dans-zqm-htb9"', 'maximumRecords': '1'})
+        # print "RESPONSE:", etree.tostring(response)
+        # doi:10.17026/dans-zqm-htb9
 
     def testSruQueryWithMultipleDrilldownDataCite(self):
         response = self.doSruQuery(**{"query": 'untokenized.meta_collection exact "dataset"', 'maximumRecords': '0', "x-term-drilldown": "dd_cat:0,dd_year:2,meta_collection:0,meta_repositorygroupid:0,access:0,genre:0"})
@@ -145,11 +148,11 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('openAccess', '5'), ('closedAccess', '3'), ('embargoedAccess', '1')], drilldown)
+        self.assertEqual([('openAccess', '6'), ('closedAccess', '3'), ('embargoedAccess', '1')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1')], drilldown)
+        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1'), ('report', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):
@@ -160,7 +163,7 @@ class ApiTest(IntegrationTestCase):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
         # print "OAI body:", etree.tostring(body) #
         records = xpath(body, '//oai:record/oai:metadata')
-        self.assertEqual(9, len(records))
+        self.assertEqual(10, len(records))
         self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
     # def testOaiPovenance(self):
@@ -186,13 +189,13 @@ class ApiTest(IntegrationTestCase):
         
 
     def testRSS(self):
-        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.dateissued,,0', startRecord='3'))
+        header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.dateissued,,0', startRecord='4'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(10, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Example Program 2', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b'}, set(xpath(body, "//item/title/text()")))
-        self.assertEqual({'FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'Abstract van dit document', 'This is an example program about Programming with Meresco', 'Abstract'}, set(xpath(body, "//item/description/text()")))
+        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Havens van het IJsselmeergebied', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b'}, set(xpath(body, "//item/title/text()")))
+        self.assertEqual({'FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'Abstract van dit document', 'Verslag van een (literatuur-) onderzoek naar de\n            havens in het IJselmeergebied, dat tot doel heeft na te gaan hoe de havens functioneren\n            ten aanzien van de visserij, beroepsscheepvaart en recreatie, alsmede de economische\n            betekenis van de functies en relaties. -', 'Abstract'}, set(xpath(body, "//item/description/text()")))
         self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
 
     def testDcToLong(self):
@@ -254,7 +257,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('This is the subject', testNamespaces.xpathFirst(response, '//long:metadata/long:subject/long:topic/long:topicValue/text()'))
         self.assertEqual('FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', testNamespaces.xpathFirst(response, '//long:metadata/long:abstract/text()'))
         self.assertEqual('opgraafdatum 3000 jaar voor christus', testNamespaces.xpathFirst(response, '//long:metadata/long:dateIssued/long:unParsed/text()'))
-        self.assertEqual('00282162:root_id', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="issn"]/text()'))
+        self.assertEqual('00282162', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="issn"]/text()'))
         self.assertEqual('http://www.dds.nl/semantics/article', testNamespaces.xpathFirst(response, '//long:metadata/long:location_url/text()'))
         self.assertEqual('Amsterdam', testNamespaces.xpathFirst(response, '//long:metadata/long:placeTerm/text()'))
         self.assertEqual('text', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/text()'))
@@ -268,7 +271,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('209', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:part/long:start_page/text()'))
         self.assertEqual('228', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:part/long:end_page/text()'))
         self.assertEqual('Spektator', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:titleInfo[@xml:lang="en"]/long:title/text()'))
-        self.assertEqual('00282162:relItem', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:publication_identifier[@type="issn"]/text()'))
+        self.assertEqual('00286666', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:publication_identifier[@type="issn"]/text()'))
         self.assertEqual('Oxford', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:placeTerm/text()'))
         self.assertEqual(0, len(testNamespaces.xpathFirst(response, '//long:objectFiles/long:objectFile/long:resource[@mimeType="application/pdf" and @ref="http://depot.knaw.nl/565/1/14807.pdf"]')))
         self.assertEqual(3, len(testNamespaces.xpath(response, '//long:metadata/long:name')))
@@ -300,8 +303,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('Samenvatting', testNamespaces.xpathFirst(response, '//long:metadata/long:abstract/text()'))
         self.assertEqual('1993-1-01', testNamespaces.xpathFirst(response, '//long:metadata/long:dateIssued/long:unParsed/text()'))
         self.assertEqual('1993-01-01', testNamespaces.xpathFirst(response, '//long:metadata/long:dateIssued/long:parsed/text()'))
-        self.assertEqual('0010-440MODS', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="issn"]/text()'))
-        self.assertEqual('90022333', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="isbn"]/text()'))
+        self.assertEqual('0010-440X', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="issn"]/text()'))
+        self.assertEqual('9002233389', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="isbn"]/text()'))
         self.assertEqual('http://repository-acc.ubn.ru.nl/handle/123456789/126651', testNamespaces.xpathFirst(response, '//long:metadata/long:related_identifier/text()'))
         self.assertEqual('http://repository.cwi.nl/search/fullrecord.php?publnr=2271', testNamespaces.xpathFirst(response, '//long:metadata/long:location_url/text()'))
         self.assertEqual('text', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/text()'))

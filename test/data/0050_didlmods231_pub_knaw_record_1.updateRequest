@@ -53,7 +53,7 @@
                                 &lt;mods:language&gt;
                                     &lt;mods:languageTerm type=&quot;code&quot; authority=&quot;rfc3066&quot;&gt;NL-01234&lt;/mods:languageTerm&gt;
                                 &lt;/mods:language&gt;
-                                &lt;mods:identifier type=&quot;local&quot;&gt;info:doi/00282162&lt;/mods:identifier&gt;
+                                &lt;mods:identifier type=&quot;local&quot;&gt;info:doi/10.00282162&lt;/mods:identifier&gt;
                                 &lt;mods:titleInfo&gt;
                                     &lt;mods:title&gt;Appositie en de interne struktuur van de NP&lt;/mods:title&gt;
                                 &lt;/mods:titleInfo&gt;
@@ -120,7 +120,7 @@
                                     &lt;/wmp:rights&gt;
                                 &lt;/mods:extension&gt;
                                 &lt;mods:typeOfResource&gt;text&lt;/mods:typeOfResource&gt;
-                                &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00282162:root_id&lt;/mods:identifier&gt;
+                                &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00282162&lt;/mods:identifier&gt;
                                 &lt;mods:relatedItem type=&quot;host&quot;&gt;
                                     &lt;mods:titleInfo&gt;
                                         &lt;mods:title&gt;Spektator&lt;/mods:title&gt;
@@ -144,7 +144,7 @@
                                             &lt;mods:placeTerm type=&quot;text&quot;&gt;Oxford&lt;/mods:placeTerm&gt;
                                         &lt;/mods:place&gt;
                                     &lt;/mods:originInfo&gt;
-                                    &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00282162:relItem&lt;/mods:identifier&gt;
+                                    &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00286666&lt;/mods:identifier&gt;
                                 &lt;/mods:relatedItem&gt;
                                 &lt;mods:genre&gt;info:eu-repo/semantics/article&lt;/mods:genre&gt;
                                 &lt;mods:location&gt;

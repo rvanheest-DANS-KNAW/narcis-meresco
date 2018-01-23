@@ -159,8 +159,8 @@
                                             &lt;mods:classification authority=&quot;msc&quot;&gt;05C90&lt;/mods:classification&gt;
                                             &lt;mods:classification authority=&quot;msc&quot;&gt;90B10&lt;/mods:classification&gt;
                                             &lt;mods:classification authority=&quot;msc&quot;&gt;90C35&lt;/mods:classification&gt;
-                                            &lt;mods:identifier type=&quot;uri&quot;&gt;URN:ISSN:0010-440MODS&lt;/mods:identifier&gt;
-                                            &lt;mods:identifier type=&quot;uri&quot;&gt;urn:isbn:90022333&lt;/mods:identifier&gt;
+                                            &lt;mods:identifier type=&quot;uri&quot;&gt;URN:ISSN:0010-440X&lt;/mods:identifier&gt;
+                                            &lt;mods:identifier type=&quot;uri&quot;&gt;urn:isbn:9002233389&lt;/mods:identifier&gt;
 
                                         &lt;/mods:mods&gt;
                                     &lt;/nl_didl:Resource&gt;

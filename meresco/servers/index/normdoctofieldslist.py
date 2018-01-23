@@ -270,8 +270,11 @@ class NormdocToFieldsList(Observable):
             dateIssued = None # we do not know yet.
             # Year facet: Results from knaw_long/dateIssued or knaw_long/dateAvailable, dateAvailable takes precedence over dateIssued (DataCite)
             if len(results) > 0: dateIssued = results[0].strip().replace('\n', '')
+            publicationYear = lxmlNode.xpath("//long:metadata/long:publicationYear/text()", namespaces=namespacesmap)
             dateAvailable = lxmlNode.xpath("//long:metadata/long:dateAvailable/long:parsed/text()", namespaces=namespacesmap)
-            if len(dateAvailable) > 0:
+            if len(publicationYear) > 0:
+                dateIssued = publicationYear[0].strip().replace('\n', '')
+            elif len(dateAvailable) > 0:
                 dateIssued = dateAvailable[0].strip().replace('\n', '')
             if self._getYearGroupForDrilldown( dateIssued ) is not None: # 201 returns None, however it is a valid year, but not wanted for drilldown.
                 if self._verbose: print 'addField:', fieldName.upper(), dateIssued, "--->", self._getYearGroupForDrilldown( dateIssued )
