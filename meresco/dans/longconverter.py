@@ -447,9 +447,6 @@ class NormaliseOaiRecord(UiaConverter):
                     primId = PidFactory.factory(pid_type[0], pid[0])
                     if primId.is_valid():
                         str_hsp = primId.get_idx_id()
-            #########################################
-            #doi = lxmlNode.xpath("//datacite:resource/datacite:identifier/text()", namespaces=namespacesmap)
-            #if len(doi) > 0 : str_hsp = "doi:"+self._firstElement(doi)
         else:
             # DIDL or DC(1st dc:identifier)
             hsp = self._findFirstXpath(lxmlNode,
@@ -916,7 +913,7 @@ class NormaliseOaiRecord(UiaConverter):
             e_topic = etree.SubElement(e_subject, "topic")
             etree.SubElement(e_topic, "topicValue").text = topic.strip()
 
-    def _getDataciteTopic(self, e_subject, topics):  
+    def _getDataciteTopic(self, e_subject, topics):
         for topic in topics:
             if not topic.text: continue
             e_topic = etree.SubElement(e_subject, "topic")
@@ -1040,7 +1037,8 @@ class NormaliseOaiRecord(UiaConverter):
                 if len(pid) > 0 and len(pid_type) > 0: # Found primary identifier and type (probably DOI)
                     primId = PidFactory.factory(pid_type[0], pid[0])
                     if primId.is_valid():
-                        etree.SubElement(e_longmetadata, "publication_identifier", type=primId.get_name()).text = primId.get_unformatted_id()                 
+                        etree.SubElement(e_longmetadata, "publication_identifier", type=primId.get_name()).text = primId.get_unformatted_id()
+
         elif self._metadataformat.isMods(): ## Also Called from getRelatedItems: (relatedItem, e_relateditem, root='self::mods:relatedItem/')
             identifierList = lxmlNode.xpath( root+"mods:identifier[@type != 'local']", namespaces=namespacesmap) # Skip local ids.
             for identifier in identifierList:
@@ -1051,15 +1049,24 @@ class NormaliseOaiRecord(UiaConverter):
                 pId = PidFactory.factory(idType, idText)
                 if pId.is_valid():
                     etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name()).text = pId.get_unformatted_id()
-                # Again, get MODS-PI: 
-                if (root=='//mods:mods/'): # But only if called from toplevel, not if called from RelatedItems...
-                    pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap)
-                    if len(pi) > 0: # TODO: Hoe weten we welk type identifier hierin gaat? Gaat EduStandaard ALTIJD uit van URN:NBN?
-                        e_pi = etree.SubElement(e_longmetadata, "publication_identifier")
-                        e_pi.text = self._firstElement(pi)
-                        pI = PidFactory.factory('urn:nbn', self._firstElement(pi))
-                        if pI.is_valid(): # Type urn:nbn gevonden...
-                            e_pi.attrib['type'] = pI.get_name()
+            if (root=='//mods:mods/'): # But only if called from toplevel, not if called from RelatedItems...
+                pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap) # Primary (persistent) identifier.
+                if len(pi) > 0: # TODO: Hoe weten we welk type identifier hierin gaat? Gaat EduStandaard ALTIJD uit van URN:NBN?
+                    e_pi = etree.SubElement(e_longmetadata, "publication_identifier")
+                    e_pi.text = self._firstElement(pi)
+                    pI = PidFactory.factory('urn:nbn', self._firstElement(pi))
+                    if pI.is_valid(): # Type urn:nbn gevonden...
+                        e_pi.attrib['type'] = pI.get_name()
+                # HSP 'identifier' as well? Vaak dezelfde als de @ref van de urn:nbn:nl
+                hsp = self._findFirstXpath(lxmlNode,
+                    '//didl:Item/didl:Item[didl:Descriptor/didl:Statement/rdf:type/@rdf:resource="info:eu-repo/semantics/humanStartPage"]/didl:Component/didl:Resource/@ref', #DIDL 3.0
+                    '//didl:Item/didl:Item[didl:Descriptor/didl:Statement/dip:ObjectType/text()="info:eu-repo/semantics/humanStartPage"]/didl:Component/didl:Resource/@ref', #fallback DIDL 2.3.1
+                    "//mods:mods/mods:location/mods:url[contains(.,'://')]/text()" #fallback MODS
+                    )
+                if len(hsp) > 0:
+                    hrefId = PidFactory.factory('href', hsp[0])
+                    if hrefId.is_valid(): # Type 'href/url' gevonden...
+                        etree.SubElement(e_longmetadata, "publication_identifier", type=hrefId.get_name()).text = hrefId.get_unformatted_id()
 
 
     def _getLanguage(self, lxmlNode, e_longmetadata):
@@ -1161,7 +1168,7 @@ class NormaliseOaiRecord(UiaConverter):
                     fname = ga.xpath('self::datacite:fundingReference/datacite:funderName/text()', namespaces=namespacesmap)
                     if len(fname) > 0: etree.SubElement(e_ga, "funder").text = fname[0]
                     
-                    anumber = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/text()', namespaces=namespacesmap)                    
+                    anumber = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/text()', namespaces=namespacesmap)
                     if len(anumber) > 0: etree.SubElement(e_ga, "description").text = anumber[0]                    
                     auri = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/@awardURI', namespaces=namespacesmap)
                     if len(auri) > 0: etree.SubElement(e_ga, "code").text = auri[0]

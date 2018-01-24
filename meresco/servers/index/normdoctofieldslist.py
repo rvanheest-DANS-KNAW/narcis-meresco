@@ -118,7 +118,7 @@ fieldnamesMapping = {
     'knaw_long.persistentIdentifier'                                    : 'persistentid',
     'knaw_long.humanStartPage'                                          : 'humanstartpage',
     'knaw_long.metadata.grantAgreements.grantAgreement.funderIdentifier': 'relatedid',
-    'knaw_long.metadata.related_identifier'                             : 'relatedid',        
+    'knaw_long.metadata.related_identifier'                             : 'relatedid',   #<related_identifier relationType="IsCitedBy" type="arxiv">0706.0001</related_identifier>     
     'organisatie.acroniem'                                              : 'acroniem',
     'organisatie.taak_en'                                               : 'abstract_en',
     'organisatie.taak_nl'                                               : 'abstract',
@@ -163,7 +163,7 @@ fieldNamesXpathMap = {
     'dd_penv'           : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
     'dd_fin'            : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
     'publicationid'     : "//long:publication_identifier/text()", # MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
-    'pidref'            : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to wich the pubId reffers to. (BRI)
+    'pidref'            : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to which the pubId refers to. (BRI)
     'dd_abrprd'         : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", #
     'dd_abrcmplx'       : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", #
     # 'dd_format'         : "//long:metadata/long:format/text()",
@@ -264,18 +264,19 @@ class NormdocToFieldsList(Observable):
     def _findAndAddToFieldslist(self, lxmlNode, fieldName, xpath):
         # Adds fieldnames and values to the fieldslist list.
         results = lxmlNode.xpath(xpath, namespaces=namespacesmap)
-        if not results and not fieldName == 'dd_year': # dd_year is a special case: it depends on 2 xpaths, not just this one result.
+        if not results and not fieldName == 'dd_year': # dd_year is a special case: it depends on multiple xpaths, not just this one result.
             return
         elif fieldName == 'dd_year':
-            dateIssued = None # we do not know yet.
-            # Year facet: Results from knaw_long/dateIssued or knaw_long/dateAvailable, dateAvailable takes precedence over dateIssued (DataCite)
-            if len(results) > 0: dateIssued = results[0].strip().replace('\n', '')
+            dateIssued = None
             publicationYear = lxmlNode.xpath("//long:metadata/long:publicationYear/text()", namespaces=namespacesmap)
             dateAvailable = lxmlNode.xpath("//long:metadata/long:dateAvailable/long:parsed/text()", namespaces=namespacesmap)
-            if len(publicationYear) > 0:
+            # Year-facet: Order/precedence: 1: knaw_long:dateAvailable, 2: knaw_long:dateIssued, 3: knaw_long:publicationYear
+            if len(dateAvailable) > 0:
+                dateIssued = dateAvailable[0].strip().replace('\n', '')            
+            elif len(results) > 0: # knaw_long:dateIssued
+                dateIssued = results[0].strip().replace('\n', '')
+            elif len(publicationYear) > 0:
                 dateIssued = publicationYear[0].strip().replace('\n', '')
-            elif len(dateAvailable) > 0:
-                dateIssued = dateAvailable[0].strip().replace('\n', '')
             if self._getYearGroupForDrilldown( dateIssued ) is not None: # 201 returns None, however it is a valid year, but not wanted for drilldown.
                 if self._verbose: print 'addField:', fieldName.upper(), dateIssued, "--->", self._getYearGroupForDrilldown( dateIssued )
                 self._fieldslist.append((fieldName, self._getYearGroupForDrilldown( dateIssued )))

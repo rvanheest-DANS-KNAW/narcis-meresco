@@ -163,7 +163,7 @@ class SruSlaveTest(IntegrationTestCase):
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(13, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual(['1993-01-01', '2004-06-30', '2009-11-24', '2013', '2019-11-06', '2014', '2016', '2016-01-31', '2016-05-05'], xpath(body, "//item/pubDate/text()"))
+        self.assertEqual(['1993-01-01', '2004-06-30', '2009-11-24', '2013', '2014', '2016', '2016-01-31', '2016-05-05', '2019-11-06'], xpath(body, "//item/pubDate/text()"))
         self.assertEqual('MyWorkerLabel', xpathFirst(body, '//channel/title/text()'))
 
 
