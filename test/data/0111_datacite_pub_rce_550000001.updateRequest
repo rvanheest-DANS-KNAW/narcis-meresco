@@ -79,7 +79,7 @@
         &lt;alternateIdentifier alternateIdentifierType=&quot;DOI&quot;&gt;10.17026/dans-x38-rkke&lt;/alternateIdentifier&gt;
     &lt;/alternateIdentifiers&gt;
     &lt;relatedIdentifiers&gt;
-        &lt;relatedIdentifier relatedIdentifierType=&quot;URL&quot; relationType=&quot;IsSupplementedBy&quot;&gt;https:\\archisarchief.cultureelerfgoed.nl\bibliotheek\InterneRapportenROB8.pdf&lt;/relatedIdentifier&gt;
+        &lt;relatedIdentifier relatedIdentifierType=&quot;URL&quot; resourceTypeGeneral=&quot;Audiovisual&quot; relationType=&quot;IsSupplementedBy&quot;&gt;https://archisarchief.cultureelerfgoed.nl\bibliotheek\InterneRapportenROB8.pdf&lt;/relatedIdentifier&gt;
     &lt;/relatedIdentifiers&gt;
     &lt;formats&gt;
         &lt;format&gt;application/pdf&lt;/format&gt;

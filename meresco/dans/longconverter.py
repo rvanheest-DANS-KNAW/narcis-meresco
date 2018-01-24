@@ -471,7 +471,7 @@ class NormaliseOaiRecord(UiaConverter):
             if len(pi) > 0: # Found URN, check validity:
                 pId = PidFactory.factory('urn', self._firstElement(pi))
                 if pId.is_valid():
-                    etree.SubElement(e_longRoot, "persistentIdentifier", type="urn").text = pId.get_unformatted_id()
+                    etree.SubElement(e_longRoot, "persistentIdentifier", type="urn", ref=pId.get_resolver()).text = pId.get_unformatted_id()
             else: # fallback to primary identifier. This should be a DOI, except for RCE.
                 pis = lxmlNode.xpath("//datacite:resource/datacite:identifier", namespaces=namespacesmap)
                 for pi in pis:
@@ -480,7 +480,7 @@ class NormaliseOaiRecord(UiaConverter):
                     if len(pid) > 0 and len(pid_type) > 0: # Found primary identifier and type (probably DOI)
                         primId = PidFactory.factory(pid_type[0], pid[0])
                         if primId.is_valid():
-                            etree.SubElement(e_longRoot, "persistentIdentifier", type=primId.get_name(), ref=primId.get_resolver()).text = primId.get_unformatted_id() # TWEE attributen. GAAT DIT GOED??
+                            etree.SubElement(e_longRoot, "persistentIdentifier", type=primId.get_name(), ref=primId.get_resolver()).text = primId.get_unformatted_id()
         else:
             pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap)
             if len(pi) > 0: # TODO: Hoe weten we welk type identifier hierin gaat? Gaat EduStandaard ALTIJD uit van URN:NBN?
@@ -491,7 +491,8 @@ class NormaliseOaiRecord(UiaConverter):
                     e_pi.attrib['ref'] = uri[0]
 
 
-    def _getRelatedIdentifiers(self, lxmlNode, e_longRoot):
+    def _getRelatedIdentifiers(self, lxmlNode, e_longmetadata):
+        attrib_dict = {}
         if self._metadataformat.isDatacite():
             identifiers = lxmlNode.xpath("//datacite:resource/datacite:relatedIdentifiers/datacite:relatedIdentifier", namespaces=namespacesmap)
             for identifier in identifiers:
@@ -500,27 +501,35 @@ class NormaliseOaiRecord(UiaConverter):
                 if len(idee) > 0 and len(id_type) > 0: #create new element: <related_identifier type="doi" relationType="IsReferencedBy">doi:10.1006/jmbi.1995.0238</related_identifier>   
                     relId = PidFactory.factory(id_type[0], idee[0])
                     if relId.is_valid():
-                        print "VALID RELATEDID:", relId.get_idx_id()
-                        # new_element = etree.SubElement(e_longRoot, "related_identifier", type=relId.get_name()).text = relId.get_unformatted_id() # The @relationType (Description of the relationship) is MISSING here!
-                        new_element = etree.SubElement(e_longRoot, "related_identifier")
-                        new_element.text = relId.get_unformatted_id()
-                        new_element.attrib['type'] = relId.get_name()
-                        id_reltype = identifier.xpath('self::datacite:relatedIdentifier/@relationType', namespaces=namespacesmap) 
-                        if len(id_type) > 0: new_element.attrib['relationType'] = id_type[0]
-
+                        attrib_dict['type'] = relId.get_name()
+                        id_reltype = identifier.xpath('self::datacite:relatedIdentifier/@relationType', namespaces=namespacesmap)
+                        id_resourceTypeGeneral = identifier.xpath('self::datacite:relatedIdentifier/@resourceTypeGeneral', namespaces=namespacesmap)
+                        if len(id_reltype) > 0:
+                            attrib_dict['relationType'] = id_reltype[0]
+                        if len(id_resourceTypeGeneral) > 0:
+                            attrib_dict['resourceTypeGeneral'] = id_resourceTypeGeneral[0]
+                        etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = relId.get_unformatted_id()
         elif self._metadataformat.isMods():
-            rel_items = lxmlNode.xpath("//mods:mods/mods:relateditem", namespaces=namespacesmap)
+            rel_items = lxmlNode.xpath("//mods:mods/mods:relatedItem", namespaces=namespacesmap)
             for item in rel_items:
-                item_reltype = item.xpath('self::mods:relateditem/@type', namespaces=namespacesmap)
-                item_href = item.xpath('self::mods:relateditem/@xlink:href', namespaces=namespacesmap)
-                if len(item_href) > 0 and len(item_reltype) > 0 and item_reltype[0].lower() in ['isreferencedby', 'references', 'reviewof']: #create new element: <related_identifier type="doi" relationType="IsReferencedBy">doi:10.1006/jmbi.1995.0238</related_identifier>
-#                     etree.SubElement(e_longRoot, "related_identifier", type=item_type[0].lower()).text = item_href[0]
+                item_href = item.xpath('self::mods:relatedItem/@xlink:href', namespaces=namespacesmap)
+                item_reltype = item.xpath('self::mods:relatedItem/@type', namespaces=namespacesmap)
+                if len(item_reltype) > 0: attrib_dict['relationType'] = item_reltype[0]
+                attrib_resourceTypeGeneral = item.xpath('self::mods:relatedItem/mods:genre[1]/text()', namespaces=namespacesmap)
+                if len(attrib_resourceTypeGeneral) > 0: attrib_dict['resourceTypeGeneral'] = attrib_resourceTypeGeneral[0]
+
+                if len(item_href) > 0 and len(item_reltype) > 0: # Create new element: <related_identifier type="doi" relationType="IsReferencedBy">doi:10.1006/jmbi.1995.0238</related_identifier>
                     relId = PidFactory.factory('url', item_href[0])
                     if relId.is_valid():
-                        new_element = etree.SubElement(e_longRoot, "related_identifier")
-                        new_element.text = relId.get_unformatted_id()
-                        new_element.attrib['type'] = relId.get_name()
-                        new_element.attrib['relationType'] = item_reltype[0]
+                        attrib_dict['type'] = relId.get_name()
+                        etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = relId.get_unformatted_id()
+                relitem_ids = item.xpath('self::mods:relatedItem/mods:identifier[@type]', namespaces=namespacesmap)
+                for relitem_ID in item.xpath('self::mods:relatedItem/mods:identifier[@type and @type != "local"]', namespaces=namespacesmap): # Get all identifiers with type from the related items:
+                    relId = PidFactory.factory(relitem_ID.get("type"), relitem_ID.text)
+                    if relId.is_valid():
+                        attrib_dict['type'] = relId.get_name()
+                        etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = relId.get_unformatted_id()
+
 
 # https://www.loc.gov/standards/mods/userguide/relateditem.html
 # <relatedItem type="succeeding">
@@ -823,14 +832,14 @@ class NormaliseOaiRecord(UiaConverter):
                 etree.SubElement(e_longmetadata, "rightsDescription").text = BINDING_DELIMITER.join(wmp_rights)
 
 
-    def _getGenre(self, lxmlNode, e_longmetadata):
+    def _getGenre(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
         if self._metadataformat.isDC():
             # uit DC(mandatory): volgens specs mogen we first occurence pakken:
             dcGenre = lxmlNode.xpath('//dc:type[1]/text()', namespaces=namespacesmap)
             if len(dcGenre) > 0 and self._DCType2PublicationType(dcGenre[0].strip()) in pubTypes:
                 etree.SubElement(e_longmetadata, "genre").text = self._DCType2PublicationType(dcGenre[0].strip())
         elif self._metadataformat.isMods():
-            modsGenre = lxmlNode.xpath('//mods:mods/mods:genre[1]/text()', namespaces=namespacesmap)
+            modsGenre = lxmlNode.xpath(root+'mods:genre[1]/text()', namespaces=namespacesmap)
             if len(modsGenre) > 0 and self._getLabelFromGenreURI(modsGenre[0]) in pubTypes:
                 etree.SubElement(e_longmetadata, "genre").text = self._getLabelFromGenreURI(modsGenre[0])
         elif self._metadataformat.isDatacite(): # DataCite is all about researchdata/datasets...
@@ -1032,7 +1041,7 @@ class NormaliseOaiRecord(UiaConverter):
                     primId = PidFactory.factory(pid_type[0], pid[0])
                     if primId.is_valid():
                         etree.SubElement(e_longmetadata, "publication_identifier", type=primId.get_name()).text = primId.get_unformatted_id()                 
-        elif self._metadataformat.isMods():
+        elif self._metadataformat.isMods(): ## Also Called from getRelatedItems: (relatedItem, e_relateditem, root='self::mods:relatedItem/')
             identifierList = lxmlNode.xpath( root+"mods:identifier[@type != 'local']", namespaces=namespacesmap) # Skip local ids.
             for identifier in identifierList:
                 idType = identifier.attrib.get('type')
@@ -1042,16 +1051,15 @@ class NormaliseOaiRecord(UiaConverter):
                 pId = PidFactory.factory(idType, idText)
                 if pId.is_valid():
                     etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name()).text = pId.get_unformatted_id()
-                # <mods:identifier type="uri">URN:ISSN:1876-4142</mods:identifier>
-                # <mods:identifier type="uri">urn:isbn:978-94-6290-466-8</mods:identifier>
-                # Again, get MODS-PI:
-                pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap)
-                if len(pi) > 0: # TODO: Hoe weten we welk type identifier hierin gaat? Gaat EduStandaard ALTIJD uit van URN:NBN?
-                    e_pi = etree.SubElement(e_longmetadata, "publication_identifier")
-                    e_pi.text = self._firstElement(pi)
-                    pI = PidFactory.factory('urn:nbn', self._firstElement(pi))
-                    if pI.is_valid(): # Type urn:nbn gevonden...
-                        e_pi.attrib['type'] = pI.get_name()
+                # Again, get MODS-PI: 
+                if (root=='//mods:mods/'): # But only if called from toplevel, not if called from RelatedItems...
+                    pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap)
+                    if len(pi) > 0: # TODO: Hoe weten we welk type identifier hierin gaat? Gaat EduStandaard ALTIJD uit van URN:NBN?
+                        e_pi = etree.SubElement(e_longmetadata, "publication_identifier")
+                        e_pi.text = self._firstElement(pi)
+                        pI = PidFactory.factory('urn:nbn', self._firstElement(pi))
+                        if pI.is_valid(): # Type urn:nbn gevonden...
+                            e_pi.attrib['type'] = pI.get_name()
 
 
     def _getLanguage(self, lxmlNode, e_longmetadata):
@@ -1080,17 +1088,15 @@ class NormaliseOaiRecord(UiaConverter):
 
     def _getRelatedItems(self, lxmlNode, e_longmetadata):
         # Dit gaat 'slechts' 1 nivo diep. Bij diepere nesting gaat dit fout.
-        # FMODS only
         if self._metadataformat.isMods():
             relateditemtypes = ['preceding', 'succeeding', 'host', 'series', 'otherVersion']
             for relateditemtype in relateditemtypes:
                 relatedItems = lxmlNode.xpath('//mods:mods/mods:relatedItem[@type="'+relateditemtype+'"]', namespaces=namespacesmap)
                 for relatedItem in relatedItems: # voor iedere relatedItem per host, series, etc.
-                    # if len(relatedItem) > 0:
                     e_relateditem = etree.SubElement(e_longmetadata, "relatedItem", type=relateditemtype)
-                    # Get stuff from related item:
+                    # Get host or series info from related item:
                     self._addRelatedItemPart(relatedItem, relateditemtype, e_relateditem)
-                    methodNames = [ self._getTitleInfo, self._getAllRecordIdentifiers, self._getNames, self._getDates, self._getPlaceterm, self._getPublisher ] #TODO: Check function _getAllRecordIdentifiers
+                    methodNames = [ self._getTitleInfo, self._getAllRecordIdentifiers, self._getNames, self._getDates, self._getPlaceterm, self._getPublisher, self._getGenre ]
                     for method in methodNames:
                         method(relatedItem, e_relateditem, root='self::mods:relatedItem/')
 

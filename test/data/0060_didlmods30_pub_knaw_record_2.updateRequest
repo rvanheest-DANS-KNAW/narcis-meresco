@@ -129,7 +129,43 @@
                                                 &lt;mods:languageTerm type=&quot;code&quot; authority=&quot;rfc3066&quot;&gt;en&lt;/mods:languageTerm&gt;
                                             &lt;/mods:language&gt;
 
-                                            &lt;mods:relateditem type=&quot;isreferencedby&quot; xlink:href=&quot;http://repository-acc.ubn.ru.nl/handle/123456789/126651&quot;/&gt;
+                                            &lt;mods:relatedItem type=&quot;isreferencedby&quot; xlink:href=&quot;http://repository-acc.ubn.ru.nl/handle/123456789/126651&quot;/&gt;
+
+                                            &lt;mods:relatedItem type=&quot;succeeding&quot;&gt;
+                                                &lt;mods:titleInfo&gt;
+                                                    &lt;mods:title&gt;Computing in musicology&lt;/mods:title&gt;
+                                                &lt;/mods:titleInfo&gt;
+                                                &lt;mods:identifier type=&quot;issn&quot;&gt;1057-9478&lt;/mods:identifier&gt;
+                                                &lt;mods:identifier type=&quot;lccn&quot;&gt;(DLC) 91656596&lt;/mods:identifier&gt;
+                                                &lt;mods:identifier type=&quot;local&quot;&gt;(OCoLC)21202412&lt;/mods:identifier&gt;
+                                                &lt;mods:genre&gt;info:eu-repo/semantics/book&lt;/mods:genre&gt;
+                                            &lt;/mods:relatedItem&gt;
+
+
+                        &lt;mods:relatedItem type=&quot;isReferencedBy&quot; xlink:href=&quot;http://repository-acc.ubn.ru.nl/handle/123456789/169092&quot;&gt;
+                            &lt;mods:titleInfo&gt;
+                                &lt;mods:title&gt;“Wij zijn eigenlijk altijd multicultureel geweest”. Een analyse van het discours over het ‘multiculturele drama’ in Nederland en de mediatorrol van Indonesische en Surinaamse migranten&lt;/mods:title&gt;
+                            &lt;/mods:titleInfo&gt;
+                            &lt;mods:genre&gt;Dissertation&lt;/mods:genre&gt;
+                        &lt;/mods:relatedItem&gt;
+                        &lt;mods:relatedItem type=&quot;isReferencedBy&quot; xlink:href=&quot;http://repository-acc.ubn.ru.nl/handle/123456789/155610&quot;&gt;
+                            &lt;mods:titleInfo&gt;
+                                &lt;mods:title&gt;Indonesian Muslim or World Citizen? Religious Identity in the Dutch Integration Discourse&lt;/mods:title&gt;
+                            &lt;/mods:titleInfo&gt;
+                            &lt;mods:genre&gt;Part of book or chapter of book&lt;/mods:genre&gt;
+                        &lt;/mods:relatedItem&gt;
+                        &lt;mods:relatedItem type=&quot;isReferencedBy&quot; xlink:href=&quot;http://repository-acc.ubn.ru.nl/handle/123456789/143585&quot;&gt;
+                            &lt;mods:titleInfo&gt;
+                                &lt;mods:title&gt;&apos;Rice and Rice with Sambal&apos;. Indonesians and Moluccans in The Netherlands&lt;/mods:title&gt;
+                            &lt;/mods:titleInfo&gt;
+                            &lt;mods:genre&gt;Article in monograph or in proceedings&lt;/mods:genre&gt;
+                        &lt;/mods:relatedItem&gt;
+                        &lt;mods:relatedItem type=&quot;isReferencedBy&quot; xlink:href=&quot;http://repository-acc.ubn.ru.nl/handle/123456789/126651&quot;&gt;
+                            &lt;mods:titleInfo&gt;
+                                &lt;mods:title&gt;&apos;This is how we are at home&apos;. Indonesian Muslims in The Hague&lt;/mods:title&gt;
+                            &lt;/mods:titleInfo&gt;
+                            &lt;mods:genre&gt;Article in monograph or in proceedings&lt;/mods:genre&gt;
+                        &lt;/mods:relatedItem&gt;
 
                                             &lt;mods:originInfo&gt;
                                                 &lt;mods:publisher&gt;cwi&lt;/mods:publisher&gt;
