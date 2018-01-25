@@ -1,10 +1,12 @@
-from nameidentifier import NameIdentifier
 from re import compile, IGNORECASE
+
+from nameidentifier import NameIdentifier
+
+
 # from __init__ import pattern_dai
 # The PRS NOD idenitfier format: PRS1234567
 
 class NodPrs(NameIdentifier):
-
     ID_PATTERN = compile(r'^(PRS)([0-9]{7})$', IGNORECASE)
 
     def __init__(self, baseDigits):
@@ -24,7 +26,7 @@ class NodPrs(NameIdentifier):
                 self.valid = True
             self.id = str_id
 
-            self.typedVariants.extend(self.formatted)
+            self.typedVariants.update(self.formatted)
 
     def __str__(self):
         return self.get_init_value()

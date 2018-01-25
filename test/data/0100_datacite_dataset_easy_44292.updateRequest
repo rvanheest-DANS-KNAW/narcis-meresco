@@ -75,7 +75,7 @@
             &lt;/fundingReference&gt;
             &lt;fundingReference&gt;
                 &lt;funderName&gt;Andorra&lt;/funderName&gt;
-                &lt;funderIdentifier funderIdentifierType=&quot;ISNI&quot;&gt;000000012150090X&lt;/funderIdentifier&gt;
+                &lt;funderIdentifier funderIdentifierType=&quot;ISNI&quot;&gt;000000012150090x&lt;/funderIdentifier&gt;
                 &lt;awardNumber awardURI=&quot;http://cordis.europa.eu/project/rcn/204401_en.html&quot;&gt;729290&lt;/awardNumber&gt;
                 &lt;awardTitle&gt;OpenAIRE Guidelines Project&lt;/awardTitle&gt;
             &lt;/fundingReference&gt;

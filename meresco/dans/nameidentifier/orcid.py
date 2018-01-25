@@ -1,9 +1,9 @@
-from nameidentifier import NameIdentifier
 from re import compile, IGNORECASE
+
+from nameidentifier import NameIdentifier
 
 
 class Orcid(NameIdentifier):
-
     ID_PATTERN = compile(r'^(http://orcid.org/)?(\d{4}).?(\d{4}).?(\d{4}).?(\d{3}[0-9X])$', IGNORECASE)
 
     def __init__(self, baseDigits):
@@ -27,10 +27,10 @@ class Orcid(NameIdentifier):
                 self.valid = True
             self.id = str_id
 
-            self.typedVariants.extend(self.formatted)
+            self.typedVariants.update(self.formatted)
             for prefix in self.prefixes:
                 for suffix in self.formatted:
-                    self.typedVariants.append(prefix + suffix)
+                    self.typedVariants.add(prefix + suffix)
 
     def __str__(self):
         return self.get_init_value()

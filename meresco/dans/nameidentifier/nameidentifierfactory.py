@@ -1,9 +1,12 @@
 __author__ = 'wilkos'
+from crossref import Crossref
 from dai_nl import Dai
+from grid import Grid
 from isni import Isni
+from nod_prs import NodPrs
 from orcid import Orcid
 from rid import Rid
-from nod_prs import NodPrs
+from unknown import Unknown
 
 
 class NameIdentifierFactory(object):
@@ -17,4 +20,7 @@ class NameIdentifierFactory(object):
         if type.strip().lower() == "isni": return Isni(baseval)
         if type.strip().lower() == "rid": return Rid(baseval)
         if type.strip().lower() == "prs" or type.lower() == "nod-prs": return NodPrs(baseval)
-        assert 0, "Bad nid creation: " + type
+        if "crossref" in type.lower(): return Crossref(baseval)
+        if type.strip().lower() == "grid" or "grid" in type.lower(): return Grid(baseval)
+        return Unknown(type.strip().replace('\n', ''), baseval)
+        # assert 0, "Bad nid creation: " + type

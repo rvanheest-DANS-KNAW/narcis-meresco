@@ -47,8 +47,6 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
 
 
 LONG_VERSION = '1.0'
-# TODO: waar komt 'Creator' vandaan??
-# https://schema.datacite.org/meta/kernel-4.0/include/datacite-contributorType-v4.xsd
 
 # NARCIS Portal marcrelator author roles:
 #     /**
@@ -1175,10 +1173,13 @@ class NormaliseOaiRecord(UiaConverter):
                     
                     fidtxt = ga.xpath('self::datacite:fundingReference/datacite:funderIdentifier/text()', namespaces=namespacesmap)
                     if len(fidtxt) > 0:
-                        e_fid = etree.SubElement(e_ga, "funderIdentifier")
-                        e_fid.text=fidtxt[0]
                         fidtype = ga.xpath('self::datacite:fundingReference/datacite:funderIdentifier/@funderIdentifierType', namespaces=namespacesmap)
-                        if len(fidtype) > 0: e_fid.attrib['type'] = fidtype[0].lower()
+                        if len(fidtype) > 0:
+                            funderId = NameIdentifierFactory.factory(fidtype[0], fidtxt[0])
+                            if funderId.is_valid():
+                                etree.SubElement(e_ga, "funderIdentifier", type=funderId.get_name()).text = funderId.get_id()
+                        else:
+                            e_fid = etree.SubElement(e_ga, "funderIdentifier").text=fidtxt[0]
                                         
                     
         elif self._metadataformat.isMods():
