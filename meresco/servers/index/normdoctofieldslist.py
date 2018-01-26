@@ -36,6 +36,7 @@ from meresco.dans.longconverter import NormaliseOaiRecord
 
 from re import compile
 from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
+from meresco.dans.persistentidentifier import PidFactory
 from meresco.components.xml_generic.validate import ValidateException
 
 
@@ -47,7 +48,7 @@ namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco
     'gal'    : 'info:eu-repo/grantAgreement',
     'wmp'    : 'http://www.surfgroepen.nl/werkgroepmetadataplus',
     'prs'    : 'http://www.onderzoekinformatie.nl/nod/prs',
-    'prj'   : 'http://www.onderzoekinformatie.nl/nod/act',
+    'prj'    : 'http://www.onderzoekinformatie.nl/nod/act',
     'org'    : 'http://www.onderzoekinformatie.nl/nod/org',
     'long'   : 'http://www.knaw.nl/narcis/1.0/long/',
     'short'  : 'http://www.knaw.nl/narcis/1.0/short/',
@@ -117,8 +118,8 @@ fieldnamesMapping = {
     'knaw_long.accessRights'                                            : 'access',
     'knaw_long.persistentIdentifier'                                    : 'persistentid',
     'knaw_long.humanStartPage'                                          : 'humanstartpage',
-    'knaw_long.metadata.grantAgreements.grantAgreement.funderIdentifier': 'relatedid',
-    'knaw_long.metadata.related_identifier'                             : 'relatedid',   #<related_identifier relationType="IsCitedBy" type="arxiv">0706.0001</related_identifier>     
+    # 'knaw_long.metadata.grantAgreements.grantAgreement.funderIdentifier': 'relatedid', # Moved funderIdentifier to 'nids_funder' field and variants to __all__ field.
+    # 'knaw_long.metadata.related_identifier'                             : 'relatedid',   # Also moved...  
     'organisatie.acroniem'                                              : 'acroniem',
     'organisatie.taak_en'                                               : 'abstract_en',
     'organisatie.taak_nl'                                               : 'abstract',
@@ -166,6 +167,9 @@ fieldNamesXpathMap = {
     'pidref'            : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to which the pubId refers to. (BRI)
     'dd_abrprd'         : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", #
     'dd_abrcmplx'       : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", #
+    'nids_funder'       : "//long:metadata/long:grantAgreements/long:grantAgreement/long:funderIdentifier", #knaw_long.metadata.grantAgreements.grantAgreement.funderIdentifier
+    'relatedid'         : "//long:metadata/long:related_identifier",
+    'pubid'             : "//long:metadata/long:publication_identifier",
     # 'dd_format'         : "//long:metadata/long:format/text()",
     # 'dd_typeofresource' : "//long:metadata/long:typeOfResource/text()",
     # 'dd_subject'        : "//long:metadata/long:subject/long:topic[not (long:subjectScheme/text())]/long:topicValue/text()",
@@ -362,6 +366,26 @@ class NormdocToFieldsList(Observable):
                     if abr_code[:1] in ('E','G','I','N','R','V'): # Also add the parent:
                         if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code[:1]
                         self._fieldslist.append((fieldName, abr_code[:1]))
+        elif fieldName == 'nids_funder': 
+            for funderid in results:
+                fundId = NameIdentifierFactory.factory(funderid.attrib['type'], funderid.text)
+                if fundId.is_valid():
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", fundId.get_idx_id()
+                    self._fieldslist.append((fieldName, fundId.get_idx_id()))
+                    #  Add all ID formats to general field:
+                    for variant in fundId.getTypedVariants():
+                        self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
+                        if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+        elif fieldName in ('relatedid', 'pubid'):
+            for relatedIdentifier in results:
+                relId = PidFactory.factory(relatedIdentifier.attrib['type'], relatedIdentifier.text)
+                if relId.is_valid():
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", relId.get_idx_id()
+                    self._fieldslist.append((fieldName, relId.get_idx_id()))
+                    #  Add all PID formats to general field:
+                    for variant in relId.get_typedvariants():
+                        self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
+                        if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
         elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
@@ -489,13 +513,13 @@ class NormdocToFieldsList(Observable):
                 nidFieldname = 'nids_non_aut'
                 if roleterm and tiepe:
                     if roleterm[0] in marcrelatorAuthorRoles and tiepe[0] == 'personal':
-                        if (family or given): #authors need to be F+Given, NOT unstructured; this may contain 'noise' (other stuff, not related to the person name.
+                        if (family or given): #authors need to be F+Given, NOT unstructured; this may contain 'noise' (other stuff, not related to the person name).
                             authors.append(', '.join(fg_naam))
                         else:
                             authors.append(unstructured[0])
                         nidFieldname = 'nids_aut'
 
-                        #BETA functionality: Add dataset creators for dataset creators drilldown:  collection == 'dataset' and
+                        # Add dataset creators for dataset creators drilldown:  collection == 'dataset'
                         if self._wcp_collection == 'dataset':
                             if roleterm[0].lower() == 'cre' and (family or given): #We're NOT interested in unstractured/displayForm labels here...
                                 ds_creators.append(', '.join(fg_naam))

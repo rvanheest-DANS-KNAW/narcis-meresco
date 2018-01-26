@@ -507,19 +507,18 @@ class NormaliseOaiRecord(UiaConverter):
         elif self._metadataformat.isMods():
             rel_items = lxmlNode.xpath("//mods:mods/mods:relatedItem", namespaces=namespacesmap)
             for item in rel_items:
-                item_href = item.xpath('self::mods:relatedItem/@xlink:href', namespaces=namespacesmap)
+                item_href = item.xpath('self::mods:relatedItem/@xlink:href', namespaces=namespacesmap) # Get href from relatedItem
                 item_reltype = item.xpath('self::mods:relatedItem/@type', namespaces=namespacesmap)
                 if len(item_reltype) > 0: attrib_dict['relationType'] = item_reltype[0]
                 attrib_resourceTypeGeneral = item.xpath('self::mods:relatedItem/mods:genre[1]/text()', namespaces=namespacesmap)
                 if len(attrib_resourceTypeGeneral) > 0: attrib_dict['resourceTypeGeneral'] = attrib_resourceTypeGeneral[0]
-
                 if len(item_href) > 0 and len(item_reltype) > 0: # Create new element: <related_identifier type="doi" relationType="IsReferencedBy">doi:10.1006/jmbi.1995.0238</related_identifier>
                     relId = PidFactory.factory('url', item_href[0])
                     if relId.is_valid():
                         attrib_dict['type'] = relId.get_name()
                         etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = relId.get_unformatted_id()
-                relitem_ids = item.xpath('self::mods:relatedItem/mods:identifier[@type]', namespaces=namespacesmap)
-                for relitem_ID in item.xpath('self::mods:relatedItem/mods:identifier[@type and @type != "local"]', namespaces=namespacesmap): # Get all identifiers with type from the related items:
+                # Get all mods:identifier with @type from the relatedItem: 
+                for relitem_ID in item.xpath('self::mods:relatedItem/mods:identifier[@type and @type != "local"]', namespaces=namespacesmap): 
                     relId = PidFactory.factory(relitem_ID.get("type"), relitem_ID.text)
                     if relId.is_valid():
                         attrib_dict['type'] = relId.get_name()
@@ -1206,7 +1205,7 @@ class NormaliseOaiRecord(UiaConverter):
                     etree.SubElement(e_ga, "description").text = GaDescription[0]                   
                 GaFunderId = ga.xpath('self::gal:grantAgreement/gal:funder/@IDref', namespaces=namespacesmap)
                 if GaFunderId:
-                    #found Funder: Get its (plain) name
+                    #found Funder: Get its (plain) name TODO: Check for nameIdentifier and add it to 
                     funder = lxmlNode.xpath('//mods:mods/mods:name[@ID="'+GaFunderId[0]+'"]/mods:displayForm/text()', namespaces=namespacesmap)
                     if not funder:
                         funder = lxmlNode.xpath('//mods:mods/mods:name[@ID="'+GaFunderId[0]+'"]/mods:namePart/text()', namespaces=namespacesmap)
