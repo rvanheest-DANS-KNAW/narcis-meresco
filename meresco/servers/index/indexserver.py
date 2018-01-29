@@ -136,6 +136,7 @@ untokenizedFieldnames = [f.name for f in drilldownFields] + [
     untokenizedFieldname('pidref'),
     untokenizedFieldname('humanstartpage'),
     untokenizedFieldname('relatedid'), # All identifiers related somehow to this record
+    untokenizedFieldname('pubid') # All identifiers considered similar-record-identifiers
 ]
 
 DEFAULT_CORE = 'narcis'

@@ -32,8 +32,10 @@ class PidFactory(object):
                 return Issn(baseval)
             elif ("isbn" in baseval.lower()):
                 return Isbn(baseval)
-            elif (":doi" in baseval.lower()):
+            elif ("doi" in baseval.lower()):
                 return Doi(baseval)
+            elif ("handle" in baseval.lower() or "hdl" in baseval.lower()):
+                return Handle(baseval)
             else:
                 return Href(baseval)
         if type.strip().lower() == "handle" or type.strip().lower() == "hdl":

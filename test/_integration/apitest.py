@@ -28,6 +28,7 @@ from seecr.test import IntegrationTestCase
 from seecr.test.utils import getRequest, sleepWheel, htmlXPath
 from meresco.xml import xpathFirst, xpath, namespaces
 from lxml import etree
+from meresco.dans.persistentidentifier import PidFactory
 
 # TODO: create UnitTestCase for o.a. writeDelete / unDelete
 # TODO: SRU-throttle mogelijkheden uitzoeken.
@@ -95,10 +96,18 @@ class ApiTest(IntegrationTestCase):
 
 
     def testPublIdentifier(self):
-        response = self.doSruQuery(**{'query':'1937-1632', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
-        # print "DD body:", etree.tostring(response)
-        #print body.searchRetrieveResponse.records.record.recordData.knaw_long.metadata.relatedItem.publication_identifier
+        response = self.doSruQuery(**{'query': 'untokenized.relatedid exact "issn:1937-1632"', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
+#         print "DD body:", etree.tostring(response)
+        self.assertEqual('knaw:record:4', xpathFirst(response, '//srw:recordIdentifier/text()'))
+        self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
         self.assertEqual('Springer', testNamespaces.xpathFirst(response, '//long:metadata/long:relatedItem[@type="host"]/long:publisher/text()'))
+
+
+    def testAlternativeIdentifier(self):
+        doi = PidFactory.factory("doi", 'doi:10.17026/dans-x38-rkke')
+        response = self.doSruQuery(**{'query':'untokenized.pubid exact "'+doi.get_idx_id()+'"', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
+        self.assertEqual('rce:rapporten:550000001', xpathFirst(response, '//srw:recordIdentifier/text()'))
+#         print "DD body:", etree.tostring(response)
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
     
         
