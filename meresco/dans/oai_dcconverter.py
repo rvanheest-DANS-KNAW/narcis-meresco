@@ -75,7 +75,7 @@ class DcConverter(Converter):
             issn = lxmlNode.xpath(long_metadata+':relatedItem[@type="host"]/long:publication_identifier[@type="issn"]/text()', namespaces=namespacesmap)
             titleInfo = lxmlNode.xpath(long_metadata+':relatedItem[@type="host"]/long:titleInfo/long:title/text()', namespaces=namespacesmap)
             
-            dc_source = ''          
+            dc_source = ''
             if volume and volume[0].strip():
                 dc_source += 'VOLUME='+volume[0].strip()+';'
             if issue and issue[0].strip():
@@ -171,9 +171,9 @@ class DcConverter(Converter):
             identifierList = lxmlNode.xpath('//long:metadata/long:publication_identifier', namespaces=namespacesmap)
             for identifier in identifierList:
                 idType = identifier.attrib.get('type')
-                if idType.lower() in ['issn', 'isbn']: # Re-create isbn or issn to a valid urn:
+                if idType and idType.lower() in ['issn', 'isbn']: # Re-create isbn or issn to a valid urn:
                     idText = 'urn:' + idType.lower() + ":" + identifier.text
-                else: 
+                else:
                     idText = identifier.text
                 etree.SubElement(dc_root, namespacesmap.curieToTag('dc:identifier'), nsmap=self._nsOAI).text = idText
                 
