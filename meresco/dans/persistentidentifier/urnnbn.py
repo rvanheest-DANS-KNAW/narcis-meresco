@@ -4,7 +4,7 @@ from persistentidentifier import PersistentIdentifier
 
 
 class UrnNbn(PersistentIdentifier):
-    ID_PATTERN = compile(r'^[uU][rR][nN]:[nN][bB][nN]:[nN][lL](:([uU][iI]|[kK][bB]|[hH][sS]))?:\d{2}-.+', IGNORECASE)
+    ID_PATTERN = compile(r'^(?:.*?)([uU][rR][nN]:[nN][bB][nN]:[nN][lL](:([uU][iI]|[kK][bB]|[hH][sS]))?:\d{2}-.+)', IGNORECASE)
 
     def __init__(self, basestring):
         PersistentIdentifier.__init__(self, "urn", basestring, None, "http://www.persistent-identifier.nl")
@@ -14,7 +14,7 @@ class UrnNbn(PersistentIdentifier):
         m = self.get_idpattern().match(self.init_value)
 
         if m:
-            self.unformatted = m.group(0)
+            self.unformatted = m.group(1)
             self.formatted.append(self.unformatted.lower())
 
             str_id = None
