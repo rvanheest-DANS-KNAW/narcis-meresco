@@ -36,7 +36,9 @@ class PidFactory(object):
                 return Doi(baseval)
             elif ("handle" in baseval.lower() or "hdl" in baseval.lower()):
                 return Handle(baseval)
-            else:
+            elif ("urn:nbn:" in baseval.lower()):
+                return UrnNbn(baseval)
+            elif ("http" in baseval.lower() or "ftp" in baseval.lower()):
                 return Href(baseval)
         if type.strip().lower() == "handle" or type.strip().lower() == "hdl":
             return Handle(baseval)

@@ -1062,13 +1062,11 @@ class NormaliseOaiRecord(UiaConverter):
                     etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name()).text = pId.get_unformatted_id()
             if (root=='//mods:mods/'): # But only if called from toplevel, not if called from RelatedItems...
                 pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap) # Primary (persistent) identifier.
-                if len(pi) > 0: # TODO: Hoe weten we welk type identifier hierin gaat? Gaat EduStandaard ALTIJD uit van URN:NBN?
-                    e_pi = etree.SubElement(e_longmetadata, "publication_identifier")
-                    e_pi.text = self._firstElement(pi)
-                    pI = PidFactory.factory('urn:nbn', self._firstElement(pi))
-                    if pI.is_valid(): # Type urn:nbn gevonden...
-                        e_pi.attrib['type'] = pI.get_name()
-                # HSP 'identifier' as well? Vaak dezelfde als de @ref van de urn:nbn:nl
+                if len(pi) > 0: # Hoe weten we welk type identifier hierin gaat? EduStandaard gaat uit van URN:NBN, echter worden ook URL's opgestuurd...
+                    pId = PidFactory.factory("uri", self._firstElement(pi))
+                    if pId.is_valid():
+                        etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name()).text = pId.get_unformatted_id()
+                # HSP 'identifier' as well? Vaak gelijk aan @ref van de urn:nbn:nl
                 hsp = self._findFirstXpath(lxmlNode,
                     '//didl:Item/didl:Item[didl:Descriptor/didl:Statement/rdf:type/@rdf:resource="info:eu-repo/semantics/humanStartPage"]/didl:Component/didl:Resource/@ref', #DIDL 3.0
                     '//didl:Item/didl:Item[didl:Descriptor/didl:Statement/dip:ObjectType/text()="info:eu-repo/semantics/humanStartPage"]/didl:Component/didl:Resource/@ref', #fallback DIDL 2.3.1
