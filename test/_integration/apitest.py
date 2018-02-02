@@ -157,7 +157,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="access"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('openAccess', '6'), ('closedAccess', '3'), ('embargoedAccess', '1')], drilldown)
+        self.assertEqual([('openAccess', '5'), ('restrictedAccess', '3'), ('embargoedAccess', '2')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -210,7 +210,7 @@ class ApiTest(IntegrationTestCase):
     def testDcToLong(self):
         response = self.doSruQuery(**{'query': '2016-05-05', 'recordSchema':'knaw_long'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
-        self.assertEqual('restrictedAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
+        self.assertEqual('restrictedAccess', testNamespaces.xpathFirst(response, '//long:knaw_long/long:accessRights/text()'))
         self.assertEqual('Example Program 1', testNamespaces.xpathFirst(response, '//long:metadata/long:titleInfo/long:title/text()'))
         self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name/long:type/text()'))
         self.assertEqual('Seecr', testNamespaces.xpathFirst(response, '//long:metadata/long:name/long:unstructured/text()'))
@@ -228,7 +228,7 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(**{'query': '2016-01-31', 'recordSchema':'knaw_long'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
         self.assertEqual('doi:10.4121/collection:ab70dbf9-ac4f-40a7-9859-9552d38fdccd', testNamespaces.xpathFirst(response, '//long:persistentIdentifier/text()'))
-        self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
+        self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:knaw_long/long:accessRights/text()'))
         self.assertEqual('RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate', testNamespaces.xpathFirst(response, '//long:metadata/long:titleInfo/long:title/text()'))
         self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name/long:type/text()'))
         self.assertEqual('European Severe Storms Laboratory', testNamespaces.xpathFirst(response, '//long:metadata/long:name/long:unstructured/text()'))
@@ -251,7 +251,7 @@ class ApiTest(IntegrationTestCase):
         response = self.doSruQuery(**{'query': 'URN:NBN:NL:UI:17-565', 'recordSchema':'knaw_long'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
         self.assertEqual('URN:NBN:NL:UI:17-565', testNamespaces.xpathFirst(response, '//long:persistentIdentifier/text()'))
-        self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
+        self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:knaw_long/long:accessRights/text()'))
         self.assertEqual('Appositie en de interne struktuur van de NP', testNamespaces.xpathFirst(response, '//long:metadata/long:titleInfo/long:title/text()'))
         self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name/long:type/text()'))
         self.assertEqual('Bennis&Bennis', testNamespaces.xpathFirst(response, '//long:metadata/long:name/long:family/text()'))
@@ -290,13 +290,13 @@ class ApiTest(IntegrationTestCase):
  
     
     def testMods3xToLong(self):
-        response = self.doSruQuery(**{'query': 'urn:NBN:nl:ui:18-2271', 'recordSchema':'knaw_long'})
+        response = self.doSruQuery(**{'query': 'urn:NBN:nl:ui:18-2271', 'recordSchema':'knaw_long'}) # knaw_record2_didlmods
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
         self.assertEqual('urn:NBN:nl:ui:18-2271', testNamespaces.xpathFirst(response, '//long:persistentIdentifier/text()'))
-        self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:objectFiles/long:objectFile/long:accessRights/text()'))
+        self.assertEqual('closedAccess', testNamespaces.xpathFirst(response, '//long:objectFiles/long:objectFile/long:accessRights/text()'))
         self.assertEqual('urn:NBN:nl:ui:18-2271-OF', testNamespaces.xpathFirst(response, '//long:objectFiles/long:objectFile/long:persistentIdentifier/text()'))
         self.assertEqual('2012-01-01', testNamespaces.xpathFirst(response, '//long:objectFiles/long:objectFile/long:embargo/text()'))
-        self.assertEqual('openAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
+        self.assertEqual('embargoedAccess', testNamespaces.xpathFirst(response, '//long:knaw_long/long:accessRights/text()'))
         self.assertEqual('Paths and flows---a historical survey', testNamespaces.xpathFirst(response, '//long:metadata/long:titleInfo[@xml:lang="en"]/long:title/text()'))
         self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name[2]/long:type/text()'))
         self.assertEqual('prof.dr. Bennis, H. (Hans)', testNamespaces.xpathFirst(response, '//long:metadata/long:name[2]/long:unstructured/text()'))
@@ -328,6 +328,11 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(1, len(testNamespaces.xpath(response, '//long:metadata/long:rightsDescription')))
         self.assertEqual(7, len(testNamespaces.xpath(response, '//long:metadata/long:subject/long:topic')))
         self.assertEqual(3, len(testNamespaces.xpath(response, '//long:metadata/long:grantAgreements/long:grantAgreement')))
+        
+        response = self.doSruQuery(**{'query': 'URN:NBN:NL:UI:25-711504', 'recordSchema':'knaw_long'}) # TODO find exact op pubid
+        #print etree.tostring(response)
+        self.assertEqual('restrictedAccess', testNamespaces.xpathFirst(response, '//long:objectFiles/long:objectFile/long:accessRights/text()'))
+        self.assertEqual('restrictedAccess', testNamespaces.xpathFirst(response, '//long:knaw_long/long:accessRights/text()'))
  
     def testDataciteToLong(self):
         response = self.doSruQuery(**{'query': 'urn:nbn:nl:ui:13-jsk-7ek', 'recordSchema':'knaw_long'})

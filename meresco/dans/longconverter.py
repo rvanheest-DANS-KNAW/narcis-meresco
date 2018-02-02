@@ -109,11 +109,11 @@ class NormaliseOaiRecord(UiaConverter):
         UiaConverter.__init__(self, name=name, fromKwarg=fromKwarg, toKwarg=toKwarg)
         self._metadataformat = None
         self._wcpcollection = None
-        self._openAccess = True
+        self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[0] # AccesRights defaults to 'openAcces'
         self._languagePattern = compile('^([A-Za-z]{2,3})(-[a-zA-Z0-9]{1,8})?$') # Captures first 2 or 3 language chars if nothing else OR followed by '-' and 1 to 8 alfanum chars. See also: ftp://ftp.rfc-editor.org/in-notes/rfc3066.txt 
 
     def _convert(self, lxmlNode):
-        self._openAccess = True #Reset AccesRights to openAcces
+        self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[0] # Reset AccesRights to openAcces
 
         record_part = lxmlNode.xpath("//document:document/document:part[@name='record']/text()", namespaces=namespacesmap)
         metapart = lxmlNode.xpath("//document:document/document:part[@name='meta']/text()", namespaces=namespacesmap)
@@ -244,7 +244,7 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _convertNODRecord2long(self, lxmlNode, e_longmetadata):
-        
+
         title, title_en, penvoerder_nl, penvoerder_en, abstract, abstract_en, locatie, status, knaw_long, genre, e_name = None, None, None, None, None, None, None, None, None, None, None
 
         # ORGANISATIE:
@@ -256,7 +256,7 @@ class NormaliseOaiRecord(UiaConverter):
         
             abstract = lxmlNode.xpath("//org:taak_nl/text()", namespaces=namespacesmap)
             abstract_en = lxmlNode.xpath("//org:taak_en/text()", namespaces=namespacesmap)
-            
+
             # Locatie: In Dutch (NL) only!
             locatie = lxmlNode.xpath("//org:locatie/text()", namespaces=namespacesmap)
         
@@ -547,10 +547,22 @@ class NormaliseOaiRecord(UiaConverter):
             
             if self._metadataformat.isMods3():
                 # >= DIDL3.0 only:
-                # Get all accessRights for all objectFiles in one list:
+                # Get accessrights (implicit) from available objectfiles.
                 accesssRights = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Item[didl:Descriptor/didl:Statement/rdf:type/@rdf:resource="info:eu-repo/semantics/objectFile"]/didl:Descriptor/didl:Statement/dcterms:accessRights/text()', namespaces=namespacesmap)
-                if (len(objectfiles) > 0 and len(accesssRights) == len(objectfiles) and str(accesssRights).lower().find('openaccess') == -1 ) or (len(objectfiles)==0):
-                    self._openAccess = False
+
+                if len(objectfiles) == 0: # No objectfiles available: ClosedAccess
+                    self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[2]
+                elif len(accesssRights) == 0: # Objectfiles available, but no accessrights at all: OpenAccess
+                    self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[0]
+                else:
+                    # Check for the least restrictive rights on any objectfile... ACCESS_LEVELS = ['openAccess', 'restrictedAccess', 'closedAccess', 'embargoedAccess']
+                    if str(accesssRights).lower().find('restrictedaccess') >= 0:
+                        self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[1] # RestrictedAccess
+                    elif str(accesssRights).lower().find('embargoedaccess') >= 0:
+                        self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[3] # embargoedAccess
+                    elif str(accesssRights).lower().find('closedaccess') >= 0:
+                        self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[2] # closedAccess
+                    # else: Defaults to openaccess.
 
             for objectfile in objectfiles:
                 #create objectFile element:
@@ -590,25 +602,22 @@ class NormaliseOaiRecord(UiaConverter):
                         e_publicationVersion = etree.SubElement(e_objectFile, "publicationVersion")
                         e_publicationVersion.text = publicationVersion[0].strip()[publicationVersion[0].strip().rfind('/')+1:]
                     #Look for AccessRights:
-                    oa = objectfile.xpath('self::didl:Item/didl:Descriptor/didl:Statement/dcterms:accessRights/text()', namespaces=namespacesmap)
-                    if oa:
-                        e_accessRights = etree.SubElement(e_objectFile, "accessRights")
-                        if oa[0].lower().find('openaccess') >= 0:
-                            e_accessRights.text = NormaliseOaiRecord.ACCESS_LEVELS[0]
-                        else:
-                            e_accessRights.text = NormaliseOaiRecord.ACCESS_LEVELS[2]
+                    ar = objectfile.xpath('self::didl:Item/didl:Descriptor/didl:Statement/dcterms:accessRights/text()', namespaces=namespacesmap)
+                    if ar:
+                        blnHasValidRight = False
+                        for al in NormaliseOaiRecord.ACCESS_LEVELS:
+                            if al.lower() in ar[0].lower():
+                                etree.SubElement(e_objectFile, "accessRights").text = al
+                                break
+
 
     def _getAccessRights(self, lxmlNode, e_longRoot):
         # Let op: Het aantal objectFiles dient bij aanroep reeds bekend te zijn in _getObjectFiles().
-        # All formats different from DIDL3.0 or DataCite: No way to determine AccessRights.
-        # In this case, accessRights SHOULD be available from the metaPart (stack), if not, we will default to 'openAccess'
+        # All formats different from DIDL3.0 or DataCite: No way to determine AccessRights, defaults to 'openAccess'.
         accessRight = NormaliseOaiRecord.ACCESS_LEVELS[0] # default 'openAccess'
         
         #Check for DC: See if any valid dc:rights element is available, if not AccessLevel is available from the requestscope (CA-mapper)
         if self._metadataformat.isOaiDC():
-            # if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None:
-            #     accessRight = self.ctx.requestScope.get('accessRights') #AR set in metaPart by mapper: Setting AR to stack value
-            # else:
             accessLevels = lxmlNode.xpath('//dc:rights/text()', namespaces=namespacesmap)
             if len(accessLevels) > 0:
                 for dc_accesslevel in accessLevels: # dc:rights contains free text, so we will look for the first valid edustandaard occurence:
@@ -619,20 +628,26 @@ class NormaliseOaiRecord(UiaConverter):
                             blnHasValidRight = True
                             break
                     if blnHasValidRight: break
-        # if self._ssFormat not in (SurfShareFormat.SURFSHARE_FORMAT[4]): #No format found capable of setting accessRights from metadata...
-        #     if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None:
-        #         accessRight = self.ctx.requestScope.get('accessRights') #AR set in metaPart by mapper: Setting AR to stack value                
-                
-        elif self._metadataformat.isMods3(): #Gets accessRights from metadata:
-            #Check accessRights from metaPart are available on the stack:
-            # if hasattr(self.ctx, 'requestScope') and self.ctx.requestScope.get('accessRights') is not None: raise AccessRightsError('AccessRights should not be available from metaPart when using DIDL/MODS. (use of wrong wcp mapper?)')
-            # else: accessRight = NormaliseOaiRecord.ACCESS_LEVELS[0] if self._openAccess == True else NormaliseOaiRecord.ACCESS_LEVELS[2] # Found AR in metadataPart...
-            accessRight = NormaliseOaiRecord.ACCESS_LEVELS[0] if self._openAccess == True else NormaliseOaiRecord.ACCESS_LEVELS[2] # Found AR in metadataPart...
-
+        elif self._metadataformat.isMods3():
+            # Set AR to implicitly found value from ObjectFiles:
+            accessRight = self._accesRights
+            # Override this value with AR available from Non-EduStandaard <mods:accessCondition type="info:eu-repo/semantics/openAccess"/> element:
+            accessCondition = lxmlNode.xpath('//mods:accessCondition', namespaces=namespacesmap)
+            if len(accessCondition) > 0:
+                for accesslevel in accessCondition: # Look for the first valid edustandaard-value
+                    acType = accesslevel.attrib['type'].strip().lower() if accesslevel.attrib['type'] is not None else ""
+                    aclvl_txt = accesslevel.text.strip().lower() if accesslevel.text is not None else ""
+                    blnHasValidRight = False
+                    for alvl in NormaliseOaiRecord.ACCESS_LEVELS:
+                        if any(alvl.lower() in x for x in [aclvl_txt, acType]):
+                            accessRight = alvl
+                            blnHasValidRight = True
+                            break
+                    if blnHasValidRight: break
         elif self._metadataformat.isDatacite():
             rights = lxmlNode.xpath('//datacite:resource/datacite:rightsList/datacite:rights/text()', namespaces=namespacesmap)
             if len(rights) > 0:
-                for right in rights: # datacite:rights contains free text, so we will look for the first valid edustandaard occurence:
+                for right in rights: # Look for the first valid edustandaard occurence
                     blnHasValidRight = False
                     for ar in NormaliseOaiRecord.ACCESS_LEVELS:
                         if ar.lower() in right.strip().lower():
@@ -640,7 +655,6 @@ class NormaliseOaiRecord(UiaConverter):
                             blnHasValidRight = True
                             break
                     if blnHasValidRight: break
-
             
         etree.SubElement(e_longRoot, "accessRights").text = accessRight # default 'openAccess'
 
@@ -1253,7 +1267,6 @@ class NormaliseOaiRecord(UiaConverter):
             if len(pubyear) > 0: etree.SubElement(e_longmetadata, "publicationYear").text = self._normaliseDate(pubyear[0])
 
 ################### Helper methods #########################
-
 
     def _getHostCitation(self, lxmlNode):
         relatedItems = lxmlNode.xpath("//long:knaw_long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)

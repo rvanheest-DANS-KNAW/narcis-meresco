@@ -118,8 +118,6 @@ fieldnamesMapping = {
     'knaw_long.accessRights'                                            : 'access',
     'knaw_long.persistentIdentifier'                                    : 'persistentid',
     'knaw_long.humanStartPage'                                          : 'humanstartpage',
-    # 'knaw_long.metadata.grantAgreements.grantAgreement.funderIdentifier': 'relatedid', # Moved funderIdentifier to 'nids_funder' field and variants to __all__ field.
-    # 'knaw_long.metadata.related_identifier'                             : 'relatedid',   # Also moved...  
     'organisatie.acroniem'                                              : 'acroniem',
     'organisatie.taak_en'                                               : 'abstract_en',
     'organisatie.taak_nl'                                               : 'abstract',
@@ -232,13 +230,14 @@ class NormdocToFieldsList(Observable):
         fieldname = parentName + localName
         value = aNode.text
         # send addField message
-        if value and value.strip() and fieldnamesMapping.has_key(fieldname):
+        if value and value.strip() and fieldnamesMapping.has_key(fieldname): # All fields from fieldnamesMapping...
             # Map all accessRights other than 'openAccess' to 'closedAccess' into the index for NON-dataset collections:
-            if fieldname == 'knaw_long.accessRights' and self._wcp_collection != WCPEDUCOLLECTION[1] and value.strip().lower() not in (NormaliseOaiRecord.ACCESS_LEVELS[0].lower(), NormaliseOaiRecord.ACCESS_LEVELS[2].lower()):
-                if self._verbose: print 'Changing', value, 'to', NormaliseOaiRecord.ACCESS_LEVELS[2]
-                value = NormaliseOaiRecord.ACCESS_LEVELS[2]
+            # if fieldname == 'knaw_long.accessRights' and self._wcp_collection != WCPEDUCOLLECTION[1] and value.strip().lower() not in (NormaliseOaiRecord.ACCESS_LEVELS[0].lower(), NormaliseOaiRecord.ACCESS_LEVELS[2].lower()):
+            #     if self._verbose: print 'Changing', value, 'to', NormaliseOaiRecord.ACCESS_LEVELS[2]
+            #     value = NormaliseOaiRecord.ACCESS_LEVELS[2]
             self._fieldslist.append((fieldnamesMapping.get(fieldname), value.strip().replace('\n', '')))
             if self._verbose: print 'addField:', fieldnamesMapping.get(fieldname).upper(), "-->", value.strip().replace('\n', '')[:self._truncate_chars]
+        # Continue with field(paths) NOT listed in fieldnamesMapping:
         elif value and value.strip() and fieldname=='persoon.fullName': # uit NOD_PRS
             self._fieldslist.append(('title', value.strip().replace('\n', '')))
             self._fieldslist.append(('title_en', value.strip().replace('\n', '')))

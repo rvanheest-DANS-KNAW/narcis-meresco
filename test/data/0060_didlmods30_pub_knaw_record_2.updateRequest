@@ -10,9 +10,9 @@
                 <part name="record">&lt;record xmlns="http://www.openarchives.org/OAI/2.0/"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt; &lt;header
                     xmlns="http://www.openarchives.org/OAI/2.0/"&gt;&lt;identifier&gt;record:2&lt;/identifier&gt;&lt;datestamp&gt;2008-08-15T14:08:34Z&lt;/datestamp&gt;&lt;/header&gt;
-                    &lt;metadata xmlns="http://www.openarchives.org/OAI/2.0/"&gt;                    
+                    &lt;metadata xmlns="http://www.openarchives.org/OAI/2.0/"&gt;
                     &lt;nl_didl:DIDL xmlns:dcterms=&quot;http://purl.org/dc/terms/&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:dii=&quot;urn:mpeg:mpeg21:2002:01-DII-NS&quot; xmlns:nl_didl=&quot;urn:mpeg:mpeg21:2002:02-DIDL-NS&quot; xmlns:didl=&quot;urn:mpeg:mpeg21:2002:02-DIDL-NS&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; xmlns:rdf=&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot; xmlns:dip=&quot;urn:mpeg:mpeg21:2005:01-DIP-NS&quot; xsi:schemaLocation=&quot;urn:mpeg:mpeg21:2002:02-DIDL-NS http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-21_schema_files/did/didl.xsd urn:mpeg:mpeg21:2002:01-DII-NS http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-21_schema_files/dii/dii.xsd urn:mpeg:mpeg21:2005:01-DIP-NS http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-21_schema_files/dip/dip.xsd&quot;&gt;
-                        &lt;nl_didl:Item&gt;                            
+                        &lt;nl_didl:Item&gt;
                             &lt;nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
                                     &lt;dii:Identifier&gt;urn:NBN:nl:ui:18-2271&lt;/dii:Identifier&gt;
@@ -20,7 +20,7 @@
                             &lt;/nl_didl:Descriptor&gt;
                             &lt;nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
-                                    &lt;dcterms:modified&gt;2005-03-17T00:00:00&lt;/dcterms:modified&gt;                                    
+                                    &lt;dcterms:modified&gt;2005-03-17T00:00:00&lt;/dcterms:modified&gt;
                                 &lt;/nl_didl:Statement&gt;
                             &lt;/nl_didl:Descriptor&gt;
                             &lt;nl_didl:Component&gt;
@@ -29,7 +29,7 @@
                             &lt;nl_didl:Item&gt;
                                 &lt;nl_didl:Descriptor&gt;
                                     &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
-                                        &lt;rdf:type rdf:resource=&quot;info:eu-repo/semantics/descriptiveMetadata&quot;/&gt;                                        
+                                        &lt;rdf:type rdf:resource=&quot;info:eu-repo/semantics/descriptiveMetadata&quot;/&gt;
                                     &lt;/nl_didl:Statement&gt;
                                 &lt;/nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Component&gt;
@@ -67,6 +67,8 @@
                                             &lt;/mods:name&gt;
 
                                             &lt;mods:abstract&gt; Samenvatting &lt;/mods:abstract&gt;
+
+                                            &lt;mods:accessCondition type=&quot;info:eu-repo/semantics/embargoedAccess&quot;&gt;info:eu-repo/semantics/embargoedAccess&lt;/mods:accessCondition&gt;
 
                                             &lt;mods:name ID=&quot;FND_1&quot; type=&quot;corporate&quot;&gt;
                                                 &lt;mods:namePart&gt;European Commission CORDIS&lt;/mods:namePart&gt;
@@ -205,17 +207,33 @@
                             
                             &lt;nl_didl:Item&gt;
                                 &lt;nl_didl:Descriptor&gt;
-                                    &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;                                    
+                                    &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
                                         &lt;rdf:type rdf:resource=&quot;info:eu-repo/semantics/objectFile&quot;/&gt;
                                     &lt;/nl_didl:Statement&gt;
                                 &lt;/nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Descriptor&gt;
                                     &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
-                                        &lt;dcterms:accessRights&gt;http://purl.org/eprint/accessRights/OpenAccess&lt;/dcterms:accessRights&gt;
+                                        &lt;dcterms:accessRights&gt;http://purl.org/eprint/accessRights/ClosedAccess&lt;/dcterms:accessRights&gt;
                                     &lt;/nl_didl:Statement&gt;
-                                &lt;/nl_didl:Descriptor&gt;                            
+                                &lt;/nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Component&gt;
                                     &lt;nl_didl:Resource mimeType=&quot;application/pdf&quot; ref=&quot;http://oai.cwi.nl/oai/asset/2271/2271OA.pdf&quot;/&gt;
+                                &lt;/nl_didl:Component&gt;
+                            &lt;/nl_didl:Item&gt;
+
+                            &lt;nl_didl:Item&gt;
+                                &lt;nl_didl:Descriptor&gt;
+                                    &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
+                                        &lt;rdf:type rdf:resource=&quot;info:eu-repo/semantics/objectFile&quot;/&gt;
+                                    &lt;/nl_didl:Statement&gt;
+                                &lt;/nl_didl:Descriptor&gt;
+                                &lt;nl_didl:Descriptor&gt;
+                                    &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
+                                        &lt;dcterms:accessRights&gt;info:eu-repo/semantics/closedAccess&lt;/dcterms:accessRights&gt;
+                                    &lt;/nl_didl:Statement&gt;
+                                &lt;/nl_didl:Descriptor&gt;
+                                &lt;nl_didl:Component&gt;
+                                    &lt;nl_didl:Resource mimeType=&quot;application/pdf&quot; ref=&quot;http://oai.cwi.nl/oai/asset/2271/2371OA.pdf&quot;/&gt;
                                 &lt;/nl_didl:Component&gt;
                             &lt;/nl_didl:Item&gt;
                             
@@ -238,19 +256,20 @@
                                 &lt;nl_didl:Component&gt;
                                     &lt;nl_didl:Resource mimeType=&quot;application/pdf&quot; ref=&quot;http://oai.cwi.nl/oai/asset/2271/2271EAcc.pdf&quot; /&gt;
                                 &lt;/nl_didl:Component&gt;
-                            &lt;/nl_didl:Item&gt;                    
+                            &lt;/nl_didl:Item&gt;
+
                             &lt;nl_didl:Item&gt;
                                 &lt;nl_didl:Descriptor&gt;
                                     &lt;nl_didl:Statement mimeType=&quot;application/xml&quot;&gt;
                                         &lt;rdf:type rdf:resource=&quot;info:eu-repo/semantics/humanStartPage&quot;/&gt;
-                                    &lt;/nl_didl:Statement&gt;                                
+                                    &lt;/nl_didl:Statement&gt;
                                 &lt;/nl_didl:Descriptor&gt;
                                 &lt;nl_didl:Component&gt;
                                     &lt;nl_didl:Resource mimeType=&quot;text/html&quot; ref=&quot;http://repository.cwi.nl/search/fullrecord.php?publnr=2271&quot;/&gt;
                                 &lt;/nl_didl:Component&gt;
-                            &lt;/nl_didl:Item&gt;                    
+                            &lt;/nl_didl:Item&gt;
                         &lt;/nl_didl:Item&gt;
-                    &lt;/nl_didl:DIDL&gt;                    
+                    &lt;/nl_didl:DIDL&gt;
                     &lt;/metadata&gt;&lt;about&gt;
         &lt;provenance xmlns=&quot;http://www.openarchives.org/OAI/2.0/provenance&quot;
             xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
