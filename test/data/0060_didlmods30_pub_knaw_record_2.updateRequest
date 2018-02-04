@@ -70,6 +70,8 @@
 
                                             &lt;mods:accessCondition type=&quot;info:eu-repo/semantics/embargoedAccess&quot;&gt;info:eu-repo/semantics/embargoedAccess&lt;/mods:accessCondition&gt;
 
+                                            &lt;mods:accessCondition/&gt;
+
                                             &lt;mods:name ID=&quot;FND_1&quot; type=&quot;corporate&quot;&gt;
                                                 &lt;mods:namePart&gt;European Commission CORDIS&lt;/mods:namePart&gt;
                                                 &lt;mods:role&gt;

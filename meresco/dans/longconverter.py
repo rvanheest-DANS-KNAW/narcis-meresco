@@ -635,7 +635,7 @@ class NormaliseOaiRecord(UiaConverter):
             accessCondition = lxmlNode.xpath('//mods:accessCondition', namespaces=namespacesmap)
             if len(accessCondition) > 0:
                 for accesslevel in accessCondition: # Look for the first valid edustandaard-value
-                    acType = accesslevel.attrib['type'].strip().lower() if accesslevel.attrib['type'] is not None else ""
+                    acType = accesslevel.attrib['type'].strip().lower() if 'type' in accesslevel.keys() else ""
                     aclvl_txt = accesslevel.text.strip().lower() if accesslevel.text is not None else ""
                     blnHasValidRight = False
                     for alvl in NormaliseOaiRecord.ACCESS_LEVELS:
