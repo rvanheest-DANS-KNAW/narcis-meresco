@@ -376,15 +376,16 @@ class NormdocToFieldsList(Observable):
                         self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
                         if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
         elif fieldName in ('relatedid', 'pubid'):
-            for relatedIdentifier in results:
-                relId = PidFactory.factory(relatedIdentifier.attrib['type'], relatedIdentifier.text)
-                if relId.is_valid():
-                    if self._verbose: print 'addField:', fieldName.upper(), "-->", relId.get_idx_id()
-                    self._fieldslist.append((fieldName, relId.get_idx_id()))
-                    #  Add all PID formats to general field:
-                    for variant in relId.get_typedvariants():
-                        self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
-                        if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+            for idee in results:
+                if 'type' in idee.keys(): #Check for mandatory identifier type.
+                    relId = PidFactory.factory(idee.attrib['type'], idee.text)
+                    if relId.is_valid():
+                        if self._verbose: print 'addField:', fieldName.upper(), "-->", relId.get_idx_id()
+                        self._fieldslist.append((fieldName, relId.get_idx_id()))
+                        #  Add all PID formats to general field:
+                        for variant in relId.get_typedvariants():
+                            self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
+                            if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
         elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
