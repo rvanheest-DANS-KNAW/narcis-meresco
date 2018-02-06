@@ -17,7 +17,7 @@ class PidFactory(object):
         baseval = baseval.strip().replace('\n', '')
         if type.strip().lower() == "doi":
             return Doi(baseval)
-        if type.strip().lower() == "urn" or type.strip().lower() == "urn:nbn" or type.strip().lower() == "urnnbn":
+        if type.strip().lower() == "urn" or type.strip().lower() == "urn:nbn" or type.strip().lower() == "urn:nbn:nl" or type.strip().lower() == "urnnbn":
             return UrnNbn(baseval)
         if type.strip().lower() == "arxiv":
             return ArXiv(baseval)
