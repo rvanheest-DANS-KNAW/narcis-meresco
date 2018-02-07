@@ -22,6 +22,7 @@ class Issn(PersistentIdentifier):
             self.typedVariants.add(self.unformatted)
             self.typedVariants.add('%s%s' % (self.unformatted[:4], self.unformatted[-4:]))
             self.typedVariants.add('%s-%s' % (self.unformatted[:4], self.unformatted[-4:]))
+            self.typedVariants.add(self.init_value)
             self.valid = True
 
     def __str__(self):

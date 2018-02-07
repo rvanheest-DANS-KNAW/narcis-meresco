@@ -38,6 +38,7 @@ class Doi(PersistentIdentifier):
                 self.valid = True
             self.id = str_id
 
+            self.typedVariants.add(self.init_value)
             self.typedVariants.update(self.formatted)
             for prefix in self.prefixes:
                 for suffix in self.formatted:

@@ -26,6 +26,7 @@ class UrnNbn(PersistentIdentifier):
             self.id = str_id
 
             self.typedVariants.update(self.formatted)
+            self.typedVariants.add(self.init_value)
 
     def __str__(self):
         return self.get_init_value()

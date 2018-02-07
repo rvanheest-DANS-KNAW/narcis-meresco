@@ -34,13 +34,13 @@ class PidFactory(object):
                 return Isbn(baseval)
             elif ("doi" in baseval.lower()):
                 return Doi(baseval)
-            elif ("handle" in baseval.lower() or "hdl" in baseval.lower()):
+            elif ("handle:" in baseval.lower() or "hdl:" in baseval.lower()): #handle may resolve locally, prefixed with local url-resolver, so return url type if given so.
                 return Handle(baseval)
             elif ("urn:nbn:" in baseval.lower()):
                 return UrnNbn(baseval)
             elif ("http" in baseval.lower() or "ftp" in baseval.lower()):
                 return Href(baseval)
-        if type.strip().lower() == "handle" or type.strip().lower() == "hdl":
+        if type.strip().lower() == "handle" or type.strip().lower() == "handle.net" or type.strip().lower() == "hdl":
             return Handle(baseval)
         return Unknown(type.strip().replace('\n', ''), baseval)
 

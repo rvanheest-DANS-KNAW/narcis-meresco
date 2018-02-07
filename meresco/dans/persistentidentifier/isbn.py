@@ -33,6 +33,7 @@ class Isbn(PersistentIdentifier):
             self.typedVariants.add(self.id)
             self.typedVariants.add(self.unformatted)
             self.typedVariants.add(filteredisbn)
+            self.typedVariants.add(self.init_value)
             self.valid = True
 
     def __str__(self):

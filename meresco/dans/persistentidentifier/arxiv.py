@@ -24,6 +24,7 @@ class ArXiv(PersistentIdentifier):
                 for suffix in self.formatted:
                     self.typedVariants.add(prefix + suffix)
             self.typedVariants.add(self.id)
+            self.typedVariants.add(self.init_value)
             self.valid = True
 
     def __str__(self):

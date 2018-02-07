@@ -86,7 +86,7 @@ def enum(**enums):
     return type('Enum', (), enums)
 
 
-Coll = enum(PUB='publication', DAT='dataset', ORG='organisation', PRJ='research', PRS='person')
+# Coll = enum(PUB='publication', DAT='dataset', ORG='organisation', PRJ='research', PRS='person')
 # print "DATA:", Collection.DAT
 
 
@@ -161,7 +161,7 @@ fieldNamesXpathMap = {
     'dd_os'             : "//org:organisatie/@code", # Onderzoekschool
     'dd_penv'           : "//prj:activiteit/prj:penvoerder/@instituut_code", # HarremaCode van penvoerend instituut.
     'dd_fin'            : "//prj:activiteit/prj:financier/@instituut_code", # HarremaCode van financierend instituut.
-    'publicationid'     : "//long:publication_identifier/text()", # MODS:identifier from mods root as well as relatedItem (mostly: isbn, issn, doi etc.)
+    'publicationid'     : "//long:publication_identifier/text()", # MODS:identifier from mods root, but also from <relatedItem> (mostly: isbn, issn, doi etc.)
     'pidref'            : "//long:knaw_long/long:persistentIdentifier/@ref", # Physical location to which the pubId refers to. (BRI)
     'dd_abrprd'         : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-periode']/long:topicValue/text()", #
     'dd_abrcmplx'       : "//long:metadata/long:subject/long:topic[ long:subjectScheme/text() = 'ABR-complex']/long:topicValue/text()", #

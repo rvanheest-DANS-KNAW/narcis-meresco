@@ -97,7 +97,7 @@ datacite_resourceTypeGeneral = ['Audiovisual','Collection','Dataset','Event','Im
 # DATACITE Controlled List Description Types:
 datacite_descriptionTypes = ['Abstract','Other','TableOfContents','SeriesInformation','TechnicalInfo','Methods']
 
-# mods:nameIdentifiers that will be processed to long. Other types will be ignored!
+# mods:nameIdentifiers that will be processed to long. Other types will be ignored.
 # ORDER does matter!
 supportedNids = ['dai-nl', 'orcid', 'isni', 'nod-prs']
 

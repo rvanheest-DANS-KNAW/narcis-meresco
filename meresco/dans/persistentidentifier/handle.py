@@ -25,6 +25,7 @@ class Handle(PersistentIdentifier):
                 for suffix in self.formatted:
                     self.typedVariants.add(prefix + suffix)
             self.typedVariants.add(self.unformatted)
+            self.typedVariants.add(self.init_value)
             self.valid = True
 
     def __str__(self):
