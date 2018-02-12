@@ -497,6 +497,7 @@ class NormaliseOaiRecord(UiaConverter):
                     relId = PidFactory.factory(id_type[0], idee[0])
                     if relId.is_valid():
                         attrib_dict['type'] = relId.get_name()
+                        attrib_dict['idx'] = relId.get_idx_id()
                         id_reltype = identifier.xpath('self::datacite:relatedIdentifier/@relationType', namespaces=namespacesmap)
                         id_resourceTypeGeneral = identifier.xpath('self::datacite:relatedIdentifier/@resourceTypeGeneral', namespaces=namespacesmap)
                         if len(id_reltype) > 0:
@@ -516,24 +517,15 @@ class NormaliseOaiRecord(UiaConverter):
                     relId = PidFactory.factory('url', item_href[0])
                     if relId.is_valid():
                         attrib_dict['type'] = relId.get_name()
+                        attrib_dict['idx'] = relId.get_idx_id()
                         etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = relId.get_unformatted_id()
                 # Get all mods:identifier with @type from the relatedItem: 
                 for relitem_ID in item.xpath('self::mods:relatedItem/mods:identifier[@type and @type != "local"]', namespaces=namespacesmap): 
                     relId = PidFactory.factory(relitem_ID.get("type"), relitem_ID.text)
                     if relId.is_valid():
                         attrib_dict['type'] = relId.get_name()
+                        attrib_dict['idx'] = relId.get_idx_id()
                         etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = relId.get_unformatted_id()
-
-
-# https://www.loc.gov/standards/mods/userguide/relateditem.html
-# <relatedItem type="succeeding">
-#     <titleInfo>
-#         <title>Computing in musicology</title>
-#     </titleInfo>
-#     <identifier type="issn">1057-9478</identifier>
-#     <identifier type="lccn">(DLC) 91656596</identifier>
-#     <identifier type="local">(OCoLC)21202412</identifier>
-# </relatedItem>
 
 
     def _getObjectFiles(self, lxmlNode, e_longRoot):
@@ -1041,7 +1033,7 @@ class NormaliseOaiRecord(UiaConverter):
                 if identifier.text and idType: # alternateIdentifierType is mandatory by datacite scheme:
                     pId = PidFactory.factory(idType, identifier.text)
                     if pId.is_valid():
-                        etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name()).text = pId.get_unformatted_id()
+                        etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name(), idx=pId.get_idx_id()).text = pId.get_unformatted_id()
             # We need the primary Identifier type as well.
             pi = lxmlNode.xpath("//datacite:resource/datacite:identifier[1]", namespaces=namespacesmap)
             if len(pi) > 0:
@@ -1050,7 +1042,7 @@ class NormaliseOaiRecord(UiaConverter):
                 if len(pid) > 0 and len(pid_type) > 0: # Found primary identifier and type (probably DOI)
                     primId = PidFactory.factory(pid_type[0], pid[0])
                     if primId.is_valid():
-                        etree.SubElement(e_longmetadata, "publication_identifier", type=primId.get_name()).text = primId.get_unformatted_id()
+                        etree.SubElement(e_longmetadata, "publication_identifier", type=primId.get_name(), idx=primId.get_idx_id()).text = primId.get_unformatted_id()
 
         elif self._metadataformat.isMods(): ## Also Called from getRelatedItems: (relatedItem, e_relateditem, root='self::mods:relatedItem/')
             identifierList = lxmlNode.xpath( root+"mods:identifier[@type != 'local']", namespaces=namespacesmap) # Skip local ids.
@@ -1061,13 +1053,13 @@ class NormaliseOaiRecord(UiaConverter):
                 if not idText or idText == '' : continue
                 pId = PidFactory.factory(idType, idText)
                 if pId.is_valid():
-                    etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name()).text = pId.get_unformatted_id()
+                    etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name(), idx=pId.get_idx_id()).text = pId.get_unformatted_id()
             if (root=='//mods:mods/'): # But only if called from toplevel, not if called from RelatedItems...
                 pi = lxmlNode.xpath('//didl:DIDL/didl:Item/didl:Descriptor/didl:Statement/dii:Identifier/text()', namespaces=namespacesmap) # Primary (persistent) identifier.
                 if len(pi) > 0: # Hoe weten we welk type identifier hierin gaat? EduStandaard gaat uit van URN:NBN, echter worden ook URL's opgestuurd...
                     pId = PidFactory.factory("uri", self._firstElement(pi))
                     if pId.is_valid():
-                        etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name()).text = pId.get_unformatted_id()
+                        etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name(), idx=pId.get_idx_id()).text = pId.get_unformatted_id()
                 # HSP 'identifier' as well? Vaak gelijk aan @ref van de urn:nbn:nl
                 hsp = self._findFirstXpath(lxmlNode,
                     '//didl:Item/didl:Item[didl:Descriptor/didl:Statement/rdf:type/@rdf:resource="info:eu-repo/semantics/humanStartPage"]/didl:Component/didl:Resource/@ref', #DIDL 3.0
@@ -1077,7 +1069,7 @@ class NormaliseOaiRecord(UiaConverter):
                 if len(hsp) > 0:
                     hrefId = PidFactory.factory('href', hsp[0])
                     if hrefId.is_valid(): # Type 'href/url' gevonden...
-                        etree.SubElement(e_longmetadata, "publication_identifier", type=hrefId.get_name()).text = hrefId.get_unformatted_id()
+                        etree.SubElement(e_longmetadata, "publication_identifier", type=hrefId.get_name(), idx=hrefId.get_idx_id()).text = hrefId.get_unformatted_id()
 
 
     def _getLanguage(self, lxmlNode, e_longmetadata):

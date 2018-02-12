@@ -377,11 +377,14 @@ class NormdocToFieldsList(Observable):
                         if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
         elif fieldName in ('relatedid', 'pubid'):
             for idee in results:
+                if 'idx' in idee.keys(): #Check for mandatory index-value type.
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", idee.attrib['idx']
+                    self._fieldslist.append((fieldName, idee.attrib['idx']))
                 if 'type' in idee.keys(): #Check for mandatory identifier type.
                     relId = PidFactory.factory(idee.attrib['type'], idee.text)
                     if relId.is_valid():
-                        if self._verbose: print 'addField:', fieldName.upper(), "-->", relId.get_idx_id()
-                        self._fieldslist.append((fieldName, relId.get_idx_id()))
+#                         if self._verbose: print 'addField:', fieldName.upper(), "-->", relId.get_idx_id()
+#                         self._fieldslist.append((fieldName, relId.get_idx_id()))
                         #  Add all PID formats to general field:
                         for variant in relId.get_typedvariants():
                             self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
