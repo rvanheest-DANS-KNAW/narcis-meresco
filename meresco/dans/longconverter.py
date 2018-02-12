@@ -556,7 +556,9 @@ class NormaliseOaiRecord(UiaConverter):
                     self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[0]
                 else:
                     # Check for the least restrictive rights on any objectfile... ACCESS_LEVELS = ['openAccess', 'restrictedAccess', 'closedAccess', 'embargoedAccess']
-                    if str(accesssRights).lower().find('restrictedaccess') >= 0:
+                    if str(accesssRights).lower().find('openaccess') >= 0:
+                        self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[0] # OpenAccess
+                    elif str(accesssRights).lower().find('restrictedaccess') >= 0:
                         self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[1] # RestrictedAccess
                     elif str(accesssRights).lower().find('embargoedaccess') >= 0:
                         self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[3] # embargoedAccess
