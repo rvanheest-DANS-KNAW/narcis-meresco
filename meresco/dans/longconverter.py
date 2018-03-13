@@ -362,14 +362,16 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _getTitleInfo(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
-        titleNL = ['','']    # [title, subtitle/alternative-title]
+        titleNL = ['','']    # Wrapper: [title, subtitle/alternative-title]
         titleEN = ['','']
 
         if self._metadataformat.isDatacite():
             titles = lxmlNode.xpath("//datacite:resource/datacite:titles", namespaces=namespacesmap)
             if len(titles) > 0:
-                titleNL = self._nlTitleFromTitles(titles[0])
-                titleEN = self._enTitleFromTitles(titles[0])
+                titleNL = self._getDataCiteTitleNL(titles[0])
+                titleEN = self._getDataCiteTitleEN(titles[0])
+                if not titleNL[0] or titleNL[0] == '':
+                    titleNL = titleEN
         else:
             #Get title from any dc: (only ONE)
             if self._metadataformat.isDC():
@@ -402,22 +404,26 @@ class NormaliseOaiRecord(UiaConverter):
         else:
             return
 
-    def _nlTitleFromTitles(self, titlesNode):
+    def _getDataCiteTitleNL(self, titlesNode):
         if titlesNode is not None:
             title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and not(@titleType)]/text()", namespaces=namespacesmap)) or \
+                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and @titleType='TranslatedTitle']/text()", namespaces=namespacesmap)) or \
                     self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang) and not(@titleType)]/text()", namespaces=namespacesmap)) or \
                     self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(starts-with(@xml:lang, 'en')) and not(@titleType)]/text()", namespaces=namespacesmap)) 
-            alternative_title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and @titleType]/text()", namespaces=namespacesmap)) or \
-                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang) and @titleType]/text()", namespaces=namespacesmap)) or \
-                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(starts-with(@xml:lang, 'en')) and @titleType]/text()", namespaces=namespacesmap))
+            alternative_title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='nl' and (@titleType='Subtitle' or @titleType='AlternativeTitle')]/text()", namespaces=namespacesmap)) or \
+                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(@xml:lang) and (@titleType='Subtitle' or @titleType='AlternativeTitle')]/text()", namespaces=namespacesmap)) or \
+                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[not(starts-with(@xml:lang, 'en')) and (@titleType='Subtitle' or @titleType='AlternativeTitle')]/text()", namespaces=namespacesmap))
             return [title, alternative_title]
         else:
             return
 
-    def _enTitleFromTitles(self, titlesNode):
+    def _getDataCiteTitleEN(self, titlesNode):
         if titlesNode is not None:
-            title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en' and not(@titleType)]/text()", namespaces=namespacesmap))
-            alternative_title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[starts-with(@xml:lang, 'en') and @titleType]/text()", namespaces=namespacesmap))
+            title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en' and not(@titleType)]/text()", namespaces=namespacesmap)) or \
+                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[@xml:lang='en' and @titleType='TranslatedTitle']/text()", namespaces=namespacesmap)) or \
+                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[starts-with(@xml:lang, 'en') and not (@titleType)]/text()", namespaces=namespacesmap)) or \
+                    self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[starts-with(@xml:lang, 'en') and @titleType='TranslatedTitle']/text()", namespaces=namespacesmap))
+            alternative_title = self._firstElement(titlesNode.xpath("self::datacite:titles/datacite:title[starts-with(@xml:lang, 'en') and (@titleType='Subtitle' or @titleType='AlternativeTitle')]/text()", namespaces=namespacesmap))
             return [title, alternative_title]
         else:
             return
