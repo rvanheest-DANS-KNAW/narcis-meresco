@@ -1165,7 +1165,7 @@ class NormaliseOaiRecord(UiaConverter):
     def _getFunding(self, lxmlNode, e_longmetadata):
     
         if self._metadataformat.isDatacite():
-            funders = lxmlNode.xpath("//datacite:resource/datacite:fundingReference", namespaces=namespacesmap)
+            funders = lxmlNode.xpath("//datacite:resource/datacite:fundingReferences/datacite:fundingReference", namespaces=namespacesmap)
             if len(funders) > 0:
                 e_gas = etree.SubElement(e_longmetadata, "grantAgreements")
                 for ga in funders:
