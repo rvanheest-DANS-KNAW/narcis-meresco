@@ -1,13 +1,12 @@
 from re import compile, IGNORECASE
-
 from persistentidentifier import PersistentIdentifier
 
 
-class Href(PersistentIdentifier):
+class Purl(PersistentIdentifier):
     ID_PATTERN = compile(r'^(https?|ftp)://.*$', IGNORECASE)
 
     def __init__(self, basestring):
-        PersistentIdentifier.__init__(self, "url", basestring)
+        PersistentIdentifier.__init__(self, "purl", basestring)
 
     def _validate_and_initialize(self):
         m = self.get_idpattern().match(self.init_value)

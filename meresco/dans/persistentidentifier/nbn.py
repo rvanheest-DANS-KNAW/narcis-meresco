@@ -3,12 +3,12 @@ from re import compile, IGNORECASE
 from persistentidentifier import PersistentIdentifier
 
 
-class UrnNbn(PersistentIdentifier):
-    # ID_PATTERN = compile(r'^(?:.*?)([uU][rR][nN]:[nN][bB][nN]:[nN][lL](:([uU][iI]|[kK][bB]|[hH][sS]))?:\d{2}-.+)', IGNORECASE)
+class Nbn(PersistentIdentifier):
+
     ID_PATTERN = compile(r'^(?:.*?)([uU][rR][nN]:[nN][bB][nN]:[nN][lL](:([a-zA-Z]{2}))?:\d{2}-.+)', IGNORECASE)
 
     def __init__(self, basestring):
-        PersistentIdentifier.__init__(self, "urn", basestring, None, "http://www.persistent-identifier.nl")
+        PersistentIdentifier.__init__(self, "nbn", basestring, None, "http://www.persistent-identifier.nl")
 
     def _validate_and_initialize(self):
 

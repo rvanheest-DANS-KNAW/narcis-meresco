@@ -7,6 +7,7 @@ class Handle(PersistentIdentifier):
     ID_PATTERN = None
 
     # Valid handles: "info:hdl/20.1000/100", "20.1000/100", "2381/12345", "http://hdl.handle.net/10.1000/182", "hdl:4263537/4000", "http://handle.net/10.1000/182", "https://doi.org/20.1000/100"
+    # Handles may consist of any printable characters from the Universal Character Set of ISO/IEC 10646, which is the exact character set defined by Unicode
 
     def __init__(self, basestring):
         PersistentIdentifier.__init__(self, "handle", basestring,

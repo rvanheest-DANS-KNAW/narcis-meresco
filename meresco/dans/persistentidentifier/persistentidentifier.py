@@ -10,9 +10,9 @@ class PersistentIdentifier(object):
         self.init_value = init_value  # Initial value used to construct the PersistentIdentifier. 1::1
         self.unformatted = None  # Unformatted 'id' string, without resolver part: 07193555x, 0000000123456789, 000000021694233x, etc. 1::1 (no case correction)
         self.id = None  # 'Fully qualified name' or 'preferred' variant to be stored into the index/database.
-        self.formatted = []  # List of 'known' base string variations (formatted): 0000 0001 3333 4444, 0000-0001-3333-4444, 0000#0001#3333#4444 etc. 0::n
+        self.formatted = []  # List of 'known' string variations (formatted): 0000 0001 3333 4444, 0000-0001-3333-4444, 0000#0001#3333#4444 etc. 0::n
         self.typedVariants = set()  # List of all possible 'valid' persistentidentifier string configurations. 1::n
-        self.valid = False  # Is the given Pid valid according our own validity checks?
+        self.valid = False  # Is the given Pid-value valid according to the type and our format check?
         self._validate_and_initialize()  # Match the constructor to the PID validity checks and generate the typedVariants.
 
     def get_name(self):

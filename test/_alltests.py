@@ -39,6 +39,9 @@ from storagesplittest import StorageSplitTest
 from metaparttofieldslisttest import MetapartToFieldsListTest
 from normdocparttofieldslisttest import NormdocToFieldsListTest
 
+
+from test_persistentidentifier import TestPidFactory
+
 # Converters:
 from convertertest import ConverterTest
 from metapartconvertertest import MetaPartConverterTest

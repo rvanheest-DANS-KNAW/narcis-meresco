@@ -16,7 +16,7 @@ from meresco.components import lxmltostring
 from meresco.dans.metadataformats import MetadataFormat
 from meresco.dans.uiaconverter import UiaConverter
 from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
-from meresco.dans.persistentidentifier import Doi, UrnNbn, ArXiv, Href, Handle, Isbn, Issn, PidFactory
+from meresco.dans.persistentidentifier import PidFactory
 from meresco.xml import namespaces
 
 from re import compile
@@ -1051,7 +1051,7 @@ class NormaliseOaiRecord(UiaConverter):
                         etree.SubElement(e_longmetadata, "publication_identifier", type=primId.get_name(), idx=primId.get_idx_id()).text = primId.get_unformatted_id()
 
         elif self._metadataformat.isMods(): ## Also Called from getRelatedItems: (relatedItem, e_relateditem, root='self::mods:relatedItem/')
-            identifierList = lxmlNode.xpath( root+"mods:identifier[@type != 'local']", namespaces=namespacesmap) # Skip local ids.
+            identifierList = lxmlNode.xpath( root+"mods:identifier[@type]", namespaces=namespacesmap)
             for identifier in identifierList:
                 idType = identifier.attrib.get('type')
                 if not idType: continue

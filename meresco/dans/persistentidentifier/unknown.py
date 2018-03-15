@@ -19,7 +19,7 @@ class Unknown(PersistentIdentifier):
         self.typedVariants.add(self.unformatted)
         self.typedVariants.add(self.id)
 
-        self.valid = True  # Set to true, for we have no knowledge of validating this identifier, but we want to use it anyway.
+        self.valid = False  # Set to false, for we have no knowledge of validating this identifier to it's scheme.
 
     def __str__(self):
         return self.get_init_value()
