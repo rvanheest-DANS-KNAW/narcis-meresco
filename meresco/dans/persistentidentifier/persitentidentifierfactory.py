@@ -35,6 +35,8 @@ class PidFactory(object):
         if type.strip().lower() == "arxiv":
             return ArXiv(baseval)
         if type.strip().lower() == "href" or type.strip().lower() == "url" or type.strip().lower() == "purl": # :mods:relatedItem/@xlink:href wordt met type 'url' opgezet...
+            if ("doi.org/" in baseval.lower()):
+                return Doi(baseval)
             return Purl(baseval)
         if type.strip().lower() == "issn":
             return Issn(baseval)
