@@ -19,6 +19,8 @@ class PidFactory(object):
 
     @staticmethod
     def factory(type, baseval):
+        if type is None or baseval is None:
+            return Unknown("", "")
         if type.strip().lower() == "local" and (baseval.count(':') >= 1 or baseval.count('|') >= 1):
             baseval_list = re.split(':|', baseval, maxsplit=1)
             type = baseval_list[0].strip().lower()
