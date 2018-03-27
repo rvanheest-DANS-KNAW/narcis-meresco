@@ -6,3 +6,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> id = ('ut:oai:ris.utwente.nl:publications/9ad28b28-a652-4f14-ba51-cdf73e732224','metadata')
 >>> print md5Split(id)
 ['ut', '0f', '6f', 'oai:ris.utwente.nl:publications/9ad28b28-a652-4f14-ba51-cdf73e732224', 'metadata']
+
+Of:
+
+python -c "from meresco.dans.storagesplit import md5Split, md5Join, MD5JoinError; print md5Split(('rug:oai:pure.rug.nl:publications/be6503f1-cff8-4e3d-85db-1ff3d892068c','metadata'))"
