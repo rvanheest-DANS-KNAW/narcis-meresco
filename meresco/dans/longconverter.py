@@ -756,7 +756,6 @@ class NormaliseOaiRecord(UiaConverter):
                 etree.SubElement(e_name_type, 'mcRoleTerm').text = 'aut'
 
             # if dc.type == dissertation or doctoral thesis: marcrelator will be thesis advisor(ths) ctb (contributor) otherwise:
-            # xpath is case sensitive: just in case...
             dc_type_thesis_dissertation = lxmlNode.xpath('//dc:type[contains(.,"issertation") or contains(.,"thesis")]', namespaces=namespacesmap)
             dc_type_e = 'ctb'
             if dc_type_thesis_dissertation: dc_type_e = 'ths'
@@ -811,11 +810,12 @@ class NormaliseOaiRecord(UiaConverter):
             else:
                 etree.SubElement(e_name_type, 'mcRoleTerm').text = 'ctb' # cbt = contributor
 
-            if len(nameIdentifier) > 0 and len(nameIdentifierType) > 0: # Transfer identifier found:
-                if nameIdentifierType[0].lower() in supportedNids or 'dai' in nameIdentifierType[0].lower():
-                    nameId = NameIdentifierFactory.factory(nameIdentifierType[0], nameIdentifier[0])
-                    if nameId.is_valid():
-                        etree.SubElement(e_name_type, "nameIdentifier", type=nameId.get_name()).text = nameIdentifier[0]
+            if len(nameIdentifier) > 0 and len(nameIdentifierType) > 0 and len(nameIdentifier) == len(nameIdentifierType): # Transfer all supported identifiers found:
+                for idx, nameIdType in enumerate(nameIdentifierType):
+                    if nameIdType.lower() in supportedNids or 'dai' in nameIdType.lower():
+                        nameId = NameIdentifierFactory.factory(nameIdType, nameIdentifier[idx])
+                        if nameId.is_valid():
+                            etree.SubElement(e_name_type, "nameIdentifier", type=nameId.get_name()).text = nameId.get_id()
     
             if len(affiliation) > 0:
                 etree.SubElement(e_name_type, 'affiliation').text = affiliation[0]
