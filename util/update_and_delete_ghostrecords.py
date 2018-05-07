@@ -19,6 +19,8 @@ import time
 # 3: Stuurt een delete voor het record naar de gateway.
 # Dit werkt wel.
 
+# http://anarcis01.dans.knaw.nl:9080/sru?operation=searchRetrieve&version=1.1&maximumRecords=1&recordSchema=knaw_short&query=(untokenized.meta_repositoryid%20exact%20rce-kb)
+
 
 
 
@@ -57,7 +59,7 @@ SRU_UPDATE_REQUEST = """<ucp:updateRequest xmlns:srw="http://www.loc.gov/zing/sr
                 &lt;repository&gt;
                 &lt;id&gt;%(repoid)s&lt;/id&gt;
                 &lt;baseurl&gt;http://corpus1.mpi.nl/ds/oaiprovider/oai3&lt;/baseurl&gt;
-                &lt;repositoryGroupId&gt;%(repoid)s&lt;/repositoryGroupId&gt;
+                &lt;repositoryGroupId&gt;%(repogid)s&lt;/repositoryGroupId&gt;
                 &lt;metadataPrefix&gt;oai_dc&lt;/metadataPrefix&gt;
                 &lt;collection&gt;dataset&lt;/collection&gt;
                 &lt;/repository&gt;
@@ -68,7 +70,10 @@ SRU_UPDATE_REQUEST = """<ucp:updateRequest xmlns:srw="http://www.loc.gov/zing/sr
 </ucp:updateRequest>"""
 
 
-STORAGE_DIR = '/data/meresco/api/store/bogus'
+
+REPOID = 'rce-kb'
+REPOGROUPID = 'rce'
+STORAGE_DIR = '/data/meresco/api/store/'+REPOID
 
 
 
@@ -82,7 +87,8 @@ def send(data, baseurl, port, path):
     connection.send(data)
     
     response = connection.getresponse()
-    print "STATUS:", response.status
+    if response.status != 200:
+        print "STATUS:", response.status
     # print "HEADERS:", response.getheaders()
     # print "MESSAGE:", response.read()
 
@@ -112,8 +118,8 @@ for subdir, dirs, files in os.walk(STORAGE_DIR):
                 else:
                     cnt += 1
                     print cnt, upload_id.text, oai_id.text, harvestdate.text, collection.text
-                    send(SRU_UPDATE_REQUEST % { "repoid": "mpi", "upload_id": upload_id.text, "oai_id": oai_id.text}, 'localhost', 8000, '/update')
-                    time.sleep(.100)
+                    send(SRU_UPDATE_REQUEST % { "repoid": REPOID, "repogid": REPOGROUPID, "upload_id": upload_id.text, "oai_id": oai_id.text}, 'localhost', 8000, '/update')
+                    time.sleep(.030)
                     send(SRU_DELETE_REQUEST % { "upload_id": upload_id.text}, 'localhost', 8000, '/update')
                 
                 
