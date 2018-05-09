@@ -124,3 +124,17 @@ for subdir, dirs, files in os.walk(STORAGE_DIR):
                 
                 
 print "finished!", cnt
+
+
+
+# OR:
+
+# uploadids = ['rug:oai:pure.rug.nl:publications/960b00bd-83b6-49ee-8e93-ee2eabacfb42','rug:oai:pure.rug.nl:publications/047d7a40-2293-4f64-b88e-50e9bb92de2a','rug:oai:pure.rug.nl:publications/eb49b4be-7ac4-4434-a1a0-dd5d528e8dc6','rug:oai:pure.rug.nl:publications/5fceb4c9-1c27-42a3-a077-8972ed6370d0','rug:oai:pure.rug.nl:publications/0d76af52-a1e4-484c-9f3c-77115e0ba5d3','rug:oai:pure.rug.nl:publications/8277ff88-b336-4849-af0f-f4da8400d1e8','rug:oai:pure.rug.nl:publications/d51b6494-58de-4ad2-b23f-aa14d1928e97','rug:oai:pure.rug.nl:publications/1b36ab03-4931-4226-8960-1a154c3680f5','rug:oai:pure.rug.nl:publications/6cf4c248-e5d3-4d24-ba4f-541dd7f8b089','rug:oai:pure.rug.nl:publications/d713c77d-1847-44f1-8992-2830e3fe0683','rug:oai:pure.rug.nl:publications/fb6d5838-a978-4d14-af7f-5d8d8ce71088','rug:oai:pure.rug.nl:publications/7e57430a-8ebe-4e32-89bf-cc9d63e41ceb']
+# 
+# for uploadid in uploadids:
+# 
+#     send(SRU_UPDATE_REQUEST % { "repoid": "rug", "repogid": "rug", "upload_id": uploadid, "oai_id": uploadid[4:]}, 'localhost', 8000, '/update')
+#     time.sleep(.030)
+#     send(SRU_DELETE_REQUEST % { "upload_id": uploadid}, 'localhost', 8000, '/update')
+# 
+# print "ready"
