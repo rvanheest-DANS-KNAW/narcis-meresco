@@ -71,7 +71,7 @@ UNQUALIFIED_TERMS = ''  #'__all__'
 priceRegex = compile('NWO\\s{0,1}\\-\\s{0,1}(\\w*?)\\s[1-2]{1}[0-9]{3}.*?')
 
 # ABR-code regex for DateCite@EASY-DANS
-abrRegex = compile(r'^.*\((.*?)\)$')
+abrRegex = re.compile(r'^.*\(([a-zA-Z.]+)\)$')
 
 # MarcrelatorRoleTerms which are considered "authors":
 marcrelatorAuthorRoles = ['aut','dis','pta','rev','ctb','cre','prg','edt']
