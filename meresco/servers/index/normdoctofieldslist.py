@@ -383,8 +383,6 @@ class NormdocToFieldsList(Observable):
                 if 'type' in idee.keys(): #Check for mandatory identifier type.
                     relId = PidFactory.factory(idee.attrib['type'], idee.text)
                     if relId.is_valid():
-#                         if self._verbose: print 'addField:', fieldName.upper(), "-->", relId.get_idx_id()
-#                         self._fieldslist.append((fieldName, relId.get_idx_id()))
                         #  Add all PID formats to general field:
                         for variant in relId.get_typedvariants():
                             self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
@@ -397,9 +395,9 @@ class NormdocToFieldsList(Observable):
             self._fieldslist.append((fieldName, ' '.join(results).replace('\n', ''))) 
             if self._verbose: print 'adddField:', fieldName.upper(), "-->", ' '.join(results).replace('\n', '')[:self._truncate_chars]
 
-    # returns the year category, used for drilldown: <1900, <1910 etc.
+    # returns the year category, used for drilldown: <1900, <1910 etc, discarding years < 1000 A.D.
     def _getYearGroupForDrilldown(self, date_string):
-        if date_string and date_string.strip() and len(date_string.strip()) >= 4:
+        if date_string and date_string.strip() and len(date_string.strip()) >= 4 and int(filter(str.isdigit, date_string.strip()[:4])) >= 1000:
             YYYY = int(date_string.strip()[:4])
             if YYYY < 1900: # first category (all before 1900)
                 return '1000'
