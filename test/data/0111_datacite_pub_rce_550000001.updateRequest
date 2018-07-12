@@ -53,6 +53,8 @@
         &lt;subject subjectScheme=&quot;NARCIS-classification&quot; schemeURI=&quot;http://www.narcis.nl/classification&quot; valueURI=&quot;http://www.narcis.nl/classfication/D37000&quot; xml:lang=&quot;en&quot;&gt;Archaeology&lt;/subject&gt;
         &lt;subject subjectScheme=&quot;ABR-complex&quot; schemeURI=&quot;http://cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Nederzetting, onbepaald (NX)&lt;/subject&gt;
         &lt;subject subjectScheme=&quot;ABR-periode&quot; schemeURI=&quot;http://data.cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Nieuwe Tijd (NT)&lt;/subject&gt;
+        &lt;subject subjectScheme=&quot;ABR-complex&quot; schemeURI=&quot;http://data.cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Loopgraaf (BEWV.LG)&lt;/subject&gt;
+        &lt;subject subjectScheme=&quot;ABR-complex&quot; schemeURI=&quot;http://data.cultureelerfgoed.nl/&quot; xml:lang=&quot;nl&quot;&gt;Begraving, onbepaald (BGV.X)&lt;/subject&gt;
     &lt;/subjects&gt;
     &lt;contributors&gt;
         &lt;contributor contributorType=&quot;Other&quot;&gt;

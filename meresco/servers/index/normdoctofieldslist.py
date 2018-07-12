@@ -360,10 +360,13 @@ class NormdocToFieldsList(Observable):
                 m = abrRegex.match(abr_label)
                 if m:
                     abr_code = m.group(1).upper()
-                    if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code
+                    if not self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code
                     self._fieldslist.append((fieldName, abr_code))
-                    if abr_code[:1] in ('E','G','I','N','R','V'): # Also add the parent:
-                        if self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code[:1]
+                    if "." in abr_code:
+                        if not self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code.split(".",1)[0]+"."
+                        self._fieldslist.append((fieldName, abr_code.split(".",1)[0]+"."))
+                    elif abr_code[:1] in ('E','G','I','N','R','V','B'): # Also add the parent:
+                        if not self._verbose: print 'addField:', fieldName.upper(), "-->", abr_code[:1]
                         self._fieldslist.append((fieldName, abr_code[:1]))
         elif fieldName == 'nids_funder': 
             for funderid in results:
