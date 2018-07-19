@@ -49,7 +49,7 @@ class ApiTest(IntegrationTestCase):
     def testSruQuery(self):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
-        self.assertEqual('13', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('14', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual({
             'Example Program 1',
             'Example Program 2',
@@ -124,7 +124,7 @@ class ApiTest(IntegrationTestCase):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
         response = self.doSruQuery(**{"query": '*', 'maximumRecords': '1', "x-term-drilldown": "dd_cat:0"})
         # print "DD body:", etree.tostring(response)
-        self.assertEqual('13', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('14', xpathFirst(response, '//srw:numberOfRecords/text()'))
         # self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
@@ -201,7 +201,7 @@ class ApiTest(IntegrationTestCase):
         header, body = getRequest(self.apiPort, '/rss', dict(query="*", querylabel='MyLabel', sortKeys='untokenized.dateissued,,0', startRecord='4'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
-        self.assertEquals(10, len(items))
+        self.assertEquals(11, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
         self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Example Program 2', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b'}, set(xpath(body, "//item/title/text()")))
         self.assertEqual({'FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'Abstract van dit document', 'This is an example program about Programming with Meresco', 'Abstract'}, set(xpath(body, "//item/description/text()")))

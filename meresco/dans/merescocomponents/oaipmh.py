@@ -40,16 +40,16 @@ import re
 from weightless.core import be, compose
 from meresco.core import Transparent, Observable
 
-from meresco.dans.merescocomponents import OaiIdentify
+from oaiidentify import OaiIdentify
 
-from oailist import OaiList
-from oaijazz import DEFAULT_BATCH_SIZE
-from oaigetrecord import OaiGetRecord
-from oailistmetadataformats import OaiListMetadataFormats
-from oailistsets import OaiListSets
-from oaierror import OaiError
-from oairecord import OaiRecord
-from oairepository import OaiRepository
+from meresco.oai.oailist import OaiList
+from meresco.oai.oaijazz import DEFAULT_BATCH_SIZE
+from meresco.oai.oaigetrecord import OaiGetRecord
+from meresco.oai.oailistmetadataformats import OaiListMetadataFormats
+from meresco.oai.oailistsets import OaiListSets
+from meresco.oai.oaierror import OaiError
+from meresco.oai.oairecord import OaiRecord
+from meresco.oai.oairepository import OaiRepository
 
 
 class OaiPmh(object):

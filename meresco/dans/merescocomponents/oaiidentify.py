@@ -37,8 +37,8 @@ from xml.sax.saxutils import escape as escapeXml
 
 from meresco.core import Observable
 
-from oaiutils import oaiHeader, oaiFooter, oaiRequestArgs, zuluTime
-from oaierror import oaiError
+from meresco.oai.oaiutils import oaiHeader, oaiFooter, oaiRequestArgs, zuluTime
+from meresco.oai.oaierror import oaiError
 
 
 class OaiIdentify(Observable):
