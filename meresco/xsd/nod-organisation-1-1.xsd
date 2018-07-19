@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 ****************************************************************
-*                            ORGANISATION 1.1                                    
-*                                                                               
-*                            October 25, 2017                 
+*                            ORGANISATION 1.1
+*
+*                            October 25, 2017
+*
+*                            ================
+*                            Juli 18, 2018
+*                            addition of 'identifier', 'org_telefoon',
+*                            'org_fax', 'org_email', 'org_url' and
+*                            'org_parent'
+*                            ================
 *****************************************************************
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
@@ -14,11 +21,17 @@
   <xs:element name="organisatie">
     <xs:complexType>
       <xs:sequence>
+        <xs:element name="identifier" type="xs:string"/>
 	    <xs:element name="naam_nl" type="xs:string"/>
 	    <xs:element minOccurs="0" name="naam_en" type="xs:string"/>
 	    <xs:group   ref="organisation:taak"/>
   	    <xs:element minOccurs="0" name="acroniem" type="xs:string"/>
   	    <xs:element minOccurs="0" name="locatie" type="xs:string"/>
+  	    <xs:element minOccurs="0" name="org_telefoon" type="xs:string"/>
+  	    <xs:element minOccurs="0" name="org_fax" type="xs:string"/>
+  	    <xs:element minOccurs="0" name="org_email" type="xs:string"/>
+  	    <xs:element minOccurs="0" name="org_url" type="xs:string"/>
+  	    <xs:element minOccurs="0" name="org_parent" type="xs:string"/>
 	    <xs:element minOccurs="0" name="invoer_datum" type="xs:date"/>
 	    <xs:element name="url" type="xs:anyURI"/>
 	    <xs:element minOccurs="0" ref="organisation:categories"/>
@@ -63,5 +76,5 @@
     <xs:restriction base="xs:string">
 	  <xs:pattern value="[ACDE]([0-9]){5}" />
 	</xs:restriction>
-  </xs:simpleType>  
+  </xs:simpleType>
 </xs:schema>

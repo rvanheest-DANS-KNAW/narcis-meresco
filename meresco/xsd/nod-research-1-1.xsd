@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 ****************************************************************
-*                            RESEARCH 1.1                                    
-*                                                                               
-*                            October 26, 2017                 
+*                            RESEARCH 1.1
+*
+*                            October 26, 2017
+*
+*                            ================
+*                            Juli 18, 2018
+*                            addition of 'type', 'startdate',
+*                            'enddate', 'extern-identifier',
+*                            'categories' and 'werkzaamheid'
+*                            ================
 *****************************************************************
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
@@ -18,12 +25,25 @@
 	    <xs:element name="title_nl" type="xs:string"/>
 	    <xs:element name="title_en" type="xs:string"/>
   	    <xs:group   ref="research:summary" />
+  	    <xs:group   ref="research:type" />
 	    <xs:element ref="research:status"/>
+        <xs:element minOccurs="0" name="startdate"/>
+        <xs:element minOccurs="0" name="enddate"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="extern-identifier">
+            <xs:complexType>
+                <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                        <xs:attribute name="type" type="xs:string" use="required"/>
+                    </xs:extension>
+                </xs:simpleContent>
+            </xs:complexType>
+        </xs:element>
 	    <xs:group   minOccurs="0" maxOccurs="unbounded" ref="research:institute"/>
 	    <xs:element minOccurs="0" maxOccurs="unbounded" ref="research:person"/>
 	    <xs:element minOccurs="0" name="invoer_datum" type="xs:date"/>
 	    <xs:element name="url" type="xs:anyURI"/>
 	    <xs:element minOccurs="0" ref="research:dissertatie"/>
+        <xs:element minOccurs="0" ref="research:categories"/>
 	  </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -43,6 +63,17 @@
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="br" type="xs:string"/>
     </xs:sequence>
+  </xs:complexType>
+  <xs:group name="type">
+      <xs:sequence>
+          <xs:element minOccurs="0" name="type_nl" type="research:type"/>
+          <xs:element minOccurs="0" name="type_en" type="research:type"/>
+      </xs:sequence>
+  </xs:group>
+  <xs:complexType name="type" mixed="true">
+      <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="br" type="xs:string"/>
+      </xs:sequence>
   </xs:complexType>
   <xs:element name="status" type="research:status"/>
   <xs:simpleType name="status">
@@ -76,13 +107,14 @@
     <xs:restriction base="xs:string">
 	  <xs:pattern value="ORG([0-9]){7}" />
 	</xs:restriction>
-  </xs:simpleType>  
+  </xs:simpleType>
   <xs:element name="person">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="fullName" type="xs:string"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="research:nameIdentifier"/>
         <xs:element minOccurs="0" ref="research:role"/>
+        <xs:element minOccurs="0" name="werkzaamheid"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -114,5 +146,32 @@
     <xs:restriction base="xs:string">
 	  <xs:pattern value="true" />
 	</xs:restriction>
-  </xs:simpleType>    
+  </xs:simpleType>
+  <xs:element name="categories">
+      <xs:complexType>
+          <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="category" >
+                  <xs:complexType>
+                      <xs:sequence>
+                          <xs:element maxOccurs="unbounded" name="term">
+                              <xs:complexType>
+                                  <xs:simpleContent>
+                                      <xs:extension base="xs:string">
+                                          <xs:attribute ref="xml:lang"/>
+                                      </xs:extension>
+                                  </xs:simpleContent>
+                              </xs:complexType>
+                          </xs:element>
+                      </xs:sequence>
+                      <xs:attribute name="code" type="research:categoryCode" use="required" />
+                  </xs:complexType>
+              </xs:element>
+          </xs:sequence>
+      </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="categoryCode">
+      <xs:restriction base="xs:string">
+          <xs:pattern value="[ACDE]([0-9]){5}" />
+      </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
