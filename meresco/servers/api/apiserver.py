@@ -39,7 +39,7 @@ from meresco.components.http import ObservableHttpServer, BasicHttpHandler, Path
 from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog, LogCollectorScope, QueryLogWriter, DirectoryLog, LogFileServer, LogComponent
 from meresco.components.sru import SruHandler, SruParser, SruLimitStartRecord
 
-from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiPmh, OaiAddDeleteRecordWithPrefixesAndSetSpecs, OaiBranding, OaiProvenance
+from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiAddDeleteRecordWithPrefixesAndSetSpecs, OaiBranding, OaiProvenance
 
 from meresco.lucene import SORTED_PREFIX, UNTOKENIZED_PREFIX
 from meresco.lucene.remote import LuceneRemote
@@ -64,6 +64,8 @@ from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
 from meresco.dans.shortconverter import ShortConverter
 from meresco.dans.oai_dcconverter import DcConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
+
+from meresco.dans.merescocomponents import OaiPmh
 
 from meresco.xml import namespaces
 
