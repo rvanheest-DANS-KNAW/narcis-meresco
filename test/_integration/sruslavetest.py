@@ -46,7 +46,7 @@ testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/
 class SruSlaveTest(IntegrationTestCase):
 
     def testSruQuery(self):
-        response = self.doSruQuery(query='*', recordSchema='knaw_short')
+        response = self.doSruQuery(query='*', recordSchema='knaw_short', maximumRecords='20')
         # print "doSruQuery(query='*'):", etree.tostring(response)
         self.assertEqual('14', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set([
@@ -59,7 +59,12 @@ class SruSlaveTest(IntegrationTestCase):
             'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)',
             'Conditiebepaling PVC',
             'Wetenschapswinkel',
-            'H.J. Bennis']
+            "The Language Designer's Workbench: Automating Verification of Language Definitions",
+            'H.J. Bennis',
+            'Havens van het IJsselmeergebied',
+            'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.',
+            u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b'
+            ]
             ), set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
 
     def testSruQueryWithUntokenized(self):
@@ -124,7 +129,7 @@ class SruSlaveTest(IntegrationTestCase):
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         # print 'DD:', drilldown
-        self.assertEqual([('D37000', '2'), ('D30000', '2'), ('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
+        self.assertEqual([('D30000', '3'), ('D37000', '2'), ('D34200', '1'), ('D34000', '1'), ('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
 
         # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         # drilldown = [(i.text, i.attrib['count']) for i in ddItems]

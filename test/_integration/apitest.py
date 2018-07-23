@@ -47,12 +47,12 @@ testNamespaces = namespaces.copyUpdate({'oaibrand':'http://www.openarchives.org/
 class ApiTest(IntegrationTestCase):
 
     def testSruQuery(self):
-        response = self.doSruQuery(query='*', recordSchema='knaw_short')
+        response = self.doSruQuery(query='*', recordSchema='knaw_short', maximumRecords='20')
         # print "doSruQuery(query='*'):", etree.tostring(response)
         self.assertEqual('14', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual({
-            'Example Program 1',
             'Example Program 2',
+            'Example Program 1',
             'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate',
             'Appositie en de interne struktuur van de NP',
             'Paden en stromingen---a historical survey',
@@ -60,7 +60,11 @@ class ApiTest(IntegrationTestCase):
             'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)',
             'Conditiebepaling PVC',
             'Wetenschapswinkel',
-            'H.J. Bennis'}, set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
+            "The Language Designer's Workbench: Automating Verification of Language Definitions",
+            'H.J. Bennis',
+            'Havens van het IJsselmeergebied',
+            'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.',
+            u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b' }, set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
 
     def testSruQueryWithUntokenized(self):
         response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "knaw_long"})        
@@ -106,6 +110,7 @@ class ApiTest(IntegrationTestCase):
     def testAlternativeIdentifier(self):
         doi = PidFactory.factory("doi", 'doi:10.17026/dans-x38-rkke')
         response = self.doSruQuery(**{'query':'untokenized.pubid exact "'+doi.get_idx_id()+'"', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
+        # print "DD body:", etree.tostring(response)
         self.assertEqual('rce:rapporten:550000001', xpathFirst(response, '//srw:recordIdentifier/text()'))
 #         print "DD body:", etree.tostring(response)
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
@@ -129,7 +134,8 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('D37000', '2'), ('D30000', '2'), ('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
+        # print drilldown
+        self.assertEqual([('D30000', '3'), ('D37000', '2'), ('D34200', '1'), ('D34000', '1'), ('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
 
         # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         # drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -203,7 +209,7 @@ class ApiTest(IntegrationTestCase):
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(11, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Example Program 2', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b'}, set(xpath(body, "//item/title/text()")))
+        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Example Program 2', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b', "The Language Designer's Workbench: Automating Verification of Language Definitions"}, set(xpath(body, "//item/title/text()")))
         self.assertEqual({'FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'Abstract van dit document', 'This is an example program about Programming with Meresco', 'Abstract'}, set(xpath(body, "//item/description/text()")))
         self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
 
