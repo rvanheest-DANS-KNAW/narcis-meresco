@@ -195,12 +195,12 @@ class ApiTest(IntegrationTestCase):
     def testOaiListSets(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))
         # print "ListSets", etree.tostring(body)
-        self.assertEqual({'publication','openaire','oa_publication','ec_fundedresources','thesis','dataset'}, set(xpath(body, '//oai:setSpec/text()')))
+        self.assertEqual({'publication','openaire','oa_publication','ec_fundedresources','thesis','dataset','openaire_cris_projects'}, set(xpath(body, '//oai:setSpec/text()')))
 
     def testOaiListMetadataFormats(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListMetadataFormats"))
-        # print "ListMetadataFormats", etree.tostring(body)
-        self.assertEqual('oai_dc', xpathFirst(body, '//oai:metadataFormat/oai:metadataPrefix/text()'))
+        #print "ListMetadataFormats", etree.tostring(body)
+        self.assertEqual({'oai_dc','oai_cerif_openaire'}, set(xpath(body, '//oai:metadataFormat/oai:metadataPrefix/text()')))
         
 
     def testRSS(self):

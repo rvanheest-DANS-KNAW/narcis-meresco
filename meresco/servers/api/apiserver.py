@@ -83,6 +83,7 @@ META_PARTNAME = 'meta'
 METADATA_PARTNAME = 'metadata'
 LONG_PARTNAME = 'knaw_long'
 SHORT_PARTNAME = 'knaw_short'
+OPENAIRE_PARTNAME = 'oai_cerif_openaire'
 
 NAMESPACEMAP = namespaces.copyUpdate({
     'prs'   : 'http://www.onderzoekinformatie.nl/nod/prs',
@@ -119,7 +120,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 (FilterWcpCollection(allowed=['research']),
                                     (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                         (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-project.xsl')], fromKwarg="lxmlNode"),
-                                            (RewritePartname("cerif"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
                                                     (storageComponent,)
                                                 )
@@ -131,7 +132,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 (FilterWcpCollection(allowed=['person']),                                    
                                     (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                         (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-person.xsl')], fromKwarg="lxmlNode"),
-                                            (RewritePartname("cerif"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
                                                     (storageComponent,)
                                                 )
@@ -143,7 +144,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 (FilterWcpCollection(allowed=['organisation']),
                                     (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                         (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-orgunit.xsl')], fromKwarg="lxmlNode"),
-                                            (RewritePartname("cerif"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
                                                 (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
                                                     (storageComponent,)
                                                 )
@@ -200,7 +201,6 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                         (oaiJazz,),
                                     ),
                                     (XmlXPath(["//long:knaw_long[long:accessRights ='openAccess']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        # (LogComponent("OPENACCESS"),),
                                         (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire'], name='NARCISPORTAL'),
                                             (oaiJazz,),
                                         )
@@ -217,11 +217,21 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                     )
                                 ),
                                 (FilterWcpCollection(allowed=['dataset']),
-                                    # (LogComponent("DATASET"),),
                                     (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset'], name='NARCISPORTAL'),
                                         (oaiJazz,),
                                     )
+                                ),
+
+                                (FilterWcpCollection(allowed=['research']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_projects'], name='NARCISPORTAL'),
+                                        (oaiJazz,),
+                                    )
                                 )
+
+
+
+
+
                             )
                         ), # Schrijf 'meta' partname naar storage:
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="meta"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
@@ -311,11 +321,11 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
 
 
     strategie = Md5HashDistributeStrategy()
-    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME])
+    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME, OPENAIRE_PARTNAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
     oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/") # def updateMetadataFormat(self, prefix, schema, namespace):
-    # oaiJazz.updateMetadataFormat("knaw_long", "http://www.narcis.nl/scheme/knaw_long.xsd", "http://www.knaw.nl/narcis/1.0/long/")
+    oaiJazz.updateMetadataFormat(OPENAIRE_PARTNAME, " https://github.com/openaire/guidelines-cris-managers/raw/v1.1/schemas/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
 
     # Wat doet dit?
     cqlClauseConverters = [
