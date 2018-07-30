@@ -24,6 +24,7 @@
 
 import sys
 from os.path import join, dirname, abspath
+# from os.path import dirname, abspath, join, isdir
 
 from weightless.core import be, consume
 from weightless.io import Reactor
@@ -63,6 +64,7 @@ from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
 from meresco.dans.shortconverter import ShortConverter
 from meresco.dans.oai_dcconverter import DcConverter
+from meresco.dans.cerifconverter import CerifConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
 
 from meresco.dans.merescocomponents import OaiPmh
@@ -111,9 +113,46 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                         )
                     ),
                     (FilterMessages(allowed=['add']),
-                        # TODO: onderstaande toKwarg='data' kan eruit. Dan de volgende regel ook:-)
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
                             (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
+                                    
+                                (FilterWcpCollection(allowed=['research']),
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-project.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname("cerif"),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+
+                                (FilterWcpCollection(allowed=['person']),                                    
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-person.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname("cerif"),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+
+                                (FilterWcpCollection(allowed=['organisation']),
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-orgunit.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname("cerif"),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+
+
                                 (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                     (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
@@ -123,7 +162,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 ),
                                 (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
                                     (RewritePartname("knaw_long"), # Hernoemt partname van 'record' naar "knaw_long".
-                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
+                                        (FilterWcpCollection(disallowed=['person', 'research', 'organisation']),
                                             (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                 (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
                                             )
@@ -135,7 +174,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                                 )
                                             )
                                         ),
-                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
+                                        (FilterWcpCollection(disallowed=['person', 'research', 'organisation']),
                                             (DcConverter(fromKwarg='lxmlNode'), # Hernoem partname van 'record' naar "oai_dc".
                                                 (RewritePartname("oai_dc"),
                                                     (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
@@ -202,7 +241,6 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
         )
     )
 
-
 ######## START Lucene Integration ###############################################################
 
 def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, lucenePort):
@@ -220,9 +258,7 @@ def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, lucenePort)
 ######## END Lucene Integration ###############################################################
 
 
-
 def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, **ignored):
-
 
 ######## START Lucene Integration ###############################################################
     defaultLuceneSettings = LuceneSettings(
