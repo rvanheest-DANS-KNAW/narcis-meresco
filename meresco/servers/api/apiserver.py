@@ -40,7 +40,7 @@ from meresco.components.http import ObservableHttpServer, BasicHttpHandler, Path
 from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog, LogCollectorScope, QueryLogWriter, DirectoryLog, LogFileServer, LogComponent
 from meresco.components.sru import SruHandler, SruParser, SruLimitStartRecord
 
-from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiAddDeleteRecordWithPrefixesAndSetSpecs, OaiBranding, OaiProvenance
+from meresco.oai import OaiPmh, OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiAddDeleteRecordWithPrefixesAndSetSpecs, OaiBranding, OaiProvenance
 
 from meresco.lucene import SORTED_PREFIX, UNTOKENIZED_PREFIX
 from meresco.lucene.remote import LuceneRemote
@@ -59,7 +59,7 @@ from seecr.utils import DebugPrompt
 from meresco.components.drilldownqueries import DrilldownQueries
 from storage import StorageComponent
 
-from meresco.dans.merescocomponents import Rss, RssItem
+from meresco.dans.merescocomponents import Rss, RssItem, OaiOpenAIREDescription
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
 from meresco.dans.shortconverter import ShortConverter
@@ -67,7 +67,7 @@ from meresco.dans.oai_dcconverter import DcConverter
 from meresco.dans.cerifconverter import CerifConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
 
-from meresco.dans.merescocomponents import OaiPmh
+from meresco.dans.merescocomponents import OaiPmh as OaiPmhDans
 
 from meresco.xml import namespaces
 
@@ -98,7 +98,7 @@ NAMESPACEMAP = namespaces.copyUpdate({
 
 
 
-def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
+def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz, oai_oa_cerifJazz):
     return \
     (periodicDownload, # Scheduled connection to a remote (response / request)...
         (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)), # Convert from plain text to lxml-object.
@@ -108,6 +108,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                         # (LogComponent("Delete Update"),),
                         (storageComponent,), # Delete from storage
                         (oaiJazz,), # Delete from OAI-pmh repo
+                        (oai_oa_cerifJazz,),
                         # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
                         (WriteTombstone(),
                             (storageComponent,),
@@ -222,15 +223,24 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                     )
                                 ),
 
+                                # Add NOD OpenAIRE Cerif to OpenAIRE-PMH repo.
                                 (FilterWcpCollection(allowed=['research']),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_projects'], name='NARCISPORTAL'),
-                                        (oaiJazz,),
+                                    # (LogComponent("RESEARCH ADD:"),),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_projects']),
+                                        # (LogComponent("RESEARCH ADD:"),),
+                                        (oai_oa_cerifJazz,),
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['person']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_persons']),
+                                        (oai_oa_cerifJazz,),
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['organisation']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_orgunits']),
+                                        (oai_oa_cerifJazz,),
                                     )
                                 )
-
-
-
-
 
                             )
                         ), # Schrijf 'meta' partname naar storage:
@@ -240,7 +250,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                             )
                         )
                     ),
-                    (FilterMessages(allowed=['add']), # TODO: Remove this line.
+                    (FilterMessages(allowed=['add']),
                         # (LogComponent("UnDelete"),),
                         (ResurrectTombstone(),
                             (storageComponent,),
@@ -325,9 +335,11 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
     oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/") # def updateMetadataFormat(self, prefix, schema, namespace):
-    oaiJazz.updateMetadataFormat(OPENAIRE_PARTNAME, " https://github.com/openaire/guidelines-cris-managers/raw/v1.1/schemas/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
 
-    # Wat doet dit?
+    oai_oa_cerifJazz = OaiJazz(join(statePath, 'oai_cerif'))
+    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, " https://github.com/openaire/guidelines-cris-managers/raw/v1.1/schemas/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
+
+
     cqlClauseConverters = [
         RenameFieldForExact(
             untokenizedFields=untokenizedFieldnames,
@@ -369,7 +381,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
 
     return \
     (Observable(),
-        createDownloadHelix(reactor, periodicGateWayDownload, oaiDownload, storage, oaiJazz),
+        createDownloadHelix(reactor, periodicGateWayDownload, oaiDownload, storage, oaiJazz, oai_oa_cerifJazz),
         (ObservableHttpServer(reactor, port, compressResponse=True),
             (BasicHttpHandler(),
                 (PathFilter(["/oai"]),
@@ -383,6 +395,40 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                             link="http://oai.narcis.nl", 
                             title="Narcis - The gateway to scholarly information in The Netherlands"),
                         ),
+                        (OaiProvenance(
+                            nsMap=NAMESPACEMAP,
+                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 
+                            harvestDate=('meta', '//meta:record/meta:harvestdate/text()'),
+                            metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
+                            identifier=('header','//oai:identifier/text()'),
+                            datestamp=('header', '//oai:datestamp/text()')
+                            ),
+                            (storage,)
+                        )
+                    )
+                ),
+                (PathFilter(["/cerif_oa"]),
+                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="narcis.nl"),
+                        (oai_oa_cerifJazz,),
+                        (StorageAdapter(),
+                            (storage,)
+                        ),
+                        (OaiOpenAIREDescription(
+                            serviceid='',
+                            acronym='OpenAIRE',
+                            name='',
+                            description='Beschrijving...',
+                            website='',
+                            baseurl='',
+                            subjectheading='',
+                            orgunitid='',
+                            owneracronym='NARCIS'),
+                        ),
+                        # (OaiBranding(
+                        #     url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", 
+                        #     link="http://oai.narcis.nl", 
+                        #     title="Narcis - The gateway to scholarly information in The Netherlands"),
+                        # ),
                         (OaiProvenance(
                             nsMap=NAMESPACEMAP,
                             baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 

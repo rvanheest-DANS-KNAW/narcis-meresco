@@ -181,6 +181,14 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(10, len(records))
         self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
+    def testOaiCerif(self):
+        header, body = getRequest(self.apiPort, '/cerif_oa', dict(verb="ListRecords", metadataPrefix="oai_cerif_openaire"))
+        # print "OAI body:", etree.tostring(body) #
+        records = xpath(body, '//oai:record/oai:metadata')
+        self.assertEqual(4, len(records))
+        # self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
+
+
     # def testOaiPovenance(self):
     #     header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
     #     # print "OAI body:", etree.tostring(body)
@@ -192,15 +200,32 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('NARCIS OAI-pmh', xpathFirst(body, '//oai:Identify/oai:repositoryName/text()'))
         self.assertEqual('Narcis - The gateway to scholarly information in The Netherlands', testNamespaces.xpathFirst(body, '//oai:Identify/oai:description/oaibrand:branding/oaibrand:collectionIcon/oaibrand:title/text()'))
 
+    def testOaiCerifIdentify(self):
+        header, body = getRequest(self.apiPort, '/cerif_oa', dict(verb="Identify"), parse=True)
+        # print "OAI body:", str(body)
+        # print "OAI body:", etree.tostring(body)
+        self.assertEqual('OpenAIRE CERIF', xpathFirst(body, '//oai:Identify/oai:repositoryName/text()'))
+        # self.assertEqual('Narcis - The gateway to scholarly information in The Netherlands', testNamespaces.xpathFirst(body, '//oai:Identify/oai:description/oaibrand:branding/oaibrand:collectionIcon/oaibrand:title/text()'))
+
+    def testOaiCerifListSets(self):
+        header, body = getRequest(self.apiPort, '/cerif_oa', dict(verb="ListSets"))
+        # print "ListSets", etree.tostring(body)
+        self.assertEqual({'openaire_cris_persons','openaire_cris_projects','openaire_cris_orgunits'}, set(xpath(body, '//oai:setSpec/text()')))
+
     def testOaiListSets(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))
         # print "ListSets", etree.tostring(body)
-        self.assertEqual({'publication','openaire','oa_publication','ec_fundedresources','thesis','dataset','openaire_cris_projects'}, set(xpath(body, '//oai:setSpec/text()')))
+        self.assertEqual({'publication','openaire','oa_publication','ec_fundedresources','thesis','dataset'}, set(xpath(body, '//oai:setSpec/text()')))
 
     def testOaiListMetadataFormats(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListMetadataFormats"))
         #print "ListMetadataFormats", etree.tostring(body)
-        self.assertEqual({'oai_dc','oai_cerif_openaire'}, set(xpath(body, '//oai:metadataFormat/oai:metadataPrefix/text()')))
+        self.assertEqual({'oai_dc'}, set(xpath(body, '//oai:metadataFormat/oai:metadataPrefix/text()')))
+        
+    def testOaiCerifListMetadataFormats(self):
+        header, body = getRequest(self.apiPort, '/cerif_oa', dict(verb="ListMetadataFormats"))
+        #print "ListMetadataFormats", etree.tostring(body)
+        self.assertEqual({'oai_cerif_openaire'}, set(xpath(body, '//oai:metadataFormat/oai:metadataPrefix/text()')))
         
 
     def testRSS(self):

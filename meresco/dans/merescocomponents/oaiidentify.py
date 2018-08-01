@@ -106,7 +106,7 @@ The response may include multiple instances of the following optional elements:
         yield '<Identify>'
         yield IDENTIFY % values
         yield descriptionRepositoryIdentifier
-        yield TOOLKIT_DESCRIPTION
+        # yield TOOLKIT_DESCRIPTION
         yield self.all.description()
         yield '</Identify>'
         yield oaiFooter()
