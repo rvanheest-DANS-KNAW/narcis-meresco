@@ -64,7 +64,6 @@ from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
 from meresco.dans.shortconverter import ShortConverter
 from meresco.dans.oai_dcconverter import DcConverter
-from meresco.dans.cerifconverter import CerifConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
 
 from meresco.dans.merescocomponents import OaiPmh as OaiPmhDans
