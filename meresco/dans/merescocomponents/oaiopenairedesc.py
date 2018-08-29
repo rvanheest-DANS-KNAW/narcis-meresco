@@ -47,7 +47,7 @@ class OaiOpenAIREDescription(object):
         yield """<Compatibility xmlns="https://www.openaire.eu/cerif-profile/vocab/OpenAIRE_Service_Compatibility">https://www.openaire.eu/cerif-profile/vocab/OpenAIRE_Service_Compatibility#1.1</Compatibility>"""
         yield "<Acronym>%s</Acronym>" % escapeXml(self._acronym)
         yield """<Name xml:lang="en">%s</Name>"""% escapeXml(self._name)
-        yield """"<Description xml:lang="en">%s</Description>"""% escapeXml(self._description)
+        yield """<Description xml:lang="en">%s</Description>"""% escapeXml(self._description)
         yield "<WebsiteURL>%s</WebsiteURL>" % escapeXml(self._website)
         yield "<OAIPMHBaseURL>%s</OAIPMHBaseURL>" % escapeXml(self._baseurl)
         yield "<SubjectHeadingsURL>%s</SubjectHeadingsURL>" % escapeXml(self._subjectheading)
