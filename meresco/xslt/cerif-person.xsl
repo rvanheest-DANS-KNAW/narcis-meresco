@@ -36,7 +36,7 @@
 
     <xsl:template match="input:identifier">
         <xsl:attribute name="id">
-            <xsl:value-of select="concat('oai:narcis.nl:person:', .)"/>
+            <xsl:value-of select="concat('oai:narcis.nl:Persons/', .)"/>
         </xsl:attribute>
     </xsl:template>
 
