@@ -116,7 +116,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                     (FilterMessages(allowed=['add']),
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
                             (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
-                                    
+
                                 (FilterWcpCollection(allowed=['research']),
                                     (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                         (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-project.xsl')], fromKwarg="lxmlNode"),
@@ -129,7 +129,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                     )
                                 ),
 
-                                (FilterWcpCollection(allowed=['person']),                                    
+                                (FilterWcpCollection(allowed=['person']),
                                     (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                         (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-person.xsl')], fromKwarg="lxmlNode"),
                                             (RewritePartname(OPENAIRE_PARTNAME),
@@ -225,18 +225,18 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 # Add NOD OpenAIRE Cerif to OpenAIRE-PMH repo.
                                 (FilterWcpCollection(allowed=['research']),
                                     # (LogComponent("RESEARCH ADD:"),),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_projects']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_projects'], name=['OpenAIRE_CRIS_projects']),
                                         # (LogComponent("RESEARCH ADD:"),),
                                         (oai_oa_cerifJazz,),
                                     )
                                 ),
                                 (FilterWcpCollection(allowed=['person']),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_persons']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_persons'], name=['OpenAIRE_CRIS_persons']),
                                         (oai_oa_cerifJazz,),
                                     )
                                 ),
                                 (FilterWcpCollection(allowed=['organisation']),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_orgunits']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_orgunits'], name=['OpenAIRE_CRIS_orgunits']),
                                         (oai_oa_cerifJazz,),
                                     )
                                 )
@@ -283,16 +283,16 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     defaultLuceneSettings = LuceneSettings(
         commitTimeout=30,
         readonly=True,)
-    
-    
+
+
     http11Request = be(
         (HttpRequest1_1(),
             (SocketPool(reactor=reactor, unusedTimeout=5, limits=dict(totalSize=100, destinationSize=10)),),
         )
     )
-    
+
     luceneIndex = luceneAndReaderConfig(defaultLuceneSettings.clone(readonly=True), http11Request, lucenePort)
-    
+
     luceneRoHelix = be(
         (AdapterToLuceneQuery(
                 defaultCore=DEFAULT_CORE,
@@ -390,13 +390,13 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                             (storage,)
                         ),
                         (OaiBranding(
-                            url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", 
-                            link="http://oai.narcis.nl", 
+                            url="http://www.narcis.nl/images/logos/logo-knaw-house.gif",
+                            link="http://oai.narcis.nl",
                             title="Narcis - The gateway to scholarly information in The Netherlands"),
                         ),
                         (OaiProvenance(
                             nsMap=NAMESPACEMAP,
-                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 
+                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'),
                             harvestDate=('meta', '//meta:record/meta:harvestdate/text()'),
                             metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
                             identifier=('header','//oai:identifier/text()'),
@@ -424,13 +424,13 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                             owneracronym='NARCIS'),
                         ),
                         # (OaiBranding(
-                        #     url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", 
-                        #     link="http://oai.narcis.nl", 
+                        #     url="http://www.narcis.nl/images/logos/logo-knaw-house.gif",
+                        #     link="http://oai.narcis.nl",
                         #     title="Narcis - The gateway to scholarly information in The Netherlands"),
                         # ),
                         (OaiProvenance(
                             nsMap=NAMESPACEMAP,
-                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 
+                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'),
                             harvestDate=('meta', '//meta:record/meta:harvestdate/text()'),
                             metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
                             identifier=('header','//oai:identifier/text()'),
@@ -468,11 +468,11 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                             maximumRecords = 20),
                         executeQueryHelix,
                         (RssItem(
-                                nsMap=NAMESPACEMAP,                                            
+                                nsMap=NAMESPACEMAP,
                                 title = ('knaw_short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
                                 description = ('knaw_short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
                                 pubdate = ('knaw_short', '//short:dateIssued/short:parsed/text()'),
-                                linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',                                
+                                linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',
                                 wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
                                 oai_identifier = ('meta', '//meta:record/meta:id/text()'),
                                 language = ('Dummy: Language is auto provided by the calling RSS component, but needs to be present to serve the linkTemplate.')
