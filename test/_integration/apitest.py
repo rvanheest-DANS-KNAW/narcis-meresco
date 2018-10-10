@@ -61,7 +61,7 @@ class ApiTest(IntegrationTestCase):
             'Conditiebepaling PVC',
             'Wetenschapswinkel',
             "The Language Designer's Workbench: Automating Verification of Language Definitions",
-            'H.J. Bennis',
+            'Bennis, Prof.dr. H.J. (Hans)',
             'Havens van het IJsselmeergebied',
             'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.',
             u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b' }, set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
@@ -135,7 +135,7 @@ class ApiTest(IntegrationTestCase):
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         # print drilldown
-        self.assertEqual([('D30000', '3'), ('D37000', '2'), ('D34200', '1'), ('D34000', '1'), ('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
+        self.assertEqual([('D30000', '5'), ('D37000', '2'), ('D34200', '1'), ('D34000', '1'), ('D10000', '1'), ('D20000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1'), ('D30100', '1'), ('D36300', '1'), ('D36000', '1')], drilldown)
 
         # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         # drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -235,8 +235,9 @@ class ApiTest(IntegrationTestCase):
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(11, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'H.J. Bennis', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Example Program 2', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b', "The Language Designer's Workbench: Automating Verification of Language Definitions"}, set(xpath(body, "//item/title/text()")))
-        self.assertEqual({'FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'Abstract van dit document', 'This is an example program about Programming with Meresco', 'Abstract'}, set(xpath(body, "//item/description/text()")))
+        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'Bennis, Prof.dr. H.J. (Hans)', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Example Program 2', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b', "The Language Designer's Workbench: Automating Verification of Language Definitions"}, set(xpath(body, "//item/title/text()")))
+        # print set(xpath(body, "//item/description/text()"))
+        self.assertEqual({'Abstract van dit document', 'FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Abstract', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'De KNAW vervult drie (wettelijke) taken: genootschap van excellente wetenschappers uit\n        alle disciplines; bestuurder van wetenschappelijke onderzoeksinstituten; adviseur van de\n        regering op het gebied van wetenschapsbeoefening. Zijne Majesteit de Koning is beschermheer\n        van de', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'This is an example program about Programming with Meresco'}, set(xpath(body, "//item/description/text()")))
         self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
 
     def testDcToLong(self):
@@ -423,11 +424,11 @@ class ApiTest(IntegrationTestCase):
     def testPersonToShort(self):
         response = self.doSruQuery(**{'query': 'person:PRS1242583', 'recordSchema':'knaw_short'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
-        self.assertEqual('H.J. Bennis', testNamespaces.xpathFirst(response, '//short:metadata/short:titleInfo/short:title/text()'))
+        self.assertEqual('Bennis, Prof.dr. H.J. (Hans)', testNamespaces.xpathFirst(response, '//short:metadata/short:titleInfo/short:title/text()'))
         self.assertEqual('person', testNamespaces.xpathFirst(response, '//short:metadata/short:genre/text()'))
         self.assertEqual('Microvariation; (Generative) Syntax; Morphosyntax;', testNamespaces.xpathFirst(response, '//short:metadata/short:abstract[@xml:lang="en"]/text()')[:50])
         self.assertEqual('personal', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:type/text()'))
-        self.assertEqual('H.J. Bennis', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:name/text()'))
+        self.assertEqual('Bennis, Prof.dr. H.J. (Hans)', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:name/text()'))
         self.assertEqual('071792279', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="dai-nl"]/text()'))
         self.assertEqual('0000000081508690', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="isni"]/text()'))
         self.assertEqual('0000-0002-4703-3788', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="orcid"]/text()'))
