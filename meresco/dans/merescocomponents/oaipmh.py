@@ -49,7 +49,7 @@ from meresco.oai.oailistmetadataformats import OaiListMetadataFormats
 from meresco.oai.oailistsets import OaiListSets
 from meresco.oai.oaierror import OaiError
 from meresco.oai.oairecord import OaiRecord
-from meresco.oai.oairepository import OaiRepository
+from oairepository import OaiRepository
 
 
 class OaiPmh(object):

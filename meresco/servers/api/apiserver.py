@@ -40,7 +40,8 @@ from meresco.components.http import ObservableHttpServer, BasicHttpHandler, Path
 from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog, LogCollectorScope, QueryLogWriter, DirectoryLog, LogFileServer, LogComponent
 from meresco.components.sru import SruHandler, SruParser, SruLimitStartRecord
 
-from meresco.oai import OaiPmh, OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiAddDeleteRecordWithPrefixesAndSetSpecs, OaiBranding, OaiProvenance
+from meresco.oai import OaiPmh, OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiBranding, OaiProvenance, OaiAddDeleteRecordWithPrefixesAndSetSpecs
+# from meresco.dans.merescocomponents import OaiAddDeleteRecordWithPrefixesAndSetSpecs
 
 from meresco.lucene import SORTED_PREFIX, UNTOKENIZED_PREFIX
 from meresco.lucene.remote import LuceneRemote
@@ -67,6 +68,7 @@ from meresco.dans.oai_dcconverter import DcConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
 
 from meresco.dans.merescocomponents import OaiPmh as OaiPmhDans
+
 
 from meresco.xml import namespaces
 
@@ -197,46 +199,44 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 ),
                                 (FilterWcpCollection(allowed=['publication']),
                                     # (LogComponent("PUBLICATION"),),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publication'], name='NARCISPORTAL'), #TODO: Skip name='NARCISPORTAL'
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publication']),
                                         (oaiJazz,),
                                     ),
                                     (XmlXPath(["//long:knaw_long[long:accessRights ='openAccess']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire'], name='NARCISPORTAL'),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire']),
                                             (oaiJazz,),
                                         )
                                     ),
                                     (XmlXPath(["//long:knaw_long/long:metadata[long:genre ='doctoralthesis']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['thesis'], name='NARCISPORTAL'),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['thesis']),
                                             (oaiJazz,),
                                         )
                                     ),
                                     (XmlXPath(['//long:knaw_long/long:metadata/long:grantAgreements/long:grantAgreement[long:code[contains(.,"greement/EC/") or contains(.,"greement/ec/")]][1]'], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire'], name='NARCISPORTAL'),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire']),
                                             (oaiJazz,),
                                         )
                                     )
                                 ),
                                 (FilterWcpCollection(allowed=['dataset']),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset'], name='NARCISPORTAL'),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset']),
                                         (oaiJazz,),
                                     )
                                 ),
 
                                 # Add NOD OpenAIRE Cerif to OpenAIRE-PMH repo.
                                 (FilterWcpCollection(allowed=['research']),
-                                    # (LogComponent("RESEARCH ADD:"),),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_projects'], name=['OpenAIRE_CRIS_projects']),
-                                        # (LogComponent("RESEARCH ADD:"),),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_projects"]),
                                         (oai_oa_cerifJazz,),
                                     )
                                 ),
                                 (FilterWcpCollection(allowed=['person']),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_persons'], name=['OpenAIRE_CRIS_persons']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_persons']),
                                         (oai_oa_cerifJazz,),
                                     )
                                 ),
                                 (FilterWcpCollection(allowed=['organisation']),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_orgunits'], name=['OpenAIRE_CRIS_orgunits']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_orgunits']),
                                         (oai_oa_cerifJazz,),
                                     )
                                 )
@@ -333,10 +333,22 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME, OPENAIRE_PARTNAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/") # def updateMetadataFormat(self, prefix, schema, namespace):
+    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/")
 
     oai_oa_cerifJazz = OaiJazz(join(statePath, 'oai_cerif'))
-    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, " https://github.com/openaire/guidelines-cris-managers/raw/v1.1/schemas/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
+    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, "https://github.com/openaire/guidelines-cris-managers/raw/v1.1/schemas/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
+    # All of the following OAI-PMH sets shall be recognized by the CRIS, even if not all of them are populated.
+    oai_oa_cerifJazz.updateSet("openaire_cris_projects", "OpenAIRE_CRIS_projects")
+    oai_oa_cerifJazz.updateSet("openaire_cris_orgunits", "OpenAIRE_CRIS_orgunits")
+    oai_oa_cerifJazz.updateSet("openaire_cris_persons", "OpenAIRE_CRIS_persons")
+
+    oai_oa_cerifJazz.updateSet("openaire_cris_publications", "OpenAIRE_CRIS_publications")
+    oai_oa_cerifJazz.updateSet("openaire_cris_products", "OpenAIRE_CRIS_products")
+    oai_oa_cerifJazz.updateSet("openaire_cris_patents", "OpenAIRE_CRIS_patents")
+    oai_oa_cerifJazz.updateSet("openaire_cris_funding", "OpenAIRE_CRIS_funding")
+    oai_oa_cerifJazz.updateSet("openaire_cris_events", "OpenAIRE_CRIS_events")
+    oai_oa_cerifJazz.updateSet("openaire_cris_equipments", "OpenAIRE_CRIS_equipments")
+ 
 
 
     cqlClauseConverters = [
@@ -384,7 +396,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
         (ObservableHttpServer(reactor, port, compressResponse=True),
             (BasicHttpHandler(),
                 (PathFilter(["/oai"]),
-                    (OaiPmh(repositoryName="NARCIS OAI-pmh", adminEmail="narcis@dans.knaw.nl"),
+                    (OaiPmh(repositoryName="NARCIS OAI-pmh", adminEmail="narcis@dans.knaw.nl", externalUrl="http://oai.narcis.nl"),
                         (oaiJazz,),
                         (StorageAdapter(),
                             (storage,)
@@ -406,8 +418,8 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                         )
                     )
                 ),
-                (PathFilter(["/cerif_oa"]),
-                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="narcis.nl"),
+                (PathFilter(["/cerif"]),
+                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="narcis.nl", externalUrl="http://oai.narcis.nl"),
                         (oai_oa_cerifJazz,),
                         (StorageAdapter(),
                             (storage,)
