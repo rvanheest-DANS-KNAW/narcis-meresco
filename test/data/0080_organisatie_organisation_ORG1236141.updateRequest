@@ -86,11 +86,12 @@
             &lt;/record&gt;</part>
             <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;
                 &lt;upload&gt;
-                &lt;id&gt;organisation:ORG1236141&lt;/id&gt;
-                &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+                &lt;id&gt;organisation:ORG1236141&lt;/id&gt;                
                 &lt;/upload&gt;
                 &lt;record&gt;
-                &lt;id&gt;ORG1236141&lt;/id&gt;               
+                &lt;id&gt;ORG1236141&lt;/id&gt;
+                &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+                &lt;metadataNamespace&gt;http://www.onderzoekinformatie.nl/nod/org&lt;/metadataNamespace&gt;
                 &lt;/record&gt;
                 &lt;repository&gt;
                 &lt;id&gt;organisation&lt;/id&gt;
