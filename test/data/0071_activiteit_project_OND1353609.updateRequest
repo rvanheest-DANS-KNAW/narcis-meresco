@@ -55,6 +55,7 @@
                 &lt;record&gt;
                 &lt;id&gt;OND1353609&lt;/id&gt;
                 &lt;harvestdate&gt;2018-07-19T13:46:09Z&lt;/harvestdate&gt;
+                &lt;metadataNamespace&gt;http://www.onderzoekinformatie.nl/nod/act&lt;/metadataNamespace&gt;
                 &lt;/record&gt;
                 &lt;repository&gt;
                 &lt;id&gt;research&lt;/id&gt;
