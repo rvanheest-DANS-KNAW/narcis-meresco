@@ -47,9 +47,9 @@ java = '/usr/bin/java'
 if 'JAVA_BIN' in environ and environ['JAVA_BIN']:
     java = environ['JAVA_BIN'] + "/java"
 
-if system("%s -version 2>&1 | grep '1.7' > /dev/null" % java) != 0:
-    print "Java version should be java 7; You could specify a different java with JAVA_BIN"
-    exit(1)
+#if system("%s -version 2>&1 | grep '1.7' > /dev/null" % java) != 0:
+#    print "Java version should be java 7; You could specify a different java with JAVA_BIN"
+#    exit(1)
 
 # print 'Java Path:', java
 # print 'java args:', [argv0] + XOptions + ['-cp', CP, 'org.meresco.lucene.http.LuceneHttpServer'] + args
