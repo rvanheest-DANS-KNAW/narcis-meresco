@@ -27,7 +27,10 @@
             <xsl:apply-templates select="input:initials"/>
         </PersonName>
 
-        <xsl:apply-templates select="input:nameIdentifier"/>
+        <xsl:apply-templates select="input:nameIdentifier[@type='orcid'][1]"/>
+        <xsl:apply-templates select="input:nameIdentifier[@type='rid'][1]"/>
+        <xsl:apply-templates select="input:nameIdentifier[@type='said'][1]"/>
+        <xsl:apply-templates select="input:nameIdentifier[@type='isni'][1]"/>
 
         <xsl:apply-templates select="input:person_url"/>
 
@@ -56,75 +59,73 @@
         </xsl:if>
     </xsl:template>
 
-    <xsl:template match="input:nameIdentifier">
-        <xsl:choose>
-            <xsl:when test="@type='orcid'">
-                <xsl:variable name="orcid1">
-                    <xsl:value-of select="substring(., 1, 4)"/>
-                </xsl:variable>
-                <xsl:variable name="orcid2">
-                    <xsl:value-of select="substring(., 5, 4)"/>
-                </xsl:variable>
-                <xsl:variable name="orcid3">
-                    <xsl:value-of select="substring(., 9, 4)"/>
-                </xsl:variable>
-                <xsl:variable name="orcid4">
-                    <xsl:value-of select="substring(., 13, 4)"/>
-                </xsl:variable>
-                <ORCID>
-                    <xsl:text>https://orcid.org/</xsl:text>
-                    <xsl:value-of select="normalize-space($orcid1)"/>
-                    <xsl:text>-</xsl:text>
-                    <xsl:value-of select="normalize-space($orcid2)"/>
-                    <xsl:text>-</xsl:text>
-                    <xsl:value-of select="normalize-space($orcid3)"/>
-                    <xsl:text>-</xsl:text>
-                    <xsl:value-of select="normalize-space($orcid4)"/>
-                </ORCID>
-            </xsl:when>
-            <xsl:when test="@type='isni'">
-                <xsl:variable name="isni1">
-                    <xsl:value-of select="substring(., 1, 4)"/>
-                </xsl:variable>
-                <xsl:variable name="isni2">
-                    <xsl:value-of select="substring(., 5, 4)"/>
-                </xsl:variable>
-                <xsl:variable name="isni3">
-                    <xsl:value-of select="substring(., 9, 4)"/>
-                </xsl:variable>
-                <xsl:variable name="isni4">
-                    <xsl:value-of select="substring(., 13, 4)"/>
-                </xsl:variable>
-                <ISNI>
-                    <xsl:value-of select="normalize-space($isni1)"/>
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="normalize-space($isni2)"/>
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="normalize-space($isni3)"/>
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="normalize-space($isni4)"/>
-                </ISNI>
-            </xsl:when>
-            <xsl:when test="@type='rid'">
-                <!--
-                    TODO when adding the ResearcherID, this number must be properly formatted
-                    we don't know yet what the format is gonna look like from the NOD OAI-PMH output
-                  -->
-                <ResearcherID>
-                    <xsl:value-of select="."/>
-                </ResearcherID>
-            </xsl:when>
-            <xsl:when test="@type='said'">
-                <!--
-                    TODO when adding the ScopusAuthorID, this number must be properly formatted
-                    we don't know yet what the format is gonna look like from the NOD OAI-PMH output
-                  -->
-                <ScopusAuthorID>
-                    <xsl:value-of select="."/>
-                </ScopusAuthorID>
-            </xsl:when>
-        </xsl:choose>
+    <xsl:template match="input:nameIdentifier[@type='orcid']">
+        <xsl:variable name="orcid1">
+            <xsl:value-of select="substring(., 1, 4)"/>
+        </xsl:variable>
+        <xsl:variable name="orcid2">
+            <xsl:value-of select="substring(., 5, 4)"/>
+        </xsl:variable>
+        <xsl:variable name="orcid3">
+            <xsl:value-of select="substring(., 9, 4)"/>
+        </xsl:variable>
+        <xsl:variable name="orcid4">
+            <xsl:value-of select="substring(., 13, 4)"/>
+        </xsl:variable>
+        <ORCID>
+            <xsl:text>https://orcid.org/</xsl:text>
+            <xsl:value-of select="normalize-space($orcid1)"/>
+            <xsl:text>-</xsl:text>
+            <xsl:value-of select="normalize-space($orcid2)"/>
+            <xsl:text>-</xsl:text>
+            <xsl:value-of select="normalize-space($orcid3)"/>
+            <xsl:text>-</xsl:text>
+            <xsl:value-of select="normalize-space($orcid4)"/>
+        </ORCID>
+    </xsl:template>
 
+    <xsl:template match="input:nameIdentifier[@type='isni']">
+        <xsl:variable name="isni1">
+            <xsl:value-of select="substring(., 1, 4)"/>
+        </xsl:variable>
+        <xsl:variable name="isni2">
+            <xsl:value-of select="substring(., 5, 4)"/>
+        </xsl:variable>
+        <xsl:variable name="isni3">
+            <xsl:value-of select="substring(., 9, 4)"/>
+        </xsl:variable>
+        <xsl:variable name="isni4">
+            <xsl:value-of select="substring(., 13, 4)"/>
+        </xsl:variable>
+        <ISNI>
+            <xsl:value-of select="normalize-space($isni1)"/>
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="normalize-space($isni2)"/>
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="normalize-space($isni3)"/>
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="normalize-space($isni4)"/>
+        </ISNI>
+    </xsl:template>
+
+    <xsl:template match="input:nameIdentifier[@type='rid']">
+        <!--
+            TODO when adding the ResearcherID, this number must be properly formatted
+            we don't know yet what the format is gonna look like from the NOD OAI-PMH output
+          -->
+        <ResearcherID>
+            <xsl:value-of select="."/>
+        </ResearcherID>
+    </xsl:template>
+
+    <xsl:template match="input:nameIdentifier[@type='said']">
+        <!--
+            TODO when adding the ScopusAuthorID, this number must be properly formatted
+            we don't know yet what the format is gonna look like from the NOD OAI-PMH output
+          -->
+        <ScopusAuthorID>
+            <xsl:value-of select="."/>
+        </ScopusAuthorID>
     </xsl:template>
 
     <xsl:template match="input:person_url">

@@ -132,31 +132,37 @@
 
     <xsl:template match="input:penvoerder">
         <xsl:if test=".">
-            <OrgUnit>
-                <xsl:attribute name="id">
-                    <xsl:value-of select="@code"/>
-                </xsl:attribute>
-            </OrgUnit>
+            <Coordinator>
+                <OrgUnit>
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="@code"/>
+                    </xsl:attribute>
+                </OrgUnit>
+            </Coordinator>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:samenwerking">
         <xsl:if test=".">
-            <OrgUnit>
-                <xsl:attribute name="id">
-                    <xsl:value-of select="@code"/>
-                </xsl:attribute>
-            </OrgUnit>
+            <Partner>
+                <OrgUnit>
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="@code"/>
+                    </xsl:attribute>
+                </OrgUnit>
+            </Partner>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:opdrachtgever">
         <xsl:if test=".">
-            <OrgUnit>
-                <xsl:attribute name="id">
-                    <xsl:value-of select="@code"/>
-                </xsl:attribute>
-            </OrgUnit>
+            <Member>
+                <OrgUnit>
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="@code"/>
+                    </xsl:attribute>
+                </OrgUnit>
+            </Member>
         </xsl:if>
     </xsl:template>
 

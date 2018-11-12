@@ -55,17 +55,17 @@
 
     <xsl:template match="input:naam_nl">
         <xsl:if test=".">
-            <Naam xml:lang="nl">
+            <Name xml:lang="nl">
                 <xsl:value-of select="."/>
-            </Naam>
+            </Name>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:naam_en">
         <xsl:if test=".">
-            <Naam xml:lang="en">
+            <Name xml:lang="en">
                 <xsl:value-of select="."/>
-            </Naam>
+            </Name>
         </xsl:if>
     </xsl:template>
 
