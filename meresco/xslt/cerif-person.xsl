@@ -31,6 +31,7 @@
         <xsl:apply-templates select="input:nameIdentifier[@type='rid'][1]"/>
         <xsl:apply-templates select="input:nameIdentifier[@type='said'][1]"/>
         <xsl:apply-templates select="input:nameIdentifier[@type='isni'][1]"/>
+        <xsl:apply-templates select="input:nameIdentifier[@type='dai-nl'][1]"/>
 
         <xsl:apply-templates select="input:person_url"/>
 
@@ -106,6 +107,13 @@
             <xsl:text> </xsl:text>
             <xsl:value-of select="normalize-space($isni4)"/>
         </ISNI>
+    </xsl:template>
+
+    <xsl:template match="input:nameIdentifier[@type='dai-nl']">
+        <DAI>
+            <xsl:text>info:eu-repo/dai/nl/</xsl:text>
+            <xsl:value-of select="."/>
+        </DAI>
     </xsl:template>
 
     <xsl:template match="input:nameIdentifier[@type='rid']">
