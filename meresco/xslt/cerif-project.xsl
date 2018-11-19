@@ -187,14 +187,18 @@
                     <xsl:value-of select="input:nameIdentifier[@type='nod-prs']"/>
                 </xsl:attribute>
             </Person>
-            <Affiliation>
-                <OrgUnit>
-                    <xsl:attribute name="id">
-                        <xsl:value-of select="input:werkzaamheid"/>
-                    </xsl:attribute>
-                </OrgUnit>
-            </Affiliation>
+            <xsl:apply-templates select="input:werkzaamheid"/>
         </Member>
+    </xsl:template>
+
+    <xsl:template match="input:person/input:werkzaamheid">
+        <Affiliation>
+            <OrgUnit>
+                <xsl:attribute name="id">
+                    <xsl:value-of select="."/>
+                </xsl:attribute>
+            </OrgUnit>
+        </Affiliation>
     </xsl:template>
 
     <xsl:template match="input:categories/input:category">
