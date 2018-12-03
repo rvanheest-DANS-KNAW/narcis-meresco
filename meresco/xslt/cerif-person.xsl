@@ -4,7 +4,7 @@
                 xmlns="https://www.openaire.eu/cerif-profile/1.1/"
                 exclude-result-prefixes="input xsi"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/prs ../xsd/nod-person-1-1.xsd https://www.openaire.eu/cerif-profile/1.1/ ../../../guidelines-cris-managers/schemas/openaire-cerif-profile.xsd"
+                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/prs ../xsd/nod-person-1-1.xsd"
                 version="1.0">
 
     <!-- =================================================================================== -->
