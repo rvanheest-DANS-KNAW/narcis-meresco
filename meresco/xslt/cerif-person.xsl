@@ -29,28 +29,23 @@
 
         <xsl:call-template name="nameIdentifier">
             <xsl:with-param name="type">orcid</xsl:with-param>
-            <xsl:with-param name="singleLabel">ORCID</xsl:with-param>
-            <xsl:with-param name="multiLabel">AlternativeORCID</xsl:with-param>
+            <xsl:with-param name="label">ORCID</xsl:with-param>
         </xsl:call-template>
         <xsl:call-template name="nameIdentifier">
             <xsl:with-param name="type">rid</xsl:with-param>
-            <xsl:with-param name="singleLabel">RID</xsl:with-param>
-            <xsl:with-param name="multiLabel">AlternativeRID</xsl:with-param>
+            <xsl:with-param name="label">RID</xsl:with-param>
         </xsl:call-template>
         <xsl:call-template name="nameIdentifier">
             <xsl:with-param name="type">said</xsl:with-param>
-            <xsl:with-param name="singleLabel">SAID</xsl:with-param>
-            <xsl:with-param name="multiLabel">AlternativeSAID</xsl:with-param>
+            <xsl:with-param name="label">SAID</xsl:with-param>
         </xsl:call-template>
         <xsl:call-template name="nameIdentifier">
             <xsl:with-param name="type">isni</xsl:with-param>
-            <xsl:with-param name="singleLabel">ISNI</xsl:with-param>
-            <xsl:with-param name="multiLabel">AlternativeISNI</xsl:with-param>
+            <xsl:with-param name="label">ISNI</xsl:with-param>
         </xsl:call-template>
         <xsl:call-template name="nameIdentifier">
             <xsl:with-param name="type">dai-nl</xsl:with-param>
-            <xsl:with-param name="singleLabel">DAI</xsl:with-param>
-            <xsl:with-param name="multiLabel">AlternativeDAI</xsl:with-param>
+            <xsl:with-param name="label">DAI</xsl:with-param>
         </xsl:call-template>
 
         <xsl:apply-templates select="input:person_url"/>
@@ -82,8 +77,7 @@
 
     <xsl:template name="nameIdentifier">
         <xsl:param name="type"/>
-        <xsl:param name="singleLabel"/>
-        <xsl:param name="multiLabel"/>
+        <xsl:param name="label"/>
 
         <xsl:variable name="elemCount" select="count(input:nameIdentifier[@type=$type])"/>
 
@@ -91,10 +85,10 @@
             <xsl:with-param name="label">
                 <xsl:choose>
                     <xsl:when test="$elemCount = 1">
-                        <xsl:value-of select="$singleLabel"/>
+                        <xsl:value-of select="$label"/>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="$multiLabel"/>
+                        <xsl:value-of select="concat('Alternative', $label)"/>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:with-param>
