@@ -27,11 +27,26 @@
             <xsl:apply-templates select="input:initials"/>
         </PersonName>
 
-        <xsl:apply-templates select="input:nameIdentifier[@type='orcid'][1]"/>
-        <xsl:apply-templates select="input:nameIdentifier[@type='rid'][1]"/>
-        <xsl:apply-templates select="input:nameIdentifier[@type='said'][1]"/>
-        <xsl:apply-templates select="input:nameIdentifier[@type='isni'][1]"/>
-        <xsl:apply-templates select="input:nameIdentifier[@type='dai-nl'][1]"/>
+        <xsl:call-template name="nameIdentifier">
+            <xsl:with-param name="type">orcid</xsl:with-param>
+            <xsl:with-param name="label">ORCID</xsl:with-param>
+        </xsl:call-template>
+        <xsl:call-template name="nameIdentifier">
+            <xsl:with-param name="type">rid</xsl:with-param>
+            <xsl:with-param name="label">RID</xsl:with-param>
+        </xsl:call-template>
+        <xsl:call-template name="nameIdentifier">
+            <xsl:with-param name="type">said</xsl:with-param>
+            <xsl:with-param name="label">SAID</xsl:with-param>
+        </xsl:call-template>
+        <xsl:call-template name="nameIdentifier">
+            <xsl:with-param name="type">isni</xsl:with-param>
+            <xsl:with-param name="label">ISNI</xsl:with-param>
+        </xsl:call-template>
+        <xsl:call-template name="nameIdentifier">
+            <xsl:with-param name="type">dai-nl</xsl:with-param>
+            <xsl:with-param name="label">DAI</xsl:with-param>
+        </xsl:call-template>
 
         <xsl:apply-templates select="input:person_url"/>
 
@@ -60,7 +75,29 @@
         </xsl:if>
     </xsl:template>
 
+    <xsl:template name="nameIdentifier">
+        <xsl:param name="type"/>
+        <xsl:param name="label"/>
+
+        <xsl:variable name="elemCount" select="count(input:nameIdentifier[@type=$type])"/>
+
+        <xsl:apply-templates select="input:nameIdentifier[@type=$type]">
+            <xsl:with-param name="label">
+                <xsl:choose>
+                    <xsl:when test="$elemCount = 1">
+                        <xsl:value-of select="$label"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="concat('Alternative', $label)"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:with-param>
+        </xsl:apply-templates>
+    </xsl:template>
+
     <xsl:template match="input:nameIdentifier[@type='orcid']">
+        <xsl:param name="label"/>
+
         <xsl:variable name="orcid1">
             <xsl:value-of select="substring(., 1, 4)"/>
         </xsl:variable>
@@ -73,7 +110,8 @@
         <xsl:variable name="orcid4">
             <xsl:value-of select="substring(., 13, 4)"/>
         </xsl:variable>
-        <ORCID>
+
+        <xsl:element name="{$label}">
             <xsl:text>https://orcid.org/</xsl:text>
             <xsl:value-of select="normalize-space($orcid1)"/>
             <xsl:text>-</xsl:text>
@@ -82,10 +120,12 @@
             <xsl:value-of select="normalize-space($orcid3)"/>
             <xsl:text>-</xsl:text>
             <xsl:value-of select="normalize-space($orcid4)"/>
-        </ORCID>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="input:nameIdentifier[@type='isni']">
+        <xsl:param name="label"/>
+
         <xsl:variable name="isni1">
             <xsl:value-of select="substring(., 1, 4)"/>
         </xsl:variable>
@@ -98,7 +138,8 @@
         <xsl:variable name="isni4">
             <xsl:value-of select="substring(., 13, 4)"/>
         </xsl:variable>
-        <ISNI>
+
+        <xsl:element name="{$label}">
             <xsl:value-of select="normalize-space($isni1)"/>
             <xsl:text> </xsl:text>
             <xsl:value-of select="normalize-space($isni2)"/>
@@ -106,34 +147,40 @@
             <xsl:value-of select="normalize-space($isni3)"/>
             <xsl:text> </xsl:text>
             <xsl:value-of select="normalize-space($isni4)"/>
-        </ISNI>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="input:nameIdentifier[@type='dai-nl']">
-        <DAI>
+        <xsl:param name="label"/>
+
+        <xsl:element name="{$label}">
             <xsl:text>info:eu-repo/dai/nl/</xsl:text>
             <xsl:value-of select="."/>
-        </DAI>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="input:nameIdentifier[@type='rid']">
+        <xsl:param name="label"/>
+
         <!--
             TODO when adding the ResearcherID, this number must be properly formatted
             we don't know yet what the format is gonna look like from the NOD OAI-PMH output
           -->
-        <ResearcherID>
+        <xsl:element name="{$label}">
             <xsl:value-of select="."/>
-        </ResearcherID>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="input:nameIdentifier[@type='said']">
+        <xsl:param name="label"/>
+
         <!--
             TODO when adding the ScopusAuthorID, this number must be properly formatted
             we don't know yet what the format is gonna look like from the NOD OAI-PMH output
           -->
-        <ScopusAuthorID>
+        <xsl:element name="{$label}">
             <xsl:value-of select="."/>
-        </ScopusAuthorID>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="input:person_url">
