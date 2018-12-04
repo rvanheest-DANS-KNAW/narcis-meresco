@@ -540,6 +540,8 @@ class NormaliseOaiRecord(UiaConverter):
                     attrib_dict['relationType'] = "References"
                     if str(identifier).find("semantics/dataset/") >= 0:
                         attrib_dict['resourceTypeGeneral'] = "dataset"
+                    elif str(identifier).find("semantics/reference/") >= 0:
+                        attrib_dict['resourceTypeGeneral'] = "publication"
                     etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = pId.get_unformatted_id()
 
     def _getObjectFiles(self, lxmlNode, e_longRoot):
@@ -750,7 +752,6 @@ class NormaliseOaiRecord(UiaConverter):
                 etree.SubElement(e_name_type, 'mcRoleTerm').text = 'aut'
 
             # if dc.type == dissertation or doctoral thesis: marcrelator will be thesis advisor(ths) ctb (contributor) otherwise:
-            # xpath is case sensitive: just in case...
             dc_type_thesis_dissertation = lxmlNode.xpath('//dc:type[contains(.,"issertation") or contains(.,"thesis")]', namespaces=namespacesmap)
             dc_type_e = 'ctb'
             if dc_type_thesis_dissertation: dc_type_e = 'ths'
@@ -1417,5 +1418,5 @@ class NormaliseOaiRecord(UiaConverter):
                 startIdentifier = "info:eu-repo/semantics/{0!s}/".format(idtype.lower())
                 if identifier.lower().startswith(startIdentifier):
                     id = identifier[len(startIdentifier):].split("/", 1)
-                    return (id[0], urllib.unquote(id[1])) if len(id) == 2 else (None, None)
+                    return (id[0], id[1]) if len(id) == 2 else (None, None)
         return None, None
