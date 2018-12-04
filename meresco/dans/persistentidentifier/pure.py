@@ -4,7 +4,7 @@ from persistentidentifier import PersistentIdentifier
 
 class Pure(PersistentIdentifier):
 
-    ID_PATTERN = compile("(?:.*?)([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$", IGNORECASE)
+    ID_PATTERN = compile("(?:.*?[^[0-9a-fA-F])?([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$", IGNORECASE)
 
     def __init__(self, basestring):
         PersistentIdentifier.__init__(self, "pure", basestring, [])
