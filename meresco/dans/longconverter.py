@@ -4,7 +4,6 @@
 ## end license ##
 
 import sys
-import urllib
 
 from lxml import etree
 from lxml.etree import parse, _ElementTree, tostring
