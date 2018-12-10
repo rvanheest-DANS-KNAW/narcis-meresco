@@ -4,6 +4,10 @@ from persistentidentifier import PersistentIdentifier
 
 
 class Isbn(PersistentIdentifier):
+    # https://en.wikipedia.org/wiki/International_Standard_Book_Number
+    # A 13-digit ISBN can be separated into its parts (prefix element, registration group, registrant, publication and check digit), and when this is done it is customary to separate the parts with hyphens or spaces.
+    # Separating the parts (registration group, registrant, publication and check digit) of a 10-digit ISBN is also done with either hyphens or spaces.
+
     # <identifier type="uri">URN:ISBN:8510-3940-25412</identifier>
     # <mods:identifier type="uri">urn:isbn:978-94-6290-466-8</mods:identifier>
 
@@ -22,7 +26,7 @@ class Isbn(PersistentIdentifier):
             isbn = isbn.split(" ", 1).pop()
 
         isbn_org_id = isbn
-        filteredisbn = filter(lambda x: (x.isdigit() or x.lower() == 'x'), isbn)
+        filteredisbn = filter(lambda x: (x != ' ' and x != "-"), isbn)
 
         m = self.get_idpattern().match(filteredisbn)
         if m:
