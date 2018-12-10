@@ -1,5 +1,6 @@
 import unittest
 from meresco.dans.persistentidentifier import PidFactory
+from seecr.test import IntegrationTestCase
 
 VALID = "valid"
 INVALID = "invalid"
@@ -18,7 +19,7 @@ pid_types = \
  "handle":
     {VALID:   ["20.1000/100", "2381/12345","http://hdl.handle.net/10.1000/182", "http://handle.net/10.1000/182", "https://doi.org/20.1000/100",
                "info:hdl/20.1000/100", "hdl:4263537/4000", "you_can_write_here_whatever/and_here_too"],
-     INVALID: ["", "1", "10.1234", "hdl:4263537"]
+     INVALID: ["", "1234", "10.1234", "hdl:4263537"]
     },
 
  "nbn":
@@ -33,7 +34,7 @@ pid_types = \
     },
 
  "pmid":
-    {VALID:   ["PMID|123", "PMID 12345", "whatever_before_number(s) 123"],
+    {VALID:   ["PMID|123", "PMID 12345", "PubMed: 27646112", "whatever_before_number(s) 123"],
      INVALID: ["", "no numbers"]
     },
 
@@ -44,8 +45,8 @@ pid_types = \
     },
 
  "purl":
-    {VALID:   ["https://dans.knaw.nl", "http://dans.knaw.nl", "ftp://dans.knaw.nl", "http://whatever"],
-     INVALID: ["", "http://", "httpx://dans.knaw.nl", "https:/dans.knaw.nl", "ftp//dans.knaw.nl", "something-http://whatever"]
+    {VALID:   ["https://dans.knaw.nl", "http://dans.knaw.nl", "ftp://dans.knaw.nl/docs", "http://whatever"],
+     INVALID: ["", "000000025228197x", "http://", "httpx://dans.knaw.nl", "https:/dans.knaw.nl", "ftp//dans.knaw.nl", "something-http://whatever"]
     },
 
  "isbn":
@@ -66,7 +67,8 @@ pid_types = \
 }
 
 
-class PersistentIdentifierTest(unittest.TestCase):
+# class PersistentIdentifierTest(unittest.TestCase):
+class PersistentIdentifierTest(IntegrationTestCase):
 
     def test_pid(self):
 
@@ -85,6 +87,7 @@ class PersistentIdentifierTest(unittest.TestCase):
                 self.assertFalse(pId.is_valid())
                 print "-",
                 # print "invalid {} {}".format(pid_type, pid)
+        print ""
 
 
 if __name__ == '__main__':
