@@ -1,6 +1,5 @@
 import unittest
 from meresco.dans.persistentidentifier import PidFactory
-from seecr.test import IntegrationTestCase
 
 VALID = "valid"
 INVALID = "invalid"
@@ -66,8 +65,7 @@ pid_types = \
 }
 
 
-# class PersistentIdentifierTest(unittest.TestCase):
-class PersistentIdentifierTest(IntegrationTestCase):
+class PersistentIdentifierTest(unittest.TestCase):
 
     def test_pid(self):
 
