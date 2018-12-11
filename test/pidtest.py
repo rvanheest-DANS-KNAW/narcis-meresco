@@ -39,7 +39,7 @@ pid_types = \
     },
 
  "pure":
-    {VALID:   ["0123aBcD-5e6F-aB78-8cD9-123456abcdef", "something_preceding... 0123aBcD-5e6F-aB78-8cD9-123456abcdef", "1234567890 0123aBcD-5e6F-aB78-8cD9-123456abcdef"],
+    {VALID:   ["0123aBcD-5e6F-aB78-8cD9-123456abcdef", "pure:0123aBcD-5e6F-aB78-8cD9-123456abcdef", "something_preceding... 0123aBcD-5e6F-aB78-8cD9-123456abcdef", "1234567890 0123aBcD-5e6F-aB78-8cD9-123456abcdef"],
      INVALID: ["", "0123GBcD-5e6F-aB78-8cD9-123456abcdef", "0123aBcD-12345-aB78-8cD9-123456abcdef","0123aBcD:5e6F:aB78:8cD9:123456abcdef",
                "0123aBcD-5e6F-aB78-ccD9-123456abcdef", "0123aBcD-5e6F-aB78-8cD9-123456abcdefghijklmn", "12345678900123aBcD-5e6F-aB78-8cD9-123456abcdef"]
     },
@@ -50,12 +50,11 @@ pid_types = \
     },
 
  "isbn":
-    {VALID:   ["1234567890", "1234567890123", "123456789012X", "978-0-596-52068-7", "978  0 596 52068  7",
+    {VALID:   ["1234567890", "1234567890123", "123456789012X", "978-0-596-52068-7", "978_0_596_52068_7", "978  0 596 52068  7",
                "ISBN-13: 978-0-596-52068-7", "ISBN-13 978 0 596 52068 7","ISBN-10 85-359-0277-5", "urn:isbn:978-94-6290-466-8", "isbn:978-94-6290-466-8",
-               "whatever_preceding_colon : 978-0-596-52068-7", "whatever_preceding_ISBN 85-359-0277-5"],
-     INVALID: ["", "123456789", "12345678901234", "123456789012Y", "978:0:596:52068:7", "978_0_596_52068_7",
-               "whatever_without_colon  978-0-596-52068-7", "space_preceding ISBN 85-359-0277-5"]
-      },
+               "whatever 85-359-0277-5"],
+     INVALID: ["", "123456789", "12345678901234", "978:0:596:52068:7"]
+    },
 
  "issn":
     {VALID:   ["12345678", "12345678", "1234567X", "1234-5678",

@@ -26,7 +26,7 @@ class Isbn(PersistentIdentifier):
             isbn = isbn.split(" ", 1).pop()
 
         isbn_org_id = isbn
-        filteredisbn = filter(lambda x: (x != ' ' and x != "-"), isbn)
+        filteredisbn = filter(lambda x: (x.isdigit() or x.lower() == 'x'), isbn)
 
         m = self.get_idpattern().match(filteredisbn)
         if m:
