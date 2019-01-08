@@ -577,11 +577,10 @@ class NormdocToFieldsList(Observable):
                 nids = lxmlNode.xpath('//prj:person/prj:nameIdentifier', namespaces=namespacesmap)
 
             if len(nids) > 0:
-                # print "Aantal nod Project nameIdentifiers:", len(nids)
                 for nid in nids:
                     nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
                     if nameId.is_valid():
-                        #  Add 'known' ID format to dais/nameID field:
+                        #  Add 'known' ID format to a named field:
                         self._fieldslist.append(( 'nids', nameId.get_id() ))
                         if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
                         #  Add all ID formats to general field:
