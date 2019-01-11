@@ -65,13 +65,13 @@ class NameIdentifierTest(unittest.TestCase):
                 identifier = NameIdentifierFactory.factory(id_type, id)
                 self.assertTrue(identifier.is_valid())
                 print "+",
-                print "valid {} {}".format(id_type, id)
+                # print "valid {} {}".format(id_type, id)
 
             for id in identifier_types[id_type][INVALID]:
                 identifier = NameIdentifierFactory.factory(id_type, id)
                 self.assertFalse(identifier.is_valid())
                 print "-",
-                print "invalid {} {}".format(id_type, id)
+                # print "invalid {} {}".format(id_type, id)
         print ""
 
 
