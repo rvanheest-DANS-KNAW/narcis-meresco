@@ -5,7 +5,7 @@ from nameidentifier import NameIdentifier
 
 # https://www.wikidata.org/wiki/Property:P2427
 class Grid(NameIdentifier):
-    ID_PATTERN = compile(r'.*?(grid\.\d+\.[a-f0-9]+)$', IGNORECASE)
+    ID_PATTERN = compile(r'.*?(grid\.\d{4,6}\.[a-f0-9]{1,2})$', IGNORECASE)
 
     def __init__(self, baseDigits):
         NameIdentifier.__init__(self, "grid", baseDigits, ['https://www.grid.ac/institutes/'])
