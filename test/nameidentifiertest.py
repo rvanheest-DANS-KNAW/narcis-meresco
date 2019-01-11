@@ -59,7 +59,7 @@ class NameIdentifierTest(unittest.TestCase):
 
         for id_type in identifier_types:
 
-            print "\nRunning {} validator test\n".format(id_type.upper()),
+            print "\nRunning {} validator test".format(id_type.upper()),
 
             for id in identifier_types[id_type][VALID]:
                 identifier = NameIdentifierFactory.factory(id_type, id)
