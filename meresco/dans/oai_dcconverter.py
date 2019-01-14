@@ -178,7 +178,7 @@ class DcConverter(Converter):
                 etree.SubElement(dc_root, namespacesmap.curieToTag('dc:identifier'), nsmap=self._nsOAI).text = idText
                 
             #Topics
-            topics = lxmlNode.xpath(long_metadata+':subject/long:topic/text()', namespaces=namespacesmap)
+            topics = lxmlNode.xpath(long_metadata+':subject/long:topic/long:topicValue/text()', namespaces=namespacesmap)
             for topic in topics:
                 etree.SubElement(dc_root, namespacesmap.curieToTag('dc:subject'), nsmap=self._nsOAI).text = topic
 

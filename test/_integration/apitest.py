@@ -174,6 +174,11 @@ class ApiTest(IntegrationTestCase):
         records = xpath(body, '//oai:record/oai:metadata')
         self.assertEqual(10, len(records))
         self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
+        
+    def testOaiSubject(self):
+        header, body = getRequest(self.apiPort, '/oai', dict(verb="GetRecord", identifier = "meresco:record:1",   metadataPrefix="oai_dc"))
+        self.assertEqual('Search', xpathFirst(body, '//dc:subject/text()'))
+        
 
     # def testOaiPovenance(self):
     #     header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
