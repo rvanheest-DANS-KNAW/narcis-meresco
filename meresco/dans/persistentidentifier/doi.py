@@ -5,7 +5,7 @@ from persistentidentifier import PersistentIdentifier
 
 
 class Doi(PersistentIdentifier):
-    DOIURI_PATTERN = compile("^https?://(dx\\.)?doi\\.org/(urn:)?(doi:)?", IGNORECASE)
+    DOIURI_PATTERN = compile("^(https?://(dx\\.)?)?doi\\.org/(urn:)?(doi:)?", IGNORECASE)
     ID_PATTERN = compile("^(?:urn:)?(?:doi:)?(10(?:\\.[0-9]+)+)/(.+)$", IGNORECASE)
 
     def __init__(self, baseDigits):

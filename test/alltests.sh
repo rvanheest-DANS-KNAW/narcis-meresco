@@ -30,4 +30,7 @@ mydir=$(cd $(dirname $0); pwd)
 source ./_testoptions.sh
 export PYTHONPATH=.:$PYTHONPATH
 
+echo "--- Running INTEGRATION TESTS ---"
+python _integrationtest.py "$@"
+echo "--- Running ALL OTHER TESTS ---"
 python _alltests.py "$@"

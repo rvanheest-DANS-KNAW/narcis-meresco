@@ -223,6 +223,10 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('en', testNamespaces.xpathFirst(response, '//long:metadata/long:language/text()'))
         self.assertEqual(1, len(testNamespaces.xpath(response, '//long:metadata/long:name')))
         self.assertEqual(1, len(testNamespaces.xpath(response, '//long:metadata/long:subject/long:topic')))
+        self.assertEqual(2, len(testNamespaces.xpath(response, '//long:metadata/long:publication_identifier')))
+        self.assertEqual('10.1002/lno.10611', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier/text()'))
+        self.assertEqual(2, len(testNamespaces.xpath(response, '//long:metadata/long:related_identifier')))
+        self.assertEqual('10.1234.567/abc', testNamespaces.xpathFirst(response, '//long:metadata/long:related_identifier/text()'))
 
     def testDidlDcToLong(self):
         response = self.doSruQuery(**{'query': '2016-01-31', 'recordSchema':'knaw_long'})
@@ -387,7 +391,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('Wetenschapswinkel', testNamespaces.xpathFirst(response, '//short:metadata/short:titleInfo/short:title/text()'))
         self.assertEqual('organisation', testNamespaces.xpathFirst(response, '//short:metadata/short:genre/text()'))
         self.assertEqual(2, len(testNamespaces.xpath(response, '//short:metadata/short:titleInfo/short:title')))
-     
+        self.assertEqual('0000000121536865', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="isni"]/text()'))
+
     def testPersonToShort(self):
         response = self.doSruQuery(**{'query': 'person:PRS1242583', 'recordSchema':'knaw_short'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))

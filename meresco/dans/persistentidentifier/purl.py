@@ -3,7 +3,7 @@ from persistentidentifier import PersistentIdentifier
 
 
 class Purl(PersistentIdentifier):
-    ID_PATTERN = compile(r'^(https?|ftp)://.*$', IGNORECASE)
+    ID_PATTERN = compile(r'^(https?|ftp)://.+$', IGNORECASE)
 
     def __init__(self, basestring):
         PersistentIdentifier.__init__(self, "purl", basestring)

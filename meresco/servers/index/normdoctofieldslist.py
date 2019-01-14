@@ -541,56 +541,46 @@ class NormdocToFieldsList(Observable):
                                 self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
                                 if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
 
-        # NOD_PRS:
-        elif self._wcp_collection == 'person':
-            prs_name = lxmlNode.xpath('//prs:persoon/prs:fullName/text()', namespaces=namespacesmap)
-            if prs_name:
-                names.append(prs_name[0])
-                #All orgs from <jobs>: Need to be unique?
-                prs_orgs = lxmlNode.xpath('//prs:organisatie/text()', namespaces=namespacesmap)
-                if prs_orgs:
-                    orgs_set = set([])
-                    for org in prs_orgs:
-                        orgs_set.add(org)
-                    for org in orgs_set:
-                        names.append(org)
- 
-            nids = lxmlNode.xpath('//prs:persoon/prs:nameIdentifier', namespaces=namespacesmap)
+        elif self._wcp_collection in WCPNODCOLLECTION:
+
+            nids = []
+
+            if self._wcp_collection == 'person':
+                prs_name = lxmlNode.xpath('//prs:persoon/prs:fullName/text()', namespaces=namespacesmap)
+                if prs_name:
+                    names.append(prs_name[0])
+                    #All orgs from <jobs>: Need to be unique?
+                    prs_orgs = lxmlNode.xpath('//prs:organisatie/text()', namespaces=namespacesmap)
+                    if prs_orgs:
+                        orgs_set = set([])
+                        for org in prs_orgs:
+                            orgs_set.add(org)
+                        for org in orgs_set:
+                            names.append(org)
+                nids = lxmlNode.xpath('//prs:persoon/prs:nameIdentifier', namespaces=namespacesmap)
+
+
+            elif self._wcp_collection == 'organisation':
+                # NOD_ORG: (naam_en + naam_nl)
+                org_names = lxmlNode.xpath('//org:organisatie/org:*[local-name()="naam_nl" or local-name()="naam_en"]/text()', namespaces=namespacesmap)
+                for org_name in org_names:
+                    names.append(org_name)
+                nids = lxmlNode.xpath('//org:organisatie/org:nameIdentifier', namespaces=namespacesmap)
+
+
+            elif self._wcp_collection == 'research':
+                # NOD_ACT: (fullnames + dais)
+                act_persons = lxmlNode.xpath('//prj:activiteit/prj:person', namespaces=namespacesmap)
+                for act_person in act_persons:
+                    act_name = act_person.xpath('self::prj:person/prj:fullName/text()', namespaces=namespacesmap)
+                    names.append(act_name[0])
+                nids = lxmlNode.xpath('//prj:person/prj:nameIdentifier', namespaces=namespacesmap)
+
             if len(nids) > 0:
-                # print "Aantal nod Persoon nameIdentifiers:", len(nids)
                 for nid in nids:
                     nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
                     if nameId.is_valid():
-                        #  Add 'known' ID format to dais/nameID field:
-                        self._fieldslist.append(( 'nids', nameId.get_id() ))
-                        if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
-                        #  Add all ID formats to general field:
-                        for variant in nameId.getTypedVariants():
-                            self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
-                            if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
-
-
-        elif self._wcp_collection == 'organisation':
-            # NOD_ORG: (naam_en + naam_nl)
-            org_names = lxmlNode.xpath('//org:organisatie/org:*[local-name()="naam_nl" or local-name()="naam_en"]/text()', namespaces=namespacesmap)
-            for org_name in org_names:
-                names.append(org_name)
-
-
-        elif self._wcp_collection == 'research':
-            # NOD_ACT: (fullnames + dais)
-            act_persons = lxmlNode.xpath('//prj:activiteit/prj:person', namespaces=namespacesmap)
-            for act_person in act_persons:
-                act_name = act_person.xpath('self::prj:person/prj:fullName/text()', namespaces=namespacesmap)
-                names.append(act_name[0])
-
-            nids = lxmlNode.xpath('//prj:person/prj:nameIdentifier', namespaces=namespacesmap)
-            if len(nids) > 0:
-                # print "Aantal nod Project nameIdentifiers:", len(nids)
-                for nid in nids:
-                    nameId = NameIdentifierFactory.factory(nid.attrib['type'], nid.text)
-                    if nameId.is_valid():
-                        #  Add 'known' ID format to dais/nameID field:
+                        #  Add 'known' ID format to a named field:
                         self._fieldslist.append(( 'nids', nameId.get_id() ))
                         if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
                         #  Add all ID formats to general field:

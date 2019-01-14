@@ -9,13 +9,9 @@ from lxml import etree
 from lxml.etree import parse, _ElementTree, tostring
 
 from StringIO import StringIO
-from xml.sax.saxutils import escape as escapeXml
-
-from meresco.core import Observable
-from meresco.components import lxmltostring
 from meresco.dans.metadataformats import MetadataFormat
 from meresco.dans.uiaconverter import UiaConverter
-from meresco.dans.nameidentifier import Orcid, Dai, Isni, Rid, NameIdentifierFactory
+from meresco.dans.nameidentifier import NameIdentifierFactory
 from meresco.dans.persistentidentifier import PidFactory
 from meresco.xml import namespaces
 
@@ -23,8 +19,6 @@ from re import compile
 
 from dateutil.parser import parse as parseDate
 from datetime import *
-
-import time
 
 namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco-xml/blob/master/meresco/xml/namespaces.py
     
@@ -259,8 +253,20 @@ class NormaliseOaiRecord(UiaConverter):
 
             # Locatie: In Dutch (NL) only!
             locatie = lxmlNode.xpath("//org:locatie/text()", namespaces=namespacesmap)
-        
-        # PROJECT:
+
+            # name identifiers
+            e_name = etree.Element("name")
+            etree.SubElement(e_name, "type").text = 'organisation'
+            etree.SubElement(e_name, "name").text = title_en[0]
+            nids = lxmlNode.xpath('//org:organisatie/org:nameIdentifier', namespaces=namespacesmap)
+            for nid in nids:  # serialize complete tag and remove default namespace...
+                nid_type = nid.xpath('self::org:nameIdentifier/@type', namespaces=namespacesmap)
+                nid_val = nid.xpath('self::org:nameIdentifier/text()', namespaces=namespacesmap)
+                if len(nid_type) > 0 and len(nid_val) > 0:
+                    etree.SubElement(e_name, "nameIdentifier", type=nid_type[0]).text = nid_val[0]
+
+
+    # PROJECT:
         elif self._metadataformat.isProject():
             genre = 'research'
 
@@ -493,10 +499,10 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _getRelatedIdentifiers(self, lxmlNode, e_longmetadata):
-        attrib_dict = {}
         if self._metadataformat.isDatacite():
             identifiers = lxmlNode.xpath("//datacite:resource/datacite:relatedIdentifiers/datacite:relatedIdentifier", namespaces=namespacesmap)
             for identifier in identifiers:
+                attrib_dict = {}
                 id_type = identifier.xpath('self::datacite:relatedIdentifier/@relatedIdentifierType', namespaces=namespacesmap)
                 idee = identifier.xpath('self::datacite:relatedIdentifier/text()', namespaces=namespacesmap)
                 if len(idee) > 0 and len(id_type) > 0: #create new element: <related_identifier type="doi" relationType="IsReferencedBy">doi:10.1006/jmbi.1995.0238</related_identifier>   
@@ -514,6 +520,7 @@ class NormaliseOaiRecord(UiaConverter):
         elif self._metadataformat.isMods():
             rel_items = lxmlNode.xpath("//mods:mods/mods:relatedItem", namespaces=namespacesmap)
             for item in rel_items:
+                attrib_dict = {}
                 item_href = item.xpath('self::mods:relatedItem/@xlink:href', namespaces=namespacesmap) # Get href from relatedItem
                 item_reltype = item.xpath('self::mods:relatedItem/@type', namespaces=namespacesmap)
                 if len(item_reltype) > 0: attrib_dict['relationType'] = item_reltype[0]
@@ -532,7 +539,21 @@ class NormaliseOaiRecord(UiaConverter):
                         attrib_dict['type'] = relId.get_name()
                         attrib_dict['idx'] = relId.get_idx_id()
                         etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = relId.get_unformatted_id()
-
+        elif self._metadataformat.isDC():
+            identifierList = lxmlNode.xpath("//dc:relation/text()", namespaces=namespacesmap)
+            for identifier in identifierList:
+                attrib_dict = {}
+                pidtype, pidvalue = self._getOpenAIREIdentifierFromDcRelation(identifier, "reference|dataset")
+                pId = PidFactory.factory(pidtype, pidvalue)
+                if pId.is_valid():
+                    attrib_dict['type'] = pId.get_name()
+                    attrib_dict['idx'] = pId.get_idx_id()
+                    attrib_dict['relationType'] = "References"
+                    if str(identifier).find("semantics/dataset/") >= 0:
+                        attrib_dict['resourceTypeGeneral'] = "dataset"
+                    elif str(identifier).find("semantics/reference/") >= 0:
+                        attrib_dict['resourceTypeGeneral'] = "publication"
+                    etree.SubElement(e_longmetadata, "related_identifier", attrib_dict).text = pId.get_unformatted_id()
 
     def _getObjectFiles(self, lxmlNode, e_longRoot):
         e_objectFiles = None
@@ -655,24 +676,11 @@ class NormaliseOaiRecord(UiaConverter):
                             blnHasValidRight = True
                             break
                     if blnHasValidRight: break
-            
+
         etree.SubElement(e_longRoot, "accessRights").text = accessRight # default 'openAccess'
 
     def _getNames(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
-#MODS:
-# <name type="personal" ID="n1">
-#     <namePart type="family">Vries, de</namePart>
-#     <namePart type="given">J. (Jan)</namePart>
-#     <role>
-#         <roleTerm authority="marcrelator" type="code">aut</roleTerm>
-#     </role>
-#     <nameIdentifier type="dai-nl" typeURI="info:eu-repo/dai/nl">123456789</nameIdentifier>
-#     <nameIdentifier type="isni" typeURI="http://id.loc.gov/vocabulary/identifiers/isni">http://www.isni.org/0000000133334444555X</nameIdentifier>
-#     <nameIdentifier type="orcid" typeURI="http://id.loc.gov/vocabulary/identifiers/orcid">http://orcid.org/0000-0002-1825-0097</nameIdentifier>
-# </name>
 
-#knaw_long:
-# <dai>info:eu-repo/dai/nl/328277916</dai><nameIdentifier type=\"dai-nl\">328277916</nameIdentifier><nameIdentifier type=\"orcid\">000000021694233X</nameIdentifier><nameIdentifier type=\"isni\">0000000117247366</nameIdentifier>
         if self._metadataformat.isMods():
             nameTypes = ['personal','corporate','conference','NOTYPE'] # NOTYPE used to catch names without a type attribute! We will tread them as type 'personal'.
             namepartTypes=['family','given','termsOfAddress'] # 'unstructured' is special :(
@@ -744,7 +752,6 @@ class NormaliseOaiRecord(UiaConverter):
                         e_nid = etree.SubElement(e_name_type, "nameIdentifier")
                         e_nid.attrib['type'] = supportedNids[0]
                         e_nid.text = dai
-
 
         # Get creators and contributors from DC if NO FULLMODS available, or if MMODS did not yield any authors:
         elif self._metadataformat.isDC():
@@ -1077,6 +1084,14 @@ class NormaliseOaiRecord(UiaConverter):
                     if hrefId.is_valid(): # Type 'href/url' gevonden...
                         etree.SubElement(e_longmetadata, "publication_identifier", type=hrefId.get_name(), idx=hrefId.get_idx_id()).text = hrefId.get_unformatted_id()
 
+        elif self._metadataformat.isDC():
+            identifierList = lxmlNode.xpath("//dc:relation/text()", namespaces=namespacesmap)
+            for identifier in identifierList:
+                pidtype, pidvalue = self._getOpenAIREIdentifierFromDcRelation(identifier, "altIdentifier")
+                pId = PidFactory.factory(pidtype, pidvalue)
+                if pId.is_valid():
+                    etree.SubElement(e_longmetadata, "publication_identifier", type=pId.get_name(), idx=pId.get_idx_id()).text = pId.get_unformatted_id()
+
 
     def _getLanguage(self, lxmlNode, e_longmetadata):
         if self._metadataformat.isDatacite():
@@ -1407,3 +1422,12 @@ class NormaliseOaiRecord(UiaConverter):
             return str(di_1.date().year) # Only year has been parsed succesfully.
         if di_1.date().day != di_2.date().day and di_1.date().month == di_2.date().month:
             return ('%s-%s') % (di_1.date().year, di_1.date().month) # Only year and month have been parsed succesfully.
+
+    def _getOpenAIREIdentifierFromDcRelation(self, identifier, idtypes):
+        if identifier is not None and idtypes is not None:
+            for idtype in idtypes.split("|"):
+                startIdentifier = "info:eu-repo/semantics/{0!s}/".format(idtype.lower())
+                if identifier.lower().startswith(startIdentifier):
+                    id = identifier[len(startIdentifier):].split("/", 1)
+                    return (id[0], id[1]) if len(id) == 2 else (None, None)
+        return None, None
