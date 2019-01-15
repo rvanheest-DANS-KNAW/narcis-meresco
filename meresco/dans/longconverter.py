@@ -256,7 +256,7 @@ class NormaliseOaiRecord(UiaConverter):
 
             # name identifiers
             e_name = etree.Element("name")
-            etree.SubElement(e_name, "type").text = 'organisation'
+            etree.SubElement(e_name, "type").text = 'corporate'
             if title_en and len(title_en) > 0:
                 etree.SubElement(e_name, "name").text = title_en[0]
             elif title and len(title) > 0:
