@@ -10,7 +10,6 @@
             &lt;metadata xmlns="http://www.openarchives.org/OAI/2.0/"&gt;
             &lt;organisatie xmlns=&quot;http://www.onderzoekinformatie.nl/nod/org&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.onderzoekinformatie.nl/nod/org https://www.narcis.nl/content/schemas/nod/nod-organisation-1-1.xsd&quot; code=&quot;U.EUR.UB.Wink&quot;&gt;
             &lt;naam_nl&gt;Wetenschapswinkel&lt;/naam_nl&gt;
-            &lt;naam_en&gt;Research Information Centre&lt;/naam_en&gt;
             &lt;locatie&gt;Rotterdam&lt;/locatie&gt;
             &lt;invoer_datum&gt;1993-11-19&lt;/invoer_datum&gt;
             &lt;url&gt;http://www.narcis.nl/organisation/RecordID/ORG1236141&lt;/url&gt;

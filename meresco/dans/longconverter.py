@@ -257,7 +257,12 @@ class NormaliseOaiRecord(UiaConverter):
             # name identifiers
             e_name = etree.Element("name")
             etree.SubElement(e_name, "type").text = 'organisation'
-            etree.SubElement(e_name, "name").text = title_en[0]
+            if title_en and len(title_en) > 0:
+                etree.SubElement(e_name, "name").text = title_en[0]
+            elif title and len(title) > 0:
+                etree.SubElement(e_name, "name").text = title[0]
+            else:
+                etree.SubElement(e_name, "name").text = ''
             nids = lxmlNode.xpath('//org:organisatie/org:nameIdentifier', namespaces=namespacesmap)
             for nid in nids:  # serialize complete tag and remove default namespace...
                 nid_type = nid.xpath('self::org:nameIdentifier/@type', namespaces=namespacesmap)
