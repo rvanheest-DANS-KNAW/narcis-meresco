@@ -51,8 +51,8 @@ class ApiTest(IntegrationTestCase):
         # print "doSruQuery(query='*'):", etree.tostring(response)
         self.assertEqual('14', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual({
-            'Example Program 2',
             'Example Program 1',
+            'Example Program 2',
             'RAIN: Pan-European gridded data sets of extreme weather probability of occurrence under present and future climate',
             'Appositie en de interne struktuur van de NP',
             'Paden en stromingen---a historical survey',
@@ -67,7 +67,7 @@ class ApiTest(IntegrationTestCase):
             u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b' }, set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
 
     def testSruQueryWithUntokenized(self):
-        response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "knaw_long"})
+        response = self.doSruQuery(**{"query": 'untokenized.humanstartpage exact "http://meresco.com?record=1"', "recordSchema": "knaw_long"})        
         # print "humanStartPage:", etree.tostring(response)
         self.assertEqual('meresco:record:1', xpathFirst(response, '//srw:recordIdentifier/text()'))
         response = self.doSruQuery(**{"query": 'untokenized.dd_year exact "2016"'})
@@ -113,8 +113,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('rce:rapporten:550000001', xpathFirst(response, '//srw:recordIdentifier/text()'))
 #         print "DD body:", etree.tostring(response)
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
-
-
+    
+        
     def testNODPRSnameIdentifiers(self):
         self.assertSruQuery(2, '"PRS1242583"')
         self.assertSruQuery(2, '0000000247033788')
@@ -133,7 +133,6 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        # print drilldown
         self.assertEqual([('D30000', '5'), ('D37000', '2'), ('D34200', '1'), ('D34000', '1'), ('D10000', '1'), ('D20000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1'), ('D30100', '1'), ('D36300', '1'), ('D36000', '1')], drilldown)
 
         # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
@@ -245,8 +244,7 @@ class ApiTest(IntegrationTestCase):
         items = xpath(body, "/rss/channel/item")
         self.assertEquals(11, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
-        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Wetenschapswinkel', 'Late-type Giants in the Inner Galaxy', 'Bennis, Prof.dr. H.J. (Hans)', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', 'Example Program 2', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b', "The Language Designer's Workbench: Automating Verification of Language Definitions"}, set(xpath(body, "//item/title/text()")))
-        # print set(xpath(body, "//item/description/text()"))
+        self.assertEqual({'Paden en stromingen---a historical survey', 'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)', 'Conditiebepaling PVC', 'Appositie en de interne struktuur van de NP', 'Example Program 2', 'Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam. Een archeologische opgraving.', u'\u042d\u043a\u043e\u043b\u043e\u0433\u043e-\u0440\u0435\u043a\u0440\u0435\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u0440\u0438\u0434\u043e\u0440 \u0432 \u0433\u043e\u0440\u043d\u043e\u043c \u0437\u0430\u043f\u043e\u0432\u0435\u0434\u043d\u0438\u043a\u0435 \u0411\u043e\u0433\u043e\u0442\u044b', 'Bennis, Prof.dr. H.J. (Hans)', 'Late-type Giants in the Inner Galaxy', 'Wetenschapswinkel', "The Language Designer's Workbench: Automating Verification of Language Definitions"}, set(xpath(body, "//item/title/text()")))
         self.assertEqual({'Abstract van dit document', 'FransHeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeellllllang', 'Microvariatie; (Generatieve) Syntaxis; Morphosyntaxis; Syntaxis-Semantiek Interface; Dialectologie', 'Abstract', 'Samenvatting', 'Projectomschrijving<br>Ontwikkeling van betrouwbare methoden, procedures\n            en extrapolatiemodellen om de conditie en restlevensduur van in gebruik zijnde\n            PVC-leidingen te bepalen.<br>Beoogde projectopbrengsten<br>- uitwerking van\n            huidige kennis en inzichten m.b.t.', 'De KNAW vervult drie (wettelijke) taken: genootschap van excellente wetenschappers uit\n        alle disciplines; bestuurder van wetenschappelijke onderzoeksinstituten; adviseur van de\n        regering op het gebied van wetenschapsbeoefening. Zijne Majesteit de Koning is beschermheer\n        van de', 'The present thesis describes the issue of\n            "neonatal glucocorticoid treatment and predisposition to\n            cardiovascular disease in rats".', 'This is an example program about Programming with Meresco'}, set(xpath(body, "//item/description/text()")))
         self.assertEqual('MyLabel', xpathFirst(body, '//channel/title/text()'))
 
@@ -293,7 +291,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(10, len(testNamespaces.xpath(response, '//long:metadata/long:subject/long:topic')))
         self.assertEqual(2, len(testNamespaces.xpath(response, '//long:metadata/long:coverage')))
         self.assertEqual(4, len(testNamespaces.xpath(response, '//long:metadata/long:format')))
-
+    
     def testModsToLong(self):
         response = self.doSruQuery(**{'query': 'URN:NBN:NL:UI:17-565', 'recordSchema':'knaw_long'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
@@ -334,8 +332,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(1, len(testNamespaces.xpath(response, '//long:metadata/long:rightsDescription')))
         self.assertEqual(1, len(testNamespaces.xpath(response, '//long:metadata/long:subject[@xml:lang="en"]/long:topic')))
         self.assertEqual(2, len(testNamespaces.xpath(response, '//long:metadata/long:grantAgreements/long:grantAgreement')))
-
-
+ 
+    
     def testMods3xToLong(self):
         response = self.doSruQuery(**{'query': 'urn:NBN:nl:ui:18-2271', 'recordSchema':'knaw_long'}) # knaw_record2_didlmods
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
@@ -375,12 +373,12 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(1, len(testNamespaces.xpath(response, '//long:metadata/long:rightsDescription')))
         self.assertEqual(7, len(testNamespaces.xpath(response, '//long:metadata/long:subject/long:topic')))
         self.assertEqual(3, len(testNamespaces.xpath(response, '//long:metadata/long:grantAgreements/long:grantAgreement')))
-
+        
         response = self.doSruQuery(**{'query': 'URN:NBN:NL:UI:25-711504', 'recordSchema':'knaw_long'}) # TODO find exact op pubid
         #print etree.tostring(response)
         self.assertEqual('restrictedAccess', testNamespaces.xpathFirst(response, '//long:objectFiles/long:objectFile/long:accessRights/text()'))
         self.assertEqual('restrictedAccess', testNamespaces.xpathFirst(response, '//long:knaw_long/long:accessRights/text()'))
-
+ 
     def testDataciteToLong(self):
         response = self.doSruQuery(**{'query': 'urn:nbn:nl:ui:13-jsk-7ek', 'recordSchema':'knaw_long'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
@@ -427,7 +425,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('research', testNamespaces.xpathFirst(response, '//short:metadata/short:genre/text()'))
         self.assertEqual('Projectomschrijving<br>Ontwikkeling van betrouwbare methoden,', testNamespaces.xpathFirst(response, '//short:metadata/short:abstract/text()')[:61])
         self.assertEqual(2, len(testNamespaces.xpath(response, '//short:metadata/short:titleInfo/short:title')))
-
+     
     def testOrganisationToShort(self):
         response = self.doSruQuery(**{'query': 'ORG1236141', 'recordSchema':'knaw_short'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
@@ -450,7 +448,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('0000-0002-4703-3788', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="orcid"]/text()'))
         self.assertEqual('PRS1242583', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="nod-prs"]/text()'))
         self.assertEqual(4, len(testNamespaces.xpath(response, '//short:metadata/short:name/short:nameIdentifier')))
-
+     
 
     def assertSruQuery(self, numberOfRecords, query, printout=False):
         response = self.doSruQuery(**{'query':query, "recordSchema": "knaw_short", "x-recordSchema": "header"}) # , 'maximumRecords': '1'
