@@ -395,8 +395,10 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
         self.assertEqual('Wetenschapswinkel', testNamespaces.xpathFirst(response, '//short:metadata/short:titleInfo/short:title/text()'))
         self.assertEqual('organisation', testNamespaces.xpathFirst(response, '//short:metadata/short:genre/text()'))
-        self.assertEqual(2, len(testNamespaces.xpath(response, '//short:metadata/short:titleInfo/short:title')))
-     
+        self.assertEqual(1, len(testNamespaces.xpath(response, '//short:metadata/short:titleInfo/short:title')))
+        self.assertEqual('Wetenschapswinkel', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:name/text()'))
+        self.assertEqual('0000000121536865', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="isni"]/text()'))
+
     def testPersonToShort(self):
         response = self.doSruQuery(**{'query': 'person:PRS1242583', 'recordSchema':'knaw_short'})
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))

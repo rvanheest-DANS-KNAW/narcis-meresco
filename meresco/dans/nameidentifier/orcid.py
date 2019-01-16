@@ -4,7 +4,7 @@ from nameidentifier import NameIdentifier
 
 
 class Orcid(NameIdentifier):
-    ID_PATTERN = compile(r'^(http://orcid.org/)?(\d{4}).?(\d{4}).?(\d{4}).?(\d{3}[0-9X])$', IGNORECASE)
+    ID_PATTERN = compile(r'^(https?://orcid.org/)?(\d{4}).?(\d{4}).?(\d{4}).?(\d{3}[0-9X])$', IGNORECASE)
 
     def __init__(self, baseDigits):
         NameIdentifier.__init__(self, "orcid", baseDigits, ['http://orcid.org/'])
