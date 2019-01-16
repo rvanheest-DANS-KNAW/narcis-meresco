@@ -16,6 +16,7 @@
                 &lt;record&gt;
                 &lt;id&gt;record:5&lt;/id&gt;
                 &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+                &lt;metadataNamespace&gt;unknown_metadatanamespace&lt;/metadataNamespace&gt;
                 &lt;/record&gt;
                 &lt;repository&gt;
                 &lt;id&gt;meresco&lt;/id&gt;

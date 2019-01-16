@@ -28,6 +28,7 @@
                 &lt;record&gt;
                     &lt;id&gt;record:3&lt;/id&gt;
                     &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+                    &lt;metadataNamespace&gt;http://www.openarchives.org/OAI/2.0/oai_dc/&lt;/metadataNamespace&gt;
                 &lt;/record&gt;
                 &lt;repository&gt;
                     &lt;id&gt;meresco&lt;/id&gt;

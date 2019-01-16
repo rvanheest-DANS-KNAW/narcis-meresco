@@ -47,6 +47,7 @@
     &lt;record&gt;
     &lt;id&gt;oai:oai.datacite.org:4119334&lt;/id&gt;
         &lt;harvestdate&gt;2017-07-05T13:46:09Z&lt;/harvestdate&gt;
+        &lt;metadataNamespace&gt;http://datacite.org/schema/kernel-4&lt;/metadataNamespace&gt;
     &lt;/record&gt;
     &lt;repository&gt;
         &lt;id&gt;datacite&lt;/id&gt;
