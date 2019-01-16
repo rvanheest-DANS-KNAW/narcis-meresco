@@ -41,6 +41,8 @@ from normdocparttofieldslisttest import NormdocToFieldsListTest
 
 
 from test_persistentidentifier import TestPidFactory
+from pidtest import PersistentIdentifierTest
+from nameidentifiertest import NameIdentifierTest
 
 # Converters:
 from convertertest import ConverterTest

@@ -110,7 +110,6 @@ class ApiTest(IntegrationTestCase):
     def testAlternativeIdentifier(self):
         doi = PidFactory.factory("doi", 'doi:10.17026/dans-x38-rkke')
         response = self.doSruQuery(**{'query':'untokenized.pubid exact "'+doi.get_idx_id()+'"', 'maximumRecords': '1', 'recordSchema':'knaw_long'})
-        # print "DD body:", etree.tostring(response)
         self.assertEqual('rce:rapporten:550000001', xpathFirst(response, '//srw:recordIdentifier/text()'))
 #         print "DD body:", etree.tostring(response)
         self.assertEqual(1, int(str(xpathFirst(response, '//srw:numberOfRecords/text()'))))
@@ -180,6 +179,11 @@ class ApiTest(IntegrationTestCase):
         records = xpath(body, '//oai:record/oai:metadata')
         self.assertEqual(10, len(records))
         self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
+        
+    def testOaiSubject(self):
+        header, body = getRequest(self.apiPort, '/oai', dict(verb="GetRecord", identifier = "meresco:record:1",   metadataPrefix="oai_dc"))
+        self.assertEqual('Search', xpathFirst(body, '//dc:subject/text()'))
+        
 
     def testOaiCerif(self):
         header, body = getRequest(self.apiPort, '/cerif', dict(verb="ListRecords", metadataPrefix="oai_cerif_openaire"))
@@ -430,6 +434,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('Wetenschapswinkel', testNamespaces.xpathFirst(response, '//short:metadata/short:titleInfo/short:title/text()'))
         self.assertEqual('organisation', testNamespaces.xpathFirst(response, '//short:metadata/short:genre/text()'))
         self.assertEqual(2, len(testNamespaces.xpath(response, '//short:metadata/short:titleInfo/short:title')))
+        self.assertEqual('Wetenschapswinkel', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:name/text()'))
+        self.assertEqual('0000000121536865', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="isni"]/text()'))
 
     def testPersonToShort(self):
         response = self.doSruQuery(**{'query': 'person:PRS1242583', 'recordSchema':'knaw_short'})

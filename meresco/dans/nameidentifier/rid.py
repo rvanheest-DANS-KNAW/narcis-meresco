@@ -4,7 +4,7 @@ from nameidentifier import NameIdentifier
 
 
 class Rid(NameIdentifier):
-    ID_PATTERN = compile(r'^([A-z])-?(\d{4})-?(\d{4})$', IGNORECASE)
+    ID_PATTERN = compile(r'^(?:https?://www\.researcherid\.com/rid/)?([A-z])-?(\d{4})-?(\d{4})$', IGNORECASE)
 
     def __init__(self, baseDigits):
         NameIdentifier.__init__(self, "rid", baseDigits, ['https://www.researcherid.com/rid/'])

@@ -253,8 +253,25 @@ class NormaliseOaiRecord(UiaConverter):
 
             # Locatie: In Dutch (NL) only!
             locatie = lxmlNode.xpath("//org:locatie/text()", namespaces=namespacesmap)
-        
-        # PROJECT:
+
+            # name identifiers
+            e_name = etree.Element("name")
+            etree.SubElement(e_name, "type").text = 'corporate'
+            if title_en and len(title_en) > 0:
+                etree.SubElement(e_name, "name").text = title_en[0]
+            elif title and len(title) > 0:
+                etree.SubElement(e_name, "name").text = title[0]
+            else:
+                etree.SubElement(e_name, "name").text = 'n.a.'
+            nids = lxmlNode.xpath('//org:organisatie/org:nameIdentifier', namespaces=namespacesmap)
+            for nid in nids:  # serialize complete tag and remove default namespace...
+                nid_type = nid.xpath('self::org:nameIdentifier/@type', namespaces=namespacesmap)
+                nid_val = nid.xpath('self::org:nameIdentifier/text()', namespaces=namespacesmap)
+                if len(nid_type) > 0 and len(nid_val) > 0:
+                    etree.SubElement(e_name, "nameIdentifier", type=nid_type[0]).text = nid_val[0]
+
+
+    # PROJECT:
         elif self._metadataformat.isProject():
             genre = 'research'
 

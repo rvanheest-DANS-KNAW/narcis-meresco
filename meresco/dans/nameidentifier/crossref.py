@@ -5,7 +5,7 @@ from nameidentifier import NameIdentifier
 
 # https://www.wikidata.org/wiki/Property:P3153
 class Crossref(NameIdentifier):
-    ID_PATTERN = compile(r'^.*?(?:10.13039/)?(\d+)$', IGNORECASE)
+    ID_PATTERN = compile(r'^(?:.*?/10.13039/)?[1-9](\d+)$', IGNORECASE)
 
     def __init__(self, baseDigits):
         NameIdentifier.__init__(self, "crossref", baseDigits, ['https://data.crossref.org/fundingdata/funder/10.13039/',
