@@ -13,7 +13,6 @@
     xsi:schemaLocation=&quot;http://www.onderzoekinformatie.nl/nod/org https://www.narcis.nl/content/schemas/nod/nod-organisation-1-1.xsd&quot; code=&quot;A.Asd.Al.KNAW&quot;&gt;
     &lt;identifier&gt;ORG1236141&lt;/identifier&gt;
     &lt;naam_nl&gt;Wetenschapswinkel&lt;/naam_nl&gt;
-    &lt;naam_en&gt;Research Information Centre&lt;/naam_en&gt;
     &lt;taak_nl&gt;De KNAW vervult drie (wettelijke) taken: genootschap van excellente wetenschappers uit
         alle disciplines; bestuurder van wetenschappelijke onderzoeksinstituten; adviseur van de
         regering op het gebied van wetenschapsbeoefening. Zijne Majesteit de Koning is beschermheer
@@ -81,6 +80,7 @@
             &lt;term xml:lang=&quot;en&quot;&gt;Social sciences&lt;/term&gt;
         &lt;/category&gt;
     &lt;/categories&gt;
+    &lt;nameIdentifier type=&quot;isni&quot;&gt;0000000121536865&lt;/nameIdentifier&gt;
 &lt;/organisatie&gt;
 &lt;/metadata&gt;
             &lt;/record&gt;</part>
