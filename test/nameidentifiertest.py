@@ -46,8 +46,15 @@ identifier_types = \
      },
 
  "viaf":
-     {VALID: ["https://viaf.org/viaf/10", "http://viaf.org/viaf/10", "viaf.org/viaf/10", "viaf.org/viaf/10123", "viaf.org/viaf/101234567", "viaf.org/viaf/1012345678901234567", "viaf.org/viaf/1012345678901234567890"],
-      INVALID: ["https://viaf.org/10", "viaf.org/viaf/01", "viaf.org/viaf/1a", "viaf.org/viaf/1", "viaf.org/viaf/1012345678", "viaf.org/viaf/10123456789012345678901", ""]
+     {VALID: ["https://viaf.org/viaf/10", "http://viaf.org/viaf/10", "viaf.org/viaf/10", "viaf.org/viaf/10123",
+              "viaf.org/viaf/101234567", "viaf.org/viaf/1012345678901234567", "viaf.org/viaf/1012345678901234567890"],
+      INVALID: ["https://viaf.org/10", "viaf.org/viaf/01", "viaf.org/viaf/1a", "viaf.org/viaf/1", "viaf.org/viaf/1012345678",
+                "viaf.org/viaf/10123456789012345678901", ""]
+     },
+
+ "ror":
+     {VALID: ["https://ror.org/043c0p156", "http://ror.org/043c0p156", "ror.org/043c0p156", "ror:043c0p156", "043c0p156"],
+      INVALID: ["https://ror.org/043c0p-56", "http://ror.org/_043c0p15", "rot.org/043c0p156", "ror043c0p156", "043c0p15", ""]
      },
 
  }

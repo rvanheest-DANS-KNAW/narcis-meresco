@@ -93,6 +93,7 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(3, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/282797"')
         self.assertSruQuery(1, '"Veenendaal"')
         self.assertSruQuery(1, '"Groningen Institute of Archaeology, University of Groningen"')
+        self.assertSruQuery(1, 'untokenized.nids exact "ror:008pnp284"')
 
 
     def testPublIdentifier(self):
@@ -402,6 +403,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(1, len(testNamespaces.xpath(response, '//short:metadata/short:titleInfo/short:title')))
         self.assertEqual('Wetenschapswinkel', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:name/text()'))
         self.assertEqual('0000000121536865', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="isni"]/text()'))
+        self.assertEqual('008pnp284', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="ror"]/text()'))
 
     def testPersonToShort(self):
         response = self.doSruQuery(**{'query': 'person:PRS1242583', 'recordSchema':'knaw_short'})
