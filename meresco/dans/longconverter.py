@@ -783,30 +783,36 @@ class NormaliseOaiRecord(UiaConverter):
             creators = lxmlNode.xpath('//datacite:resource/datacite:creators/datacite:creator', namespaces=namespacesmap)
             for creator in creators:
                 creatorName = creator.xpath('self::datacite:creator/datacite:creatorName/text()', namespaces=namespacesmap)
+                nametype = creator.xpath('self::datacite:creator/datacite:creatorName/@nameType', namespaces=namespacesmap)
                 givenName = creator.xpath('self::datacite:creator/datacite:givenName/text()', namespaces=namespacesmap)
                 familyName = creator.xpath('self::datacite:creator/datacite:familyName/text()', namespaces=namespacesmap)
                 nameIdentifier = creator.xpath('self::datacite:creator/datacite:nameIdentifier/text()', namespaces=namespacesmap)
                 nameIdentifierType = creator.xpath('self::datacite:creator/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
                 affiliation = creator.xpath('self::datacite:creator/datacite:affiliation/text()', namespaces=namespacesmap)
-                self._nameParts(e_longmetadata, creatorName, givenName, familyName, ['Creator'], nameIdentifier, nameIdentifierType, affiliation)
+                self._nameParts(e_longmetadata, creatorName, givenName, familyName, ['Creator'], nameIdentifier, nameIdentifierType, affiliation, nametype)
                 
             contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
             for contributor in contributors:
                 creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
+                nametype = creator.xpath('self::datacite:contributor/datacite:contributorName/@nameType', namespaces=namespacesmap)
                 givenName = contributor.xpath('self::datacite:contributor/datacite:givenName/text()', namespaces=namespacesmap)
                 familyName = contributor.xpath('self::datacite:contributor/datacite:familyName/text()', namespaces=namespacesmap)
                 contributorType = contributor.xpath('self::datacite:contributor/@contributorType', namespaces=namespacesmap)
                 nameIdentifier = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/text()', namespaces=namespacesmap)
                 nameIdentifierType = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
                 affiliation = contributor.xpath('self::datacite:contributor/datacite:affiliation/text()', namespaces=namespacesmap)
-                self._nameParts(e_longmetadata, creatorName, givenName, familyName, contributorType, nameIdentifier, nameIdentifierType, affiliation)
+                self._nameParts(e_longmetadata, creatorName, givenName, familyName, contributorType, nameIdentifier, nameIdentifierType, affiliation, nametype)
                 
 
-    def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", contributorType="", nameIdentifier="", nameIdentifierType="", affiliation=""):
+    def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", contributorType="", nameIdentifier="", nameIdentifierType="", affiliation="", nametype=None):
         # Do not create an name element if no name is available:
         if len(name) > 0 or len(familyName) > 0 or len(givenName) > 0:
             e_name_type = etree.SubElement(e_longmetadata, 'name')
-            etree.SubElement(e_name_type, 'type').text = 'personal'
+            if len(nametype) > 0 and nametype[0].strip().lower() in (
+                "organisational", "corporate", "organizational", "organisation"):
+                etree.SubElement(e_name_type, 'type').text = "corporate"
+            else:
+                etree.SubElement(e_name_type, 'type').text = "personal"
             if len(name) > 0:
                 etree.SubElement(e_name_type, 'unstructured').text = name[0]
             if len(familyName) > 0:
