@@ -372,8 +372,9 @@ class NormdocToFieldsList(Observable):
             for funderid in results:
                 fundId = NameIdentifierFactory.factory(funderid.attrib['type'], funderid.text)
                 if fundId.is_valid():
-                    if self._verbose: print 'addField:', fieldName.upper(), "-->", fundId.get_idx_id()
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", fundId.get_idx_id(), fundId.get_id()
                     self._fieldslist.append((fieldName, fundId.get_idx_id()))
+                    self._fieldslist.append((fieldName, fundId.get_id()))
                     #  Add all ID formats to general field:
                     for variant in fundId.getTypedVariants():
                         self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
@@ -533,9 +534,11 @@ class NormdocToFieldsList(Observable):
                         if nameId.is_valid():
                             #  Add 'known' ID format to dais/nameID field:
                             self._fieldslist.append(( nidFieldname, nameId.get_id() ))
+                            self._fieldslist.append(( nidFieldname, nameId.get_idx_id() ))
                             self._fieldslist.append(( 'nids', nameId.get_id() ))
-                            if self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id()
-                            if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
+                            self._fieldslist.append(( 'nids', nameId.get_idx_id() ))
+                            if self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id(), nameId.get_idx_id()
+                            if self._verbose: print 'addField: NIDS', "-->", nameId.get_id(), nameId.get_idx_id()
                             #  Add all ID formats to general field:
                             for variant in nameId.getTypedVariants():
                                 self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
@@ -582,7 +585,8 @@ class NormdocToFieldsList(Observable):
                     if nameId.is_valid():
                         #  Add 'known' ID format to a named field:
                         self._fieldslist.append(( 'nids', nameId.get_id() ))
-                        if self._verbose: print 'addField: NIDS', "-->", nameId.get_id()
+                        self._fieldslist.append(( 'nids', nameId.get_idx_id() ))
+                        if self._verbose: print 'addField: NIDS', "-->", nameId.get_id(), nameId.get_idx_id()
                         #  Add all ID formats to general field:
                         for variant in nameId.getTypedVariants():
                             self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
