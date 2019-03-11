@@ -376,6 +376,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('2009-11-24', testNamespaces.xpathFirst(response, '//long:metadata/long:dateAvailable/long:parsed/text()'))
         self.assertEqual('urn:nbn:nl:ui:13-jsk-7ek', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="nbn"]/text()'))
         self.assertEqual('dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/@generaltype'))
+        self.assertEqual('Dataset/Dataset en zo', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/text()'))
+        self.assertEqual('dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:genre/text()'))
         self.assertEqual('European Commission', testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements//long:grantAgreement/long:funder/text()'))
         self.assertEqual('nl', testNamespaces.xpathFirst(response, '//long:metadata/long:language/text()'))
         self.assertEqual('19 p.', testNamespaces.xpathFirst(response, '//long:metadata/long:format/text()'))

@@ -870,7 +870,11 @@ class NormaliseOaiRecord(UiaConverter):
                 etree.SubElement(e_longmetadata, "genre").text = self._getLabelFromGenreURI(modsGenre[0])
         elif self._metadataformat.isDatacite(): # DataCite is all about researchdata/datasets...
             if self._wcpcollection in ['dataset']:
-                etree.SubElement(e_longmetadata, "genre").text = 'dataset'
+                genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/@resourceTypeGeneral', namespaces=namespacesmap)
+                if len(genre) > 0 and genre[0].lower().strip() in [dctype.lower() for dctype in datacite_resourceTypeGeneral]:
+                    etree.SubElement(e_longmetadata, "genre").text = genre[0]
+                else:
+                    etree.SubElement(e_longmetadata, "genre").text = 'dataset'
             else: # Get 'genre' from metadata:
                 genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/text()', namespaces=namespacesmap)
                 if len(genre) > 0 and self._getLabelFromGenreURI(genre[0]) in pubTypes:
