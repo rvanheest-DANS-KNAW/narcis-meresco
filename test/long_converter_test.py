@@ -93,7 +93,6 @@ class LongConverterTest(unittest.TestCase):
 
     def _assert(self, item, expected):
         self.xml = etree.fromstring(etree.tostring(self.xml))
-        # print(etree.tostring(self.xml))
         getattr(long, methods[item])(self.xml, self.test)
         if self.test.find(item.value) >= 0:
             value = self.test.find(item.value).text
