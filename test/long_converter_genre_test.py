@@ -31,14 +31,16 @@ from test.long_converter_test import LongConverterTest, baseXmls, long, namespac
 ELEMENT_VALUE = 'element_value'
 ATTRIBUTE_VALUE = 'attribute_value'
 EXPECTED = 'expected'
+COLLECTION = 'collection'
 MODS = 'mods'
 
 test_items = {Format.OAI_DC:   [{ELEMENT_VALUE: 'newspaper', EXPECTED: 'contributiontoperiodical'},
                                 {ELEMENT_VALUE: 'bookpart', EXPECTED: 'bookpart'}],
-              Format.DATACITE: [{ELEMENT_VALUE: 'Dataset about software', ATTRIBUTE_VALUE: 'Software', EXPECTED: 'software'},
-                                {ELEMENT_VALUE: 'Dataset...', ATTRIBUTE_VALUE: '', EXPECTED: 'dataset'},
-                                {ELEMENT_VALUE: 'something', ATTRIBUTE_VALUE: 'just something', EXPECTED: 'dataset'},
-                                {ELEMENT_VALUE: 'Other collection', ATTRIBUTE_VALUE: '', EXPECTED: 'other collection'}],
+              Format.DATACITE: [{ELEMENT_VALUE: 'Dataset about software', ATTRIBUTE_VALUE: 'Software', COLLECTION: 'dataset', EXPECTED: 'software'},
+                                {ELEMENT_VALUE: 'Dataset...', ATTRIBUTE_VALUE: '', COLLECTION: 'dataset', EXPECTED: 'dataset'},
+                                {ELEMENT_VALUE: 'something', ATTRIBUTE_VALUE: 'just something', COLLECTION: 'dataset', EXPECTED: 'dataset'},
+                                {ELEMENT_VALUE: 'article', ATTRIBUTE_VALUE: '', COLLECTION: 'other', EXPECTED: 'article'},
+                                {ELEMENT_VALUE: 'something else', ATTRIBUTE_VALUE: '', COLLECTION: 'other', EXPECTED: None}],
               MODS:             [{ELEMENT_VALUE: 'info:eu-repo/semantics/article', EXPECTED: 'article'},
                                 {ELEMENT_VALUE: 'info:eu-repo/semantics/something', EXPECTED: None}]
               }
@@ -90,10 +92,7 @@ class LongConverterGenreTest(LongConverterTest):
     def _test_datacite(self, format, xml):
 
         for t in test_items[format]:
-            if t[ELEMENT_VALUE] == 'Other collection':
-                long._wcpcollection = ''
-            else:
-                long._wcpcollection = 'dataset'
+            long._wcpcollection = t[COLLECTION]
             self._reset(xml)
             resource = self.xml.find(".//datacite:resource", namespaces=namespacesmap)
             self._addElement(resource, 'resourceType', t[ELEMENT_VALUE], 'resourceTypeGeneral', t[ATTRIBUTE_VALUE])

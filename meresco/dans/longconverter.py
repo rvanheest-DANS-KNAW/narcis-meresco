@@ -872,7 +872,7 @@ class NormaliseOaiRecord(UiaConverter):
             if self._wcpcollection in ['dataset']:
                 genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/@resourceTypeGeneral', namespaces=namespacesmap)
                 if len(genre) > 0 and genre[0].lower().strip() in [dctype.lower() for dctype in datacite_resourceTypeGeneral]:
-                    etree.SubElement(e_longmetadata, "genre").text = genre[0]
+                    etree.SubElement(e_longmetadata, "genre").text = genre[0].lower().strip()
                 else:
                     etree.SubElement(e_longmetadata, "genre").text = 'dataset'
             else: # Get 'genre' from metadata:
