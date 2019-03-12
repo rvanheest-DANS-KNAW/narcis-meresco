@@ -34,16 +34,26 @@ from enum import Enum
 
 class Format(Enum):
     OAI_DC = 'oai_dc'
+    DIDLM23 = 'didl_mods231'
+    DIDLM30 = 'didl_mods30'
+    DIDLM36 = 'didl_mods36'
+    DIDLDC = 'didl_dc'
     DATACITE = 'datacite'
+
 
 class Item(Enum):
     GENRE = 'genre'
+    ACCESS_RIGHTS = 'accessRights'
 
-xmlOaiDc = '<root><oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"/></root>'
-xmlDatacite = '<root xmlns="http://datacite.org/schema/kernel-4"><resource/></root>'
+xmlOaiDc =      '<root xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"><oai_dc:dc/></root>'
+xmlDidlMods23 = '<root xmlns:didl="urn:mpeg:mpeg21:2002:02-DIDL-NS" xmlns:mods="http://www.loc.gov/mods/v3"><didl:DIDL><mods:mods/></didl:DIDL></root>'
+xmlDidlMods30 = '<root xmlns:didl="urn:mpeg:mpeg21:2002:02-DIDL-NS" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"><didl:DIDL><mods:mods/><rdf:something/></didl:DIDL></root>'
+xmlDidlMods36 = '<root xmlns:mods="http://www.loc.gov/mods/v3"><mods:mods/></root>'
+xmlDidlDc =     '<root xmlns:didl="urn:mpeg:mpeg21:2002:02-DIDL-NS" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"><didl:DIDL><oai_dc:dc/></didl:DIDL></root>'
+xmlDatacite =   '<root xmlns="http://datacite.org/schema/kernel-4"><resource/></root>'
 
-baseXmls = {Format.OAI_DC: xmlOaiDc, Format.DATACITE: xmlDatacite}
-methods = {Item.GENRE: '_getGenre'}
+baseXmls = {Format.OAI_DC: xmlOaiDc, Format.DIDLM23: xmlDidlMods23, Format.DIDLM30: xmlDidlMods30, Format.DIDLM36: xmlDidlMods36, Format.DIDLDC: xmlDidlDc, Format.DATACITE: xmlDatacite}
+methods = {Item.GENRE: '_getGenre', Item.ACCESS_RIGHTS: '_getAccessRights'}
 
 testEmpty = etree.fromstring('<test/>')
 long = NormaliseOaiRecord(UiaConverter)
@@ -73,14 +83,21 @@ class LongConverterTest(unittest.TestCase):
         self.xml = copy.deepcopy(xmlBase)
         self.test = copy.deepcopy(testEmpty)
 
-    def _addElement(self, xml, element, elementValue, attribute=None, attributeValue=None):
+    def _addElement(self, xml, element, elementValue=None, attribute=None, attributeValue=None):
         e = etree.SubElement(xml, element)
-        e.text = elementValue
+        if elementValue:
+            e.text = elementValue
         if attribute:
             e.attrib[attribute] = attributeValue
+        return e
 
     def _assert(self, item, expected):
         self.xml = etree.fromstring(etree.tostring(self.xml))
+        # print(etree.tostring(self.xml))
         getattr(long, methods[item])(self.xml, self.test)
-        value = self.test.find(item.value).text
+        if self.test.find(item.value) >= 0:
+            value = self.test.find(item.value).text
+        else:
+            value = None
         self.assertEqual(expected, value)
+        print "+",
