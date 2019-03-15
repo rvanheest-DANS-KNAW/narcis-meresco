@@ -38,7 +38,7 @@ test_items = {Format.OAI_DC:   [{ELEMENT_VALUE: 'newspaper', EXPECTED: 'contribu
                                 {ELEMENT_VALUE: 'bookpart', EXPECTED: 'bookpart'}],
               Format.DATACITE: [{ELEMENT_VALUE: 'Dataset about software', ATTRIBUTE_VALUE: 'Software', COLLECTION: 'dataset', EXPECTED: 'software'},
                                 {ELEMENT_VALUE: 'Dataset...', ATTRIBUTE_VALUE: '', COLLECTION: 'dataset', EXPECTED: 'dataset'},
-                                {ELEMENT_VALUE: 'something', ATTRIBUTE_VALUE: 'just something', COLLECTION: 'dataset', EXPECTED: 'dataset'},
+                                {ELEMENT_VALUE: 'something', ATTRIBUTE_VALUE: 'Collection', COLLECTION: 'dataset', EXPECTED: 'dataset'},
                                 {ELEMENT_VALUE: 'article', ATTRIBUTE_VALUE: '', COLLECTION: 'other', EXPECTED: 'article'},
                                 {ELEMENT_VALUE: 'something else', ATTRIBUTE_VALUE: '', COLLECTION: 'other', EXPECTED: None}],
               MODS:             [{ELEMENT_VALUE: 'info:eu-repo/semantics/article', EXPECTED: 'article'},
