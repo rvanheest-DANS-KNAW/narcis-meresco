@@ -91,6 +91,9 @@ datacite_resourceTypeGeneral = ['Audiovisual','Collection','Dataset','Event','Im
 # DATACITE Controlled List Description Types:
 datacite_descriptionTypes = ['Abstract','Other','TableOfContents','SeriesInformation','TechnicalInfo','Methods']
 
+# DATACITE Dataset Genre Values:
+datacite_datasetGenres = ['Dataset','Software']
+
 # mods:nameIdentifiers that will be processed to long. Other types will be ignored.
 # ORDER does matter!
 supportedNids = ['dai-nl', 'orcid', 'isni', 'nod-prs']
@@ -871,7 +874,7 @@ class NormaliseOaiRecord(UiaConverter):
         elif self._metadataformat.isDatacite(): # DataCite is all about researchdata/datasets...
             if self._wcpcollection in ['dataset']:
                 genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/@resourceTypeGeneral', namespaces=namespacesmap)
-                if len(genre) > 0 and genre[0].lower().strip() in [dctype.lower() for dctype in datacite_resourceTypeGeneral]:
+                if len(genre) > 0 and genre[0].lower().strip() in [dctype.lower() for dctype in datacite_datasetGenres]:
                     etree.SubElement(e_longmetadata, "genre").text = genre[0].lower().strip()
                 else:
                     etree.SubElement(e_longmetadata, "genre").text = 'dataset'
