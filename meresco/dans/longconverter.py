@@ -91,6 +91,9 @@ datacite_resourceTypeGeneral = ['Audiovisual','Collection','Dataset','Event','Im
 # DATACITE Controlled List Description Types:
 datacite_descriptionTypes = ['Abstract','Other','TableOfContents','SeriesInformation','TechnicalInfo','Methods']
 
+# DATACITE Dataset Genre Values:
+datacite_datasetGenres = ['Dataset','Software']
+
 # mods:nameIdentifiers that will be processed to long. Other types will be ignored.
 # ORDER does matter!
 supportedNids = ['dai-nl', 'orcid', 'isni', 'nod-prs']
@@ -859,22 +862,28 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _getGenre(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
+        str_genre = ''
         if self._metadataformat.isDC():
             # uit DC(mandatory): volgens specs mogen we first occurence pakken:
             dcGenre = lxmlNode.xpath('//dc:type[1]/text()', namespaces=namespacesmap)
             if len(dcGenre) > 0 and self._DCType2PublicationType(dcGenre[0].strip()) in pubTypes:
-                etree.SubElement(e_longmetadata, "genre").text = self._DCType2PublicationType(dcGenre[0].strip())
+                str_genre = self._DCType2PublicationType(dcGenre[0].strip())
         elif self._metadataformat.isMods():
             modsGenre = lxmlNode.xpath(root+'mods:genre[1]/text()', namespaces=namespacesmap)
             if len(modsGenre) > 0 and self._getLabelFromGenreURI(modsGenre[0]) in pubTypes:
-                etree.SubElement(e_longmetadata, "genre").text = self._getLabelFromGenreURI(modsGenre[0])
+                str_genre = self._getLabelFromGenreURI(modsGenre[0])
         elif self._metadataformat.isDatacite(): # DataCite is all about researchdata/datasets...
             if self._wcpcollection in ['dataset']:
-                etree.SubElement(e_longmetadata, "genre").text = 'dataset'
-            else: # Get 'genre' from metadata:
+                genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/@resourceTypeGeneral', namespaces=namespacesmap)
+                if len(genre) > 0 and genre[0].lower().strip() in [dc_genre.lower() for dc_genre in datacite_datasetGenres]:
+                    str_genre = genre[0].lower().strip()
+            else: # Get 'genre' from text-value (RCE-records:  <resourceType resourceTypeGeneral="Text">info:eu-repo/semantics/report</resourceType>
                 genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/text()', namespaces=namespacesmap)
                 if len(genre) > 0 and self._getLabelFromGenreURI(genre[0]) in pubTypes:
-                    etree.SubElement(e_longmetadata, "genre").text = self._getLabelFromGenreURI(genre[0])
+                    str_genre = self._getLabelFromGenreURI(genre[0])
+
+        if self._wcpcollection in ['dataset'] and str_genre != 'software': str_genre = 'dataset' # Apply default 'dataset' genre to all dataset-records, even if no genre is given.
+        if str_genre != '': etree.SubElement(e_longmetadata, "genre").text = str_genre
 
 
     def _getPublisher(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
