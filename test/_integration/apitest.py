@@ -162,7 +162,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1'), ('report', '1')], drilldown)
+        self.assertEqual([('dataset', '3'), ('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('report', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):
