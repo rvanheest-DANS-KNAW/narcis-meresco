@@ -97,6 +97,7 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(3, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/282797"')
         self.assertSruQuery(1, '"Veenendaal"')
         self.assertSruQuery(1, '"Groningen Institute of Archaeology, University of Groningen"')
+        self.assertSruQuery(1, 'untokenized.nids exact "ror:008pnp284"')
 
 
     def testPublIdentifier(self):
@@ -165,7 +166,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1'), ('report', '1')], drilldown)
+        self.assertEqual([('dataset', '3'), ('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('report', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):
@@ -386,8 +387,12 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('doi:10.17026/dans-zqm-htb9', testNamespaces.xpathFirst(response, '//long:humanStartPage/text()'))
         self.assertEqual('embargoedAccess', testNamespaces.xpathFirst(response, '//long:accessRights/text()'))
         self.assertEqual('Locatie [Matthijs Tinxgracht 16] te Edam, gemeente Edam-Volendam.', testNamespaces.xpathFirst(response, '//long:metadata/long:titleInfo/long:title/text()')[0:65])
-        self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:type/text()'))
+        self.assertEqual('Jacobs, E.', testNamespaces.xpathFirst(response, '//long:metadata/long:name[1]/long:unstructured/text()'))
+        self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name[1]/long:type/text()'))
+        self.assertEqual('Burnier, C.Y.', testNamespaces.xpathFirst(response, '//long:metadata/long:name[2]/long:unstructured/text()'))
+        self.assertEqual('corporate', testNamespaces.xpathFirst(response, '//long:metadata/long:name[2]/long:type/text()'))
         self.assertEqual('Miller, Elizabeth', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:unstructured/text()'))
+        self.assertEqual('personal', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:type/text()'))
         self.assertEqual('Miller', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:family/text()'))
         self.assertEqual('Elizabeth', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:given/text()'))
         self.assertEqual('cre', testNamespaces.xpathFirst(response, '//long:metadata/long:name[3]/long:mcRoleTerm/text()'))
@@ -406,6 +411,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('2009-11-24', testNamespaces.xpathFirst(response, '//long:metadata/long:dateAvailable/long:parsed/text()'))
         self.assertEqual('urn:nbn:nl:ui:13-jsk-7ek', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="nbn"]/text()'))
         self.assertEqual('dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/@generaltype'))
+        self.assertEqual('Dataset/Dataset en zo', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/text()'))
+        self.assertEqual('dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:genre/text()'))
         self.assertEqual('European Commission', testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements//long:grantAgreement/long:funder/text()'))
         self.assertEqual('nl', testNamespaces.xpathFirst(response, '//long:metadata/long:language/text()'))
         self.assertEqual('19 p.', testNamespaces.xpathFirst(response, '//long:metadata/long:format/text()'))
@@ -434,6 +441,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(1, len(testNamespaces.xpath(response, '//short:metadata/short:titleInfo/short:title')))
         self.assertEqual('Wetenschapswinkel', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:name/text()'))
         self.assertEqual('0000000121536865', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="isni"]/text()'))
+        self.assertEqual('008pnp284', testNamespaces.xpathFirst(response, '//short:metadata/short:name/short:nameIdentifier[@type="ror"]/text()'))
 
     def testPersonToShort(self):
         response = self.doSruQuery(**{'query': 'person:PRS1242583', 'recordSchema':'knaw_short'})

@@ -21,15 +21,15 @@
 		    &lt;identifier identifierType=&quot;DOI&quot;&gt;10.17026/dans-zqm-htb9&lt;/identifier&gt;
 		    &lt;creators&gt;
 		        &lt;creator&gt;
-		            &lt;creatorName&gt;Jacobs, E.&lt;/creatorName&gt;
+		            &lt;creatorName nameType=&quot;&quot;&gt;Jacobs, E.&lt;/creatorName&gt;
 		            &lt;affiliation&gt;Groningen Institute of Archaeology, University of Groningen&lt;/affiliation&gt;
 		        &lt;/creator&gt;
 		        &lt;creator&gt;
-		            &lt;creatorName&gt;Burnier, C.Y.&lt;/creatorName&gt;
+		            &lt;creatorName nameType=&quot;corporate&quot;&gt;Burnier, C.Y.&lt;/creatorName&gt;
 		            &lt;nameIdentifier nameIdentifierScheme=&quot;info:eu-repo/dai&quot;&gt;072728442&lt;/nameIdentifier&gt;
 		        &lt;/creator&gt;
 		        &lt;creator&gt;
-		            &lt;creatorName&gt;Miller, Elizabeth&lt;/creatorName&gt;
+		            &lt;creatorName nameType=&quot;personal&quot;&gt;Miller, Elizabeth&lt;/creatorName&gt;
 		            &lt;givenName&gt;Elizabeth&lt;/givenName&gt;
 		            &lt;familyName&gt;Miller&lt;/familyName&gt;
 		            &lt;nameIdentifier schemeURI=&quot;http://orcid.org/&quot; nameIdentifierScheme=&quot;ORCID&quot;&gt;0000-0001-5000-0007&lt;/nameIdentifier&gt;
