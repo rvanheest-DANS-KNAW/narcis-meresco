@@ -121,6 +121,7 @@
                     &lt;/extension&gt;
                     &lt;typeOfResource&gt;text&lt;/typeOfResource&gt;
                     &lt;genre&gt;info:eu-repo/semantics/article&lt;/genre&gt;
+                    &lt;identifier type=&quot;patent_number&quot;&gt;EP3343951&lt;/identifier&gt;
                     &lt;originInfo&gt;
                     &lt;dateIssued encoding=&quot;iso8601&quot;&gt;2014&lt;/dateIssued&gt;
                     &lt;/originInfo&gt;
@@ -131,7 +132,6 @@
                     &lt;identifier type=&quot;uri&quot;&gt; info:doi/10.3934/dcdss.2012.5.1i &lt;/identifier&gt;
                     &lt;relatedItem type=&quot;host&quot;&gt;
                     &lt;identifier type=&quot;uri&quot;&gt;URN:ISSN:1937-1632&lt;/identifier&gt;
-                    &lt;identifier type=&quot;patent_number&quot;&gt;EP3343951&lt;/identifier&gt;
                     &lt;titleInfo&gt;
                     &lt;title&gt;Discrete and Continuous Dynamical Systems - Series S&lt;/title&gt;
                     &lt;/titleInfo&gt;

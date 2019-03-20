@@ -201,6 +201,7 @@ class NormaliseOaiRecord(UiaConverter):
                 self._getDates(lxmlNode, e_longmetadata)
                 self._getAllRecordIdentifiers(lxmlNode, e_longmetadata)
                 self._getRelatedIdentifiers(lxmlNode, e_longmetadata)
+                self._getPatentNumber(lxmlNode, e_longmetadata)
                 self._getLanguage(lxmlNode, e_longmetadata)
                 self._getLocationUrl(lxmlNode, e_longmetadata)
                 self._getRelatedItems(lxmlNode, e_longmetadata)
@@ -505,6 +506,11 @@ class NormaliseOaiRecord(UiaConverter):
                 if len(uri) > 0:
                     e_pi.attrib['ref'] = uri[0]
 
+    def _getPatentNumber(self, lxmlNode, e_longmetadata): #PURE instances publish patent-numbers as: &lt;identifier type=&quot;patent_number&quot;&gt;EP3343951&lt;/identifier&gt;
+        if self._metadataformat.isMods():
+            patent_no = lxmlNode.xpath("//mods:mods/mods:identifier[@type='patent_number']/text()", namespaces=namespacesmap)
+            if patent_no: # Found patent number:
+                etree.SubElement(e_longmetadata, "patent_number").text = patent_no[0].strip()
 
     def _getRelatedIdentifiers(self, lxmlNode, e_longmetadata):
         if self._metadataformat.isDatacite():
