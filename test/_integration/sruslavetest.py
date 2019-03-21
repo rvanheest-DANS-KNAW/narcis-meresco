@@ -73,6 +73,7 @@ class SruSlaveTest(IntegrationTestCase):
 
     def testSruIndex(self):
         self.assertSruQuery(2, '__all__ = "Seecr"')
+        self.assertSruQuery(1, '__all__ = "EP3343951"')
         self.assertSruQuery(2, 'title = program')
         self.assertSruQuery(3, 'untokenized.oai_id exact "record:1"')
         self.assertSruQuery(3, 'untokenized.dd_year exact "2016"')
