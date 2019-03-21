@@ -115,6 +115,7 @@ fieldnamesMapping = {
     'knaw_long.metadata.geoLocations.geoLocation.geoLocationPlace'      : UNQUALIFIED_TERMS,
     'knaw_long.metadata.typeOfResource'                                 : UNQUALIFIED_TERMS,
     'knaw_long.metadata.rightsDescription'                              : UNQUALIFIED_TERMS,
+    'knaw_long.metadata.patent_number'                                  : UNQUALIFIED_TERMS,
     'knaw_long.accessRights'                                            : 'access',
     'knaw_long.persistentIdentifier'                                    : 'persistentid',
     'knaw_long.humanStartPage'                                          : 'humanstartpage',
