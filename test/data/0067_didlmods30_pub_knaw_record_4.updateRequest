@@ -121,6 +121,7 @@
                     &lt;/extension&gt;
                     &lt;typeOfResource&gt;text&lt;/typeOfResource&gt;
                     &lt;genre&gt;info:eu-repo/semantics/article&lt;/genre&gt;
+                    &lt;identifier type=&quot;patent_number&quot;&gt;EP3343951&lt;/identifier&gt;
                     &lt;originInfo&gt;
                     &lt;dateIssued encoding=&quot;iso8601&quot;&gt;2014&lt;/dateIssued&gt;
                     &lt;/originInfo&gt;

@@ -162,7 +162,7 @@ class ApiTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1'), ('report', '1')], drilldown)
+        self.assertEqual([('dataset', '3'), ('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('report', '1')], drilldown)
 
         # TODO: Uitzoeken waarom ie wel naar storage gaat om records op te halen, hoewel startrecord over de limiet is???
     def testSruLimitStartRecord(self):
@@ -376,6 +376,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('2009-11-24', testNamespaces.xpathFirst(response, '//long:metadata/long:dateAvailable/long:parsed/text()'))
         self.assertEqual('urn:nbn:nl:ui:13-jsk-7ek', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier[@type="nbn"]/text()'))
         self.assertEqual('dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/@generaltype'))
+        self.assertEqual('Dataset/Dataset en zo', testNamespaces.xpathFirst(response, '//long:metadata/long:typeOfResource/text()'))
+        self.assertEqual('dataset', testNamespaces.xpathFirst(response, '//long:metadata/long:genre/text()'))
         self.assertEqual('European Commission', testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements//long:grantAgreement/long:funder/text()'))
         self.assertEqual('nl', testNamespaces.xpathFirst(response, '//long:metadata/long:language/text()'))
         self.assertEqual('19 p.', testNamespaces.xpathFirst(response, '//long:metadata/long:format/text()'))

@@ -47,6 +47,8 @@ from nameidentifiertest import NameIdentifierTest
 # Converters:
 from convertertest import ConverterTest
 from metapartconvertertest import MetaPartConverterTest
+from long_converter_genre_test import LongConverterGenreTest
+from long_converter_access_rights_test import LongConverterAccessRightsTest
 
 
 if __name__ == '__main__':
