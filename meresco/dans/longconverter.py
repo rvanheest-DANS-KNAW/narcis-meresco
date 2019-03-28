@@ -172,6 +172,8 @@ class NormaliseOaiRecord(UiaConverter):
             e_longroot.set("version", LONG_VERSION)
             # Add WCP Collection to long format:
             etree.SubElement(e_longroot, "wcpcollection").text = self._wcpcollection
+            # Add Meresco uploadid long format:
+            etree.SubElement(e_longroot, "uploadid").text = self._uploadid
 
             e_longmetadata = etree.Element("metadata")
 
