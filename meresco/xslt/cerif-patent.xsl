@@ -25,7 +25,7 @@
         <Type xmlns="https://www.openaire.eu/cerif-profile/vocab/COAR_Patent_Types">http://purl.org/coar/resource_type/c_15cd</Type>
         <xsl:apply-templates select="input:metadata"/>
     </xsl:template>
-    
+
     <xsl:template match="input:metadata">
         <xsl:apply-templates select="input:titleInfo[not(@*)]"/>
 
@@ -96,6 +96,9 @@
         <xsl:element name="{$elementName}">
             <xsl:call-template name="displayName"/>
             <xsl:call-template name="person"/>
+            <xsl:if test="input:mcRoleTerm='pth'"> <!-- only a patentholder may have an OrgUnit element -->
+                <xsl:call-template name="organisation"/>
+            </xsl:if>
         </xsl:element>
     </xsl:template>
 
@@ -111,23 +114,40 @@
             </xsl:choose>
         </DisplayName>
     </xsl:template>
-    
+
     <xsl:template name="person">
-        <Person>
-            <xsl:if test="input:nameIdentifier[@type='nod-prs']">
-                <xsl:attribute name="id">
-                    <xsl:value-of select="input:nameIdentifier[@type='nod-prs']"/>
-                </xsl:attribute>
-                <PersonName>
-                    <FamilyNames>
-                        <xsl:value-of select="./input:family"/>
-                    </FamilyNames>
-                    <FirstNames>
-                        <xsl:value-of select="./input:given"/>
-                    </FirstNames>
-                </PersonName>
-            </xsl:if>
-        </Person>
+        <xsl:if test="input:type='personal'">
+            <Person>
+                <xsl:if test="input:nameIdentifier[@type='nod-prs']">
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="input:nameIdentifier[@type='nod-prs']"/>
+                    </xsl:attribute>
+                    <PersonName>
+                        <FamilyNames>
+                            <xsl:value-of select="./input:family"/>
+                        </FamilyNames>
+                        <FirstNames>
+                            <xsl:value-of select="./input:given"/>
+                        </FirstNames>
+                    </PersonName>
+                </xsl:if>
+            </Person>
+        </xsl:if>
+    </xsl:template>
+
+    <xsl:template name="organisation">
+        <xsl:if test="input:type='corporate'">
+            <OrgUnit>
+                <xsl:if test="input:nameIdentifier[@type='nod-org']">
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="input:nameIdentifier[@type='nod-org']"/>
+                    </xsl:attribute>
+                    <Name xml:lang="en">
+                        <xsl:value-of select="input:unstructured"/>
+                    </Name>
+                </xsl:if>
+            </OrgUnit>
+        </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:abstract[not(@*)]">
