@@ -145,6 +145,7 @@
       <xs:enumeration value="orcid" />
       <xs:enumeration value="isni" />
       <xs:enumeration value="nod-prs" />
+      <xs:enumeration value="nod-org" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="affiliation" type="xs:string"/>
