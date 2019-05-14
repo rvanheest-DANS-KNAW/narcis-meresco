@@ -189,7 +189,7 @@ class NormdocToFieldsList(Observable):
         
         self._fieldslist = [] # reset list
         # hier komt een compleet meresco:document binnen als LXMLnode:
-        # uploadid = kwargs['identifier']
+        # self.uploadid = kwargs['identifier']
 
         # Get meta, header and metadata part(='long') from the normdoc:
         e_metapart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="meta"]/text()', namespaces=namespacesmap)[0])
@@ -222,8 +222,8 @@ class NormdocToFieldsList(Observable):
 
 
     def _fillFieldslist(self, aNode, parentName): # NOD-nodes and Long nodes will pass here...
-        if type(aNode) != _Element:
-            print "type(aNode) != _Element"
+        if type(aNode) != _Element: # Also: <type 'lxml.etree._Comment'>: Do not proccess them
+            # print "type(aNode):", type(aNode)
             return
         if parentName:
             parentName += '.'
