@@ -805,7 +805,7 @@ class NormaliseOaiRecord(UiaConverter):
             contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
             for contributor in contributors:
                 creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
-                nametype = creator.xpath('self::datacite:contributor/datacite:contributorName/@nameType', namespaces=namespacesmap)
+                nametype = contributor.xpath('self::datacite:contributor/datacite:contributorName/@nameType', namespaces=namespacesmap)
                 givenName = contributor.xpath('self::datacite:contributor/datacite:givenName/text()', namespaces=namespacesmap)
                 familyName = contributor.xpath('self::datacite:contributor/datacite:familyName/text()', namespaces=namespacesmap)
                 contributorType = contributor.xpath('self::datacite:contributor/@contributorType', namespaces=namespacesmap)
