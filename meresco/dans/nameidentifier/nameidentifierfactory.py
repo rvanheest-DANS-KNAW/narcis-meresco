@@ -22,7 +22,7 @@ class NameIdentifierFactory(object):
         if type.strip().lower() == "isni": return Isni(baseval)
         if type.strip().lower() == "rid": return Rid(baseval)
         if type.strip().lower() == "viaf": return Viaf(baseval)
-        if type.strip().lower() == "prs" or type.lower() == "nod-prs": return NodPrs(baseval)
+        if type.strip().lower() == "prs" or type.lower() == "nod-prs" or type.lower() == "nod-person": return NodPrs(baseval)
         if "crossref" in type.lower(): return Crossref(baseval)
         if type.strip().lower() == "grid" or "grid" in type.lower(): return Grid(baseval)
         if type.strip().lower() == "ror": return Ror(baseval)
