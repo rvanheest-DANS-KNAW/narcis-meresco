@@ -15,6 +15,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" ref="long:wcpcollection"/>
+        <xs:element ref="long:uploadid"/>
         <xs:element minOccurs="0" ref="long:modificationDate"/>
         <xs:element ref="long:humanStartPage"/>
         <xs:element minOccurs="0" ref="long:persistentIdentifier"/>
@@ -26,6 +27,7 @@
     </xs:complexType>
   </xs:element>
   <xs:element name="wcpcollection" type="xs:NCName"/>
+  <xs:element name="uploadid" type="xs:string"/>
   <xs:element name="modificationDate" type="xs:string"/>
   <xs:element name="humanStartPage" type="xs:anyURI"/>
   <xs:element name="persistentIdentifier">
@@ -33,6 +35,7 @@
       <xs:simpleContent>
         <xs:extension base="xs:anyURI">
           <xs:attribute name="ref" type="xs:string"/>
+          <xs:attribute name="type" use="required" type="xs:NCName"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -81,6 +84,7 @@
         <xs:group   minOccurs="0" maxOccurs="unbounded" ref="long:date"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:publication_identifier"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:related_identifier"/>
+        <xs:element ref="long:patent_number"/>
         <xs:element minOccurs="0" ref="long:language"/>        
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:location_url"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:relatedItem"/>
@@ -91,6 +95,7 @@
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:grantAgreements"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="long:geoLocations"/>
         <xs:element minOccurs="0" ref="long:hostCitation"/>
+        <xs:element minOccurs="0" ref="long:publicationYear"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -140,6 +145,7 @@
       <xs:enumeration value="orcid" />
       <xs:enumeration value="isni" />
       <xs:enumeration value="nod-prs" />
+      <xs:enumeration value="nod-org" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="affiliation" type="xs:string"/>
@@ -202,15 +208,27 @@
       <xs:element name="parsed" minOccurs="0" type="xs:NMTOKEN"/>
     </xs:all>
   </xs:complexType>
-  <xs:element name="publication_identifier" type="long:identifier"/>
-  <xs:element name="related_identifier" type="long:identifier"/>
-  <xs:complexType name="identifier">
+  <xs:element name="publication_identifier" type="long:publication_identifier"/>
+  <xs:complexType name="publication_identifier">
     <xs:simpleContent>
       <xs:extension base="xs:string">
+        <xs:attribute name="idx" type="xs:string"/>
         <xs:attribute name="type" use="required" type="xs:NCName"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:element name="related_identifier" type="long:related_identifier"/>
+  <xs:complexType name="related_identifier">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="idx" type="xs:string"/>
+        <xs:attribute name="type" use="required" type="xs:NCName"/>
+        <xs:attribute name="relationType" type="xs:string"/>
+        <xs:attribute name="resourceTypeGeneral" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="patent_number" type="xs:string"/>
   <xs:element name="language" type="xs:language"/>
   <xs:element name="location_url" type="xs:anyURI"/>
   <xs:element name="relatedItem">
@@ -327,4 +345,5 @@
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="hostCitation" type="xs:string"/>
+  <xs:element name="publicationYear" type="xs:string"/>
 </xs:schema>
