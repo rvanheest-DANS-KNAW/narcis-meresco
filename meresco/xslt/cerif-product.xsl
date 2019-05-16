@@ -34,13 +34,15 @@
 
         <xsl:apply-templates select="input:publication_identifier"/>
 
-        <Creators>
-            <xsl:apply-templates select="input:name[input:mcRoleTerm='cre']"/>
-        </Creators>
-        
+        <xsl:if test="input:name[input:mcRoleTerm='cre']">
+            <Creators>
+                <xsl:apply-templates select="input:name[input:mcRoleTerm='cre']"/>
+            </Creators>
+        </xsl:if>
+
         <xsl:apply-templates select="input:rightsDescription"/>
         <xsl:apply-templates select="input:abstract[not(@*)]"/>
-        
+
         <xsl:apply-templates select="input:subject/input:topic/input:topicValue"/>
     </xsl:template>
 
@@ -72,7 +74,7 @@
             </Language>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:titleInfo[not(@*)]">
         <xsl:if test="input:title">
             <Title xml:lang="en">
