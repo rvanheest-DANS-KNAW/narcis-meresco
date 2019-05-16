@@ -4,7 +4,8 @@
                 xmlns="https://www.openaire.eu/cerif-profile/1.1/"
                 exclude-result-prefixes="input xsi"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/act ../xsd/nod-research-1-1.xsd"
+                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/act ../xsd/nod-research-1-1.xsd
+                                    https://www.openaire.eu/cerif-profile/1.1/ https://www.openaire.eu/schema/cris/1.1/openaire-cerif-profile.xsd"
                 version="1.0">
 
     <!-- =================================================================================== -->
@@ -34,17 +35,21 @@
         <xsl:apply-templates select="input:startdate"/>
         <xsl:apply-templates select="input:enddate"/>
 
-        <Consortium>
-            <xsl:apply-templates select="input:penvoerder"/>
+        <xsl:if test="input:penvoerder or input:samenwerking or input:opdrachtgever">
+            <Consortium>
+                <xsl:apply-templates select="input:penvoerder"/>
 
-            <xsl:apply-templates select="input:samenwerking"/>
+                <xsl:apply-templates select="input:samenwerking"/>
 
-            <xsl:apply-templates select="input:opdrachtgever"/>
-        </Consortium>
+                <xsl:apply-templates select="input:opdrachtgever"/>
+            </Consortium>
+        </xsl:if>
 
-        <Team>
-            <xsl:apply-templates select="input:person"/>
-        </Team>
+        <xsl:if test="input:person">
+            <Team>
+                <xsl:apply-templates select="input:person"/>
+            </Team>
+        </xsl:if>
 
         <xsl:apply-templates select="input:financier"/>
 

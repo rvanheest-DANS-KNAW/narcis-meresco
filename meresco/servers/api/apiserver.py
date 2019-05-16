@@ -24,7 +24,6 @@
 
 import sys
 from os.path import join, dirname, abspath
-# from os.path import dirname, abspath, join, isdir
 
 from weightless.core import be, consume
 from weightless.io import Reactor
@@ -66,6 +65,7 @@ from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
 from meresco.dans.shortconverter import ShortConverter
 from meresco.dans.oai_dcconverter import DcConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
+from meresco.dans.filterknawlonggenre import FilterKnawLongGenre
 
 from meresco.dans.merescocomponents import OaiPmh as OaiPmhDans
 
@@ -155,6 +155,23 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                     )
                                 ),
 
+                                (FilterWcpCollection(allowed=['publication']), # START CERIF CONVERSION FOR PUBLICATIONS COLLECTION
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
+
+                                        (FilterKnawLongGenre(allowed=['patent']), # START PATENTS CONVERSION
+
+                                            (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-patent.xsl')], fromKwarg="lxmlNode"),
+                                                (RewritePartname(OPENAIRE_PARTNAME),
+                                                    (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                        (storageComponent,)
+                                                    )
+                                                )
+                                            )
+
+                                        )
+
+                                    )
+                                ),
 
                                 (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                     (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
@@ -216,7 +233,16 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                         (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire']),
                                             (oaiJazz,),
                                         )
-                                    )
+                                    ),
+
+
+                                    (XmlXPath(["//long:knaw_long/long:metadata[long:genre ='patent']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_patents"]),
+                                            (oai_oa_cerifJazz,),
+                                        )
+                                    ),
+
+
                                 ),
                                 (FilterWcpCollection(allowed=['dataset']),
                                     (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset']),
@@ -341,10 +367,10 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     oai_oa_cerifJazz.updateSet("openaire_cris_projects", "OpenAIRE_CRIS_projects")
     oai_oa_cerifJazz.updateSet("openaire_cris_orgunits", "OpenAIRE_CRIS_orgunits")
     oai_oa_cerifJazz.updateSet("openaire_cris_persons", "OpenAIRE_CRIS_persons")
+    oai_oa_cerifJazz.updateSet("openaire_cris_patents", "OpenAIRE_CRIS_patents")
 
     oai_oa_cerifJazz.updateSet("openaire_cris_publications", "OpenAIRE_CRIS_publications")
     oai_oa_cerifJazz.updateSet("openaire_cris_products", "OpenAIRE_CRIS_products")
-    oai_oa_cerifJazz.updateSet("openaire_cris_patents", "OpenAIRE_CRIS_patents")
     oai_oa_cerifJazz.updateSet("openaire_cris_funding", "OpenAIRE_CRIS_funding")
     oai_oa_cerifJazz.updateSet("openaire_cris_events", "OpenAIRE_CRIS_events")
     oai_oa_cerifJazz.updateSet("openaire_cris_equipments", "OpenAIRE_CRIS_equipments")
