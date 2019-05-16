@@ -35,17 +35,21 @@
         <xsl:apply-templates select="input:startdate"/>
         <xsl:apply-templates select="input:enddate"/>
 
-        <Consortium>
-            <xsl:apply-templates select="input:penvoerder"/>
+        <xsl:if test="input:penvoerder or input:samenwerking or input:opdrachtgever">
+            <Consortium>
+                <xsl:apply-templates select="input:penvoerder"/>
 
-            <xsl:apply-templates select="input:samenwerking"/>
+                <xsl:apply-templates select="input:samenwerking"/>
 
-            <xsl:apply-templates select="input:opdrachtgever"/>
-        </Consortium>
+                <xsl:apply-templates select="input:opdrachtgever"/>
+            </Consortium>
+        </xsl:if>
 
-        <Team>
-            <xsl:apply-templates select="input:person"/>
-        </Team>
+        <xsl:if test="input:person">
+            <Team>
+                <xsl:apply-templates select="input:person"/>
+            </Team>
+        </xsl:if>
 
         <xsl:apply-templates select="input:financier"/>
 

@@ -34,13 +34,17 @@
 
         <xsl:apply-templates select="input:patent_number"/>
 
-        <Inventors>
-            <xsl:apply-templates select="input:name[input:mcRoleTerm='inv']"/>
-        </Inventors>
+        <xsl:if test="input:name[input:mcRoleTerm='inv']">
+            <Inventors>
+                <xsl:apply-templates select="input:name[input:mcRoleTerm='inv']"/>
+            </Inventors>
+        </xsl:if>
 
-        <Holders>
-            <xsl:apply-templates select="input:name[input:mcRoleTerm='pth']"/>
-        </Holders>
+        <xsl:if test="input:name[input:mcRoleTerm='pth']">
+            <Holders>
+                <xsl:apply-templates select="input:name[input:mcRoleTerm='pth']"/>
+            </Holders>
+        </xsl:if>
 
         <xsl:apply-templates select="input:abstract[not(@*)]"/>
 
