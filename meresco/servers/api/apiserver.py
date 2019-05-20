@@ -142,7 +142,6 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                         )
                                     )
                                 ),
-
                                 (FilterWcpCollection(allowed=['organisation']),
                                     (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                         (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-orgunit.xsl')], fromKwarg="lxmlNode"),
@@ -154,12 +153,20 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                         )
                                     )
                                 ),
-
+                                (FilterWcpCollection(allowed=['dataset']), # START CERIF CONVERSION FOR DATASET COLLECTION: cerif-dataset / cerif-software.
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-product.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
                                 (FilterWcpCollection(allowed=['publication']), # START CERIF CONVERSION FOR PUBLICATIONS COLLECTION
                                     (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
-
                                         (FilterKnawLongGenre(allowed=['patent']), # START PATENTS CONVERSION
-
                                             (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-patent.xsl')], fromKwarg="lxmlNode"),
                                                 (RewritePartname(OPENAIRE_PARTNAME),
                                                     (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
@@ -167,9 +174,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                                     )
                                                 )
                                             )
-
                                         )
-
                                     )
                                 ),
 
@@ -234,22 +239,20 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                             (oaiJazz,),
                                         )
                                     ),
-
-
                                     (XmlXPath(["//long:knaw_long/long:metadata[long:genre ='patent']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
                                         (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_patents"]),
                                             (oai_oa_cerifJazz,),
                                         )
                                     ),
-
-
                                 ),
                                 (FilterWcpCollection(allowed=['dataset']),
                                     (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset']),
                                         (oaiJazz,),
-                                    )
+                                    ),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_products"]),
+                                        (oai_oa_cerifJazz,),
+                                    )                                    
                                 ),
-
                                 # Add NOD OpenAIRE Cerif to OpenAIRE-PMH repo.
                                 (FilterWcpCollection(allowed=['research']),
                                     (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_projects"]),
@@ -266,7 +269,6 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                         (oai_oa_cerifJazz,),
                                     )
                                 )
-
                             )
                         ), # Schrijf 'meta' partname naar storage:
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="meta"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
@@ -368,9 +370,9 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     oai_oa_cerifJazz.updateSet("openaire_cris_orgunits", "OpenAIRE_CRIS_orgunits")
     oai_oa_cerifJazz.updateSet("openaire_cris_persons", "OpenAIRE_CRIS_persons")
     oai_oa_cerifJazz.updateSet("openaire_cris_patents", "OpenAIRE_CRIS_patents")
+    oai_oa_cerifJazz.updateSet("openaire_cris_products", "OpenAIRE_CRIS_products")
 
     oai_oa_cerifJazz.updateSet("openaire_cris_publications", "OpenAIRE_CRIS_publications")
-    oai_oa_cerifJazz.updateSet("openaire_cris_products", "OpenAIRE_CRIS_products")
     oai_oa_cerifJazz.updateSet("openaire_cris_funding", "OpenAIRE_CRIS_funding")
     oai_oa_cerifJazz.updateSet("openaire_cris_events", "OpenAIRE_CRIS_events")
     oai_oa_cerifJazz.updateSet("openaire_cris_equipments", "OpenAIRE_CRIS_equipments")
