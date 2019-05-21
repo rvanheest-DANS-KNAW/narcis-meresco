@@ -90,6 +90,8 @@
                 <xsl:when test="@type='hdl'">Handle</xsl:when>
                 <xsl:when test="@type='purl'">URL</xsl:when>
                 <xsl:when test="@type='nbn'">URN</xsl:when>
+                <xsl:when test="@type='urn'">URN</xsl:when>
+                <xsl:otherwise>ID</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
 
