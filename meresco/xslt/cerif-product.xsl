@@ -84,6 +84,8 @@
     </xsl:template>
 
     <xsl:template match="input:publication_identifier">
+        <xsl:variable name="IGNORE_OTHER_IDENTIFIERS">IGNORE_OTHER_IDENTIFIERS</xsl:variable>
+
         <xsl:variable name="elementName">
             <xsl:choose>
                 <xsl:when test="@type='doi'">DOI</xsl:when>
@@ -91,11 +93,13 @@
                 <xsl:when test="@type='purl'">URL</xsl:when>
                 <xsl:when test="@type='nbn'">URN</xsl:when>
                 <xsl:when test="@type='urn'">URN</xsl:when>
-                <xsl:otherwise>ID</xsl:otherwise>
+                <xsl:otherwise>
+                    <xsl:value-of select="$IGNORE_OTHER_IDENTIFIERS"/>
+                </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
 
-        <xsl:if test=".">
+        <xsl:if test=". and $elementName != $IGNORE_OTHER_IDENTIFIERS">
             <xsl:element name="{$elementName}">
                 <xsl:value-of select="."/>
             </xsl:element>
