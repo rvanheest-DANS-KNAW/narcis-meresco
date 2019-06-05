@@ -32,7 +32,11 @@
         <xsl:apply-templates select="input:language"/>
         <xsl:apply-templates select="input:titleInfo[not(@*)]"/>
 
-        <xsl:apply-templates select="input:publication_identifier"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='doi']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='hdl']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='purl']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='nbn']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='urn']"/>
 
         <xsl:if test="input:name[input:mcRoleTerm='cre']">
             <Creators>
@@ -91,7 +95,6 @@
                 <xsl:when test="@type='purl'">URL</xsl:when>
                 <xsl:when test="@type='nbn'">URN</xsl:when>
                 <xsl:when test="@type='urn'">URN</xsl:when>
-                <xsl:otherwise>ID</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
 
