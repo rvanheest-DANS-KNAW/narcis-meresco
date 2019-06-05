@@ -32,7 +32,11 @@
         <xsl:apply-templates select="input:language"/>
         <xsl:apply-templates select="input:titleInfo[not(@*)]"/>
 
-        <xsl:apply-templates select="input:publication_identifier"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='doi']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='hdl']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='purl']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='nbn']"/>
+        <xsl:apply-templates select="input:publication_identifier[@type='urn']"/>
 
         <xsl:if test="input:name[input:mcRoleTerm='cre']">
             <Creators>
@@ -84,8 +88,6 @@
     </xsl:template>
 
     <xsl:template match="input:publication_identifier">
-        <xsl:variable name="IGNORE_OTHER_IDENTIFIERS">IGNORE_OTHER_IDENTIFIERS</xsl:variable>
-
         <xsl:variable name="elementName">
             <xsl:choose>
                 <xsl:when test="@type='doi'">DOI</xsl:when>
@@ -93,13 +95,10 @@
                 <xsl:when test="@type='purl'">URL</xsl:when>
                 <xsl:when test="@type='nbn'">URN</xsl:when>
                 <xsl:when test="@type='urn'">URN</xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="$IGNORE_OTHER_IDENTIFIERS"/>
-                </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
 
-        <xsl:if test=". and $elementName != $IGNORE_OTHER_IDENTIFIERS">
+        <xsl:if test=".">
             <xsl:element name="{$elementName}">
                 <xsl:value-of select="."/>
             </xsl:element>
