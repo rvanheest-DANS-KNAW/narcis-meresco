@@ -199,7 +199,9 @@
                 <part name="meta">&lt;meta
                     xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt; &lt;upload&gt;
                     &lt;id&gt;knaw:record:1&lt;/id&gt; &lt;/upload&gt; &lt;record&gt;
-                    &lt;id&gt;record:1&lt;/id&gt;&lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;&lt;/record&gt; &lt;repository&gt;
+                    &lt;id&gt;record:1&lt;/id&gt;&lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+                    &lt;metadataNamespace&gt;http://www.loc.gov/mods/v3&lt;/metadataNamespace&gt;
+                    &lt;/record&gt; &lt;repository&gt;
                     &lt;id&gt;knaw&lt;/id&gt; &lt;set&gt;oa_publications&lt;/set&gt;
                     &lt;baseurl&gt;http://depot.knaw.nl/cgi/oai2&lt;/baseurl&gt;
                     &lt;repositoryGroupId&gt;knaw&lt;/repositoryGroupId&gt;

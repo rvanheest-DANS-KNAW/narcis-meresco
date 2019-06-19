@@ -91,6 +91,9 @@ datacite_resourceTypeGeneral = ['Audiovisual','Collection','Dataset','Event','Im
 # DATACITE Controlled List Description Types:
 datacite_descriptionTypes = ['Abstract','Other','TableOfContents','SeriesInformation','TechnicalInfo','Methods']
 
+# DATACITE Dataset Genre Values:
+datacite_datasetGenres = ['Dataset','Software']
+
 # mods:nameIdentifiers that will be processed to long. Other types will be ignored.
 # ORDER does matter!
 supportedNids = ['dai-nl', 'orcid', 'isni', 'nod-prs']
@@ -198,6 +201,7 @@ class NormaliseOaiRecord(UiaConverter):
                 self._getDates(lxmlNode, e_longmetadata)
                 self._getAllRecordIdentifiers(lxmlNode, e_longmetadata)
                 self._getRelatedIdentifiers(lxmlNode, e_longmetadata)
+                self._getPatentNumber(lxmlNode, e_longmetadata)
                 self._getLanguage(lxmlNode, e_longmetadata)
                 self._getLocationUrl(lxmlNode, e_longmetadata)
                 self._getRelatedItems(lxmlNode, e_longmetadata)
@@ -502,6 +506,11 @@ class NormaliseOaiRecord(UiaConverter):
                 if len(uri) > 0:
                     e_pi.attrib['ref'] = uri[0]
 
+    def _getPatentNumber(self, lxmlNode, e_longmetadata): #PURE instances publish patent-numbers as: &lt;identifier type=&quot;patent_number&quot;&gt;EP3343951&lt;/identifier&gt;
+        if self._metadataformat.isMods():
+            patent_no = lxmlNode.xpath("//mods:mods/mods:identifier[@type='patent_number']/text()", namespaces=namespacesmap)
+            if patent_no: # Found patent number:
+                etree.SubElement(e_longmetadata, "patent_number").text = patent_no[0].strip()
 
     def _getRelatedIdentifiers(self, lxmlNode, e_longmetadata):
         if self._metadataformat.isDatacite():
@@ -794,7 +803,7 @@ class NormaliseOaiRecord(UiaConverter):
             contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
             for contributor in contributors:
                 creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
-                nametype = creator.xpath('self::datacite:contributor/datacite:contributorName/@nameType', namespaces=namespacesmap)
+                nametype = contributor.xpath('self::datacite:contributor/datacite:contributorName/@nameType', namespaces=namespacesmap)
                 givenName = contributor.xpath('self::datacite:contributor/datacite:givenName/text()', namespaces=namespacesmap)
                 familyName = contributor.xpath('self::datacite:contributor/datacite:familyName/text()', namespaces=namespacesmap)
                 contributorType = contributor.xpath('self::datacite:contributor/@contributorType', namespaces=namespacesmap)
@@ -859,22 +868,28 @@ class NormaliseOaiRecord(UiaConverter):
 
 
     def _getGenre(self, lxmlNode, e_longmetadata, root='//mods:mods/'):
+        str_genre = ''
         if self._metadataformat.isDC():
             # uit DC(mandatory): volgens specs mogen we first occurence pakken:
             dcGenre = lxmlNode.xpath('//dc:type[1]/text()', namespaces=namespacesmap)
             if len(dcGenre) > 0 and self._DCType2PublicationType(dcGenre[0].strip()) in pubTypes:
-                etree.SubElement(e_longmetadata, "genre").text = self._DCType2PublicationType(dcGenre[0].strip())
+                str_genre = self._DCType2PublicationType(dcGenre[0].strip())
         elif self._metadataformat.isMods():
             modsGenre = lxmlNode.xpath(root+'mods:genre[1]/text()', namespaces=namespacesmap)
             if len(modsGenre) > 0 and self._getLabelFromGenreURI(modsGenre[0]) in pubTypes:
-                etree.SubElement(e_longmetadata, "genre").text = self._getLabelFromGenreURI(modsGenre[0])
+                str_genre = self._getLabelFromGenreURI(modsGenre[0])
         elif self._metadataformat.isDatacite(): # DataCite is all about researchdata/datasets...
             if self._wcpcollection in ['dataset']:
-                etree.SubElement(e_longmetadata, "genre").text = 'dataset'
-            else: # Get 'genre' from metadata:
+                genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/@resourceTypeGeneral', namespaces=namespacesmap)
+                if len(genre) > 0 and genre[0].lower().strip() in [dc_genre.lower() for dc_genre in datacite_datasetGenres]:
+                    str_genre = genre[0].lower().strip()
+            else: # Get 'genre' from text-value (RCE-records:  <resourceType resourceTypeGeneral="Text">info:eu-repo/semantics/report</resourceType>
                 genre = lxmlNode.xpath('//datacite:resource/datacite:resourceType/text()', namespaces=namespacesmap)
                 if len(genre) > 0 and self._getLabelFromGenreURI(genre[0]) in pubTypes:
-                    etree.SubElement(e_longmetadata, "genre").text = self._getLabelFromGenreURI(genre[0])
+                    str_genre = self._getLabelFromGenreURI(genre[0])
+
+        if self._wcpcollection in ['dataset'] and str_genre != 'software': str_genre = 'dataset' # Apply default 'dataset' genre to all dataset-records, even if no genre is given.
+        if str_genre != '': etree.SubElement(e_longmetadata, "genre").text = str_genre
 
 
     def _getPublisher(self, lxmlNode, e_longmetadata, root='//mods:mods/'):

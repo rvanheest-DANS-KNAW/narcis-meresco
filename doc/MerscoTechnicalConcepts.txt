@@ -1,0 +1,308 @@
+.. -*- coding: utf-8 -*-
+.. This documentation is written using reStructuredText. See http://docutils.sf.net
+
+============================
+ Meresco Technical Concepts: https://github.com/seecr/meresco-core/blob/master/doc/MerescoTechnicalConcepts.txt
+============================
+---------------------------------------------------------
+ About Components, Application DNA and Jackson Pipelines
+---------------------------------------------------------
+:Date: $Date$
+:Revision: $Revision$
+:Authors: Seek You Too
+:Last changed by: $LastChangedBy$
+:Contact: info@cq2.nl
+:Copyright: © Seek You Too
+:License: |by-nc-nd|_ Attribution-Noncommercial-No Derivative Works 3.0 License
+
+.. |by-nc-nd| image:: http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png
+    :alt:
+.. _by-nc-nd: http://creativecommons.org/licenses/by-nc-nd/3.0/
+
+.. contents::
+.. section-numbering::
+
+Introduction
+============
+Meresco features a generic component library to pull components together in order to create a functional system. The type of systems it creates varies from simple metadata storage, to full blown service providers.
+
+The component library is one of its kind. It is one of the simplest Plug & Play solutions around, yet it makes many hard issues such as dependencies, configuration and dataflow easy to deal with.  Also, it yields a very efficient high-performance application.
+
+Problems
+--------
+Plug & play solutions suffer from many problems. This section outlines a few of them. Because of these problems, plug & play solutions tend to become complicated, and in the end, instead of making live easier, they add to the overall complexity of a system.
+
+Dependencies
+~~~~~~~~~~~~
+Components (re)use other components.  When this happens recursively, a tree of dependent components arises.  The situation becomes even more complicated when components are not arranged in a pure tree, but in an arbitrary graph.
+
+Configuration
+~~~~~~~~~~~~~
+In order to function properly, components may need to be configured.  For example, a component might need a directory to write files, or an address to read information from.  Configuration of the components in a tree or arbitrary graph becomes increasingly difficult as not only the dependencies have to be specified, but each component has to be fed with the proper configuration values as well.
+
+Testability
+~~~~~~~~~~~
+Components often need to follow strict rules to make them work with a plug & play framework.  These rules make them hard to unittest.  Testing the cooperation of a *group* of components makes things even worse.  When plugged into a framework, such a group of components is often next to impossible to test.
+
+Dataflow
+~~~~~~~~
+Once components are connected into a graph, they exchange data.  The efficiency by which the data exchange takes place an important concern. A framework must facilitate dataflow, but should not impose too much overhead doing so. Components should be able to establish any type of transport, using any type of interface, and a framework must support this efficiently.
+
+Aspects
+~~~~~~~
+As each of the issues mentioned above can make a framework a complicated, frightening piece of software, aspects can do so even more.  Relatively simple concepts such as logging or transactions easily cause component frameworks to explode in complexity.
+
+Obtrusiveness
+~~~~~~~~~~~~~
+Component writers should be focussed on the specifics of the components the most, and on the specifics of the framework the least. A framework should not be obtrusive towards component programmers bij imposing superfluous requirements, such as the obligatory support for auxilary interfaces that are not of any relevance to the core functionality of the components.
+
+Solution
+--------
+Others
+~~~~~~
+Many solutions have been tried.  The most well-known type is the XML configuration file.  This file describes all components, their dependencies and their parameters.  Components must be present in a directory or a pathlist and must support certain base interfaces to be able to plug and play.  Either the configuration file or the components themselves provide information about supported and required interfaces, and the framework solves the puzzle of how to connect them, often making use of factories.  Among the most prominent examples are Apache, Eclipse and Solr.  However, none of these is simple enough and address the problems mentioned above well enough.  A simpler and less obtrusive component solution is needed.
+
+Meresco
+~~~~~~~
+The Meresco Component Library takes into account all these problems and tries to give a simple solution for it.  This solution:
+
+#. is lightweight, with little overhead regarding memory and CPU usage.
+
+#. is a library and not a framework, which means the application stays in control.
+
+#. allows partial configuration, to make testing easier.
+
+#. supports sharing of configuration data, to avoid duplication of configuration parameters.
+
+#. imposes litte or no contraints on components, so they can be easily reused in very different functional applications.
+
+#. supports efficient dataflow between components.
+
+#. has an easy human readable and well-known syntax.
+
+#. has no predefined components for magic functionality.
+
+#. supports aspects to be implemented as just another component.
+
+
+About Creativity
+----------------
+The Meresco Component Library is the result of over a decade of learning and well over a year of experimenting, revising and refactoring.  It can be said that it is *discovered* rather than *designed*.  Hence this document does not try to capture the reasoning during this process of creativity.  It just presents the result as it is.  Readers interested in the reasons why are encouraged to e-mail the authors.
+
+
+
+The Component Library
+=====================
+
+Base Technologies
+-----------------
+The Component Library uses a few fundamental concepts and technologies:
+
+#. Python and 'pythonic' interfaces to software written in C++, Java, Perl, Ruby and others.
+
+#. Interfaces are methods.  An interface consists of the mere name of a method.
+
+#. Coroutines. Python 2.5 generalized generators are used to stream data between components.
+
+#. Jackson Structured Programming as a means to do program decomposition.
+
+#. Observable pattern, as a means to define dependencies and facilitate communication.
+
+None of these concepts is new, in fact most of them are very old and only reused here. They are shortly described below.
+
+Interfaces are methods
+~~~~~~~~~~~~~~~~~~~~~~
+An interface facilitates the exchange of messages.  A message is a method with arguments and a return value, just as you have many of them in any program::
+
+    <value> = <message>(*args, **kwargs)
+
+For example::
+
+    write(file, mode='b')
+    hits = query('title: green')
+
+The message signature is the primary and sole point of interaction between components. Components send messages according to their signature, but without regard to their implementation, and components implement messages with respect to the message signature only.
+
+An component is said to implement an interface ``a`` if and only if it has a method with name ``a``. No other parts of the signature are taken into account.  It is up to the components to provide c.q. understand the arguments and return value.
+
+Observer Pattern
+~~~~~~~~~~~~~~~~~
+The Library arranges components into a graph of observers.  For more information on the observer pattern, see *Gamma et. al. Design Patterns, Elements of Reusable Object-Oriented Software, 1995*.
+
+When a component sends a message, only its observers will receive it.
+
+Coroutines
+~~~~~~~~~~
+Python (as do other languages) supports the concept of generators.  A generator is a method with multiple entry points, at each of which it can exchange arguments with it's caller.  Standard Python does not support program decomposition with generators like one would do with methods.  The Component Library solves this problem by means of the ``compose`` function.  The Library uses this concept for the ``all`` primitive and applies ``compose`` where and when necessary.  Most notably, ``compose`` makes catching exeptions possible while executing generators::
+
+	try:
+		yield self.all.aMessage()
+	except Exception:
+		yield 'Oops'
+
+In plain Python, exceptions raised within ``aMessage`` would not be caught.
+
+Jackson Structured Programming (JSP)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Introduced in 1975 by Michael Jackson to enable the processing of large amounts of data with a system containing only limited memory, it's relevance for today's web-servers is striking.  JSP describes a way of connecting coroutines to efficiently process datarecords while maintaining a simple code base. The design of the Component Library is largely driven bij JSP and therefore it supports and recommends the use of JSP, although this is not obligatory.  For more information, the reader is refered to *JSP in Perspective, Michael Jackson, 11th april 2001*.
+
+Components
+----------
+A component might *send* messages (or *use* interfaces), *implement* messages (or *support* interfaces) or do both.
+
+Implementing messages
+~~~~~~~~~~~~~~~~~~~~~
+A component consists of a normal Python class::
+
+    class MyComponent(object):
+        pass
+
+This class can implement any messages by providing methods with the correct signature. There is no restriction on the type of methods, nor on their name nor on their arguments.  The component below supports the interface ``myPublicMethod``::
+
+    class MyComponent(object):
+        def myPublicMethod(self, arg1, arg2=None):
+            pass
+
+As one can see, this is a normal Python class, without any constraints.
+
+Sending messages
+~~~~~~~~~~~~~~~~
+A component sending messages must extend ``Observable``, as components are connected by means of the ``Observable`` pattern::
+
+    from meresco.core import Observable
+    class OtherComponent(Observable):
+        pass
+
+Calling a public method of another component can be done with ``all``, ``any``, ``do`` or ``once``::
+
+    class OtherComponent(Observable):
+        def myMethod(self):
+            responses = self.all.retrieveRecord(record=10):
+            for response in responses:
+                print response
+            response = self.any.recordExists(record=10)
+            self.do.updateRecord(record=10, ...)
+            self.once.done()
+
+The send via ``all`` will find all observers implementing ``retrieveRecord``, returning a generator with which their responses can be retrieved.  The generator is empty when no observers implement the message. The actual sending of the messages is lazy and will not happen until the sender processes the generator.
+
+The send through ``any`` will find the *first* observer that implements ``recordExists``, send it and return the response.  It in fact implements a synchronous method call.  It raises an error when none of the observers answers the message. The functionality of ``any`` is a proper subset of that of ``all`` and is formally expressed in terms of ``all``.
+
+The call through ``do`` will find all components implementing ``updateRecord``, send the messages to all of them and ignore the responses.  This in fact implements an event mechanism with synchronous events processing. The functionality of ``do`` is a proper subset of that of ``all`` and is formally expressed in terms of ``all``.
+
+The call through ``once`` will find all observers *and* their observers recursively, send the message to all of them *once* and ignore the responses.  The message is sent only once to each component, even if this component appears multiple times in the graph of observers.
+
+All messages can be coutines and can be combined in a JSP style if the user wishes to do so.  Just take the last example and regard ``responses`` as a coroutine. The ``for`` loop in this example calls ``next`` (or ``produce`` in JSP terms) implicitly.  The JSP ``consume`` in this case will be ``send`` in Python: ``responses.send(data)`` will let the coroutine consume ``data``.
+
+Dynamic Implementation Interface (DII)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Components can receive messages without actually implementing them.  This can be done by implementing the method ``unknown``::
+
+    class MyComponent(object):
+        def unknown(self, message, *args, **kwargs):
+            pass
+
+This will intercept all messages for which no specific implementation is found in the same class.  Unknown is required to return None or a generator with responses, just as ``all`` does.  The ``unknown`` method does not intercept calls through ``once``.
+
+Dynamic Message Interface (DMI)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Components can send unforeseen messages – with the name of the messages in a variable instead of an Python identifier – by sending ``unknown``::
+
+    class MyComponent(Observable):
+        def myMethod(self):
+            self.all.unknown('getInfo', ...)
+
+This will send the message ``getInfo`` using ``all``.  Calls via ``any`` and ``do`` work as expected, ``once`` semantics cannot be achieved by ``unknown``.   Both the DII and DMI are transparent to each other, so if a component does not respond to ``getInfo``, but has the DII implemented, its ``unknown`` will be called with ``getInfo``.
+
+Dynamic Context Interface (DCI)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Components can provide message-scoped contexts that are accessible by all of its observers and their observers recursively.  When a component provides the context ``blackboard``, being a simple dictionary, it's descendants can access it using ``self.blackboard``::
+
+    class MyComponent(Observable):
+        def aMethodAccessingContext(self):
+            self.blackboard['trash'] = 'dump this'
+
+It must derive from Observable.
+
+The component providing the context ``blackboard`` can do so as follows::
+
+    class ContextProvider(Observable):
+        def aMethodProvidingContext(self):
+            __callstack_var_blackboard__ = {}
+            for result in self.all.aMethodAccessingContext():       [4]
+                yield result                                        [5]
+
+To ensure proper scoping in the event of multiple concurrent calls, the context is defined as a local, and hence put on the call stack.  This will cause it to be captured in the closure created when the generator for ``aMethodInitiatingContext`` is instantiated. To avoid termination of the closure (and the subsequent deletion of the local ``__callstack_var_blackboard__``), lines 4 and 5 make sure the generator (and hence the associated closure) will not exit until all results from its descendants are processed.
+
+
+Application DNA
+===============
+The DNA allows the program designer to select components to be used by instantiating the components and put them in the DNA.  The DNA defines the hierarchy of the components and provides configuration information for each of them.
+
+Configuration
+-------------
+
+Component Instantiation
+~~~~~~~~~~~~~~~~~~~~~~~
+Component instantiation is normal Python object instantiation by calling constructors.  The constructors take configuration information.  Important: see `Component Design Guidelines`_ for some guidelines on this topic!
+
+Simple Observer configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Components are connected to each other in a graph of observers.   Components only react to a message sent by another component if and when they are observers of that component.  The graph often contains one or more components that generate events based on input, for example from a network connection.  The leaves of the graph are often components that store something in a database or file system.  The components in between often do data processing or filtering.
+A component derives from ``Observable`` and thereby inherits the ``addObserver`` method that can be used to register another component as listener to messages send by it::
+
+    class My1Component(Observable):
+        pass
+    class My2Component(object):
+        pass
+    component1 = My1Component()
+    component2 = My2Component()
+    component1.addObserver(component2)
+
+DNA Configuration
+~~~~~~~~~~~~~~~~~
+The DNA is an easier way to define larger hierarchies without having to call ``addObserver`` many times.  DNA defined the hierarchy of the components and it provides configuration information for each of them. The DNA is a recursively defined list of components with their configuration information fed to their constructors::
+
+    dna = (Component1(configuration), dna-1, ..., dna-n)
+
+This makes ``dna-1`` to ``dna-n`` listen to messages from ``Component1``. This can go on indefinitely.  The following DNA lets ``Component3`` listen to ``Component2``, which together with ``Component4`` listens to ``Component1``::
+
+    dna = (Component1(configuration1),
+              (Component2(configuration2),
+                  (Component3(configuration3),)
+              ),
+              (Component4(configuration4),)
+          )
+
+DNA strings such as above must be activated by calling ``be``, for example::
+
+    from mereso import be
+    server = be(dna)
+
+This will cause the relations as described by the ``dna`` to be activated, which will cause all obeservers being registered with the proper observables.
+
+Component Design Guidelines
+---------------------------
+There is no obligation to provide constructors, nor are there any rules as to what must be accepted or not.  However, the Library's purpose is to get rid of feeding dependencies, classes or factories to components using constructors, so it is recommended to avoid these and use ``self.[all|any|do]`` instead, see (1) below.  Also, it is not forbidden but avoid reading configuration information from the environment or files but instead make each configuration option an argument of the constructor, see (2) below.
+
+So instead of::
+
+    class MyComponent:
+        def __init__(self, storage):
+            self._storage = storage                                 (1)
+            self._prefix = os.environ['mycomponent.prefix']         (2)
+        def doSomething(self, data, name):
+            self._storage.save(data, name=self._prefix+name)
+
+write::
+
+    class MyComponent(Observable):
+        def __init__(self, prefix):
+            self._prefix = prefix                                   (2)
+        def doSomething(self, data, name):
+            self.any.save(data, name=self._prefix+name)             (1)
+
+and make sure that ``MyComponent`` is configured with a storage listening to save::
+
+    myComponent = MyComponent()
+    myComponent.addObserver(storage)

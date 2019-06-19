@@ -121,6 +121,7 @@
                     &lt;/extension&gt;
                     &lt;typeOfResource&gt;text&lt;/typeOfResource&gt;
                     &lt;genre&gt;info:eu-repo/semantics/article&lt;/genre&gt;
+                    &lt;identifier type=&quot;patent_number&quot;&gt;EP3343951&lt;/identifier&gt;
                     &lt;originInfo&gt;
                     &lt;dateIssued encoding=&quot;iso8601&quot;&gt;2014&lt;/dateIssued&gt;
                     &lt;/originInfo&gt;
@@ -214,7 +215,9 @@
                 <part name="meta">&lt;meta
                     xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt; &lt;upload&gt;
                     &lt;id&gt;knaw:record:4&lt;/id&gt; &lt;/upload&gt; &lt;record&gt;
-                    &lt;id&gt;record:4&lt;/id&gt;&lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;&lt;/record&gt; &lt;repository&gt;
+                    &lt;id&gt;record:4&lt;/id&gt;&lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+                    &lt;metadataNamespace&gt;http://www.loc.gov/mods/v3&lt;/metadataNamespace&gt;
+                    &lt;/record&gt; &lt;repository&gt;
                     &lt;id&gt;knaw&lt;/id&gt; &lt;set&gt;oa_publications&lt;/set&gt;
                     &lt;baseurl&gt;http://depot.knaw.nl/cgi/oai2&lt;/baseurl&gt;
                     &lt;repositoryGroupId&gt;knaw&lt;/repositoryGroupId&gt;

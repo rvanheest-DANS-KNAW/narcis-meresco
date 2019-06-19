@@ -138,6 +138,7 @@
     &lt;record&gt;
         &lt;id&gt;oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
         &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
+        &lt;metadataNamespace&gt;http://datacite.org/schema/kernel-4&lt;/metadataNamespace&gt;
     &lt;/record&gt;
     &lt;repository&gt;
         &lt;id&gt;easy&lt;/id&gt;

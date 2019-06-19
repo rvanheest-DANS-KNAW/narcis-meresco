@@ -48,7 +48,7 @@ class SruSlaveTest(IntegrationTestCase):
     def testSruQuery(self):
         response = self.doSruQuery(query='*', recordSchema='knaw_short')
         # print "doSruQuery(query='*'):", etree.tostring(response)
-        self.assertEqual('13', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('14', xpathFirst(response, '//srw:numberOfRecords/text()'))
         self.assertEqual(set([
             'Example Program 1',
             'Example Program 2',
@@ -59,7 +59,7 @@ class SruSlaveTest(IntegrationTestCase):
             'Preface to special issue (Fast reaction - slow diffusion scenarios: PDE approximations and free boundaries)',
             'Conditiebepaling PVC',
             'Wetenschapswinkel',
-            'H.J. Bennis']
+            "The Language Designer's Workbench: Automating Verification of Language Definitions"]
             ), set(testNamespaces.xpath(response, '//short:metadata/short:titleInfo[1]/short:title/text()')))
 
     def testSruQueryWithUntokenized(self):
@@ -118,13 +118,13 @@ class SruSlaveTest(IntegrationTestCase):
         # response = self.doSruQuery(**{'maximumRecords': '0', "query": '*', "x-term-drilldown": "dd_penv:6,dd_thesis:6,dd_fin:6,status:5"})
         response = self.doSruQuery(**{"query": '*', 'maximumRecords': '1', "x-term-drilldown": "dd_cat:0"})
         # print "DD body:", etree.tostring(response)
-        self.assertEqual('13', xpathFirst(response, '//srw:numberOfRecords/text()'))
+        self.assertEqual('14', xpathFirst(response, '//srw:numberOfRecords/text()'))
         # self.assertEqual(set(['Example Program 1', 'Example Program 2']), set(xpath(response, '//srw:recordData/oai_dc:dc/dc:title/text()')))
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_cat"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
         # print 'DD:', drilldown
-        self.assertEqual([('D37000', '2'), ('D30000', '2'), ('A50000', '1'), ('A80000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1')], drilldown)
+        self.assertEqual([('D30000', '5'), ('D37000', '2'), ('D34200', '1'), ('D34000', '1'), ('D10000', '1'), ('D20000', '1'), ('D40000', '1'), ('D50000', '1'), ('D60000', '1'), ('D30100', '1'), ('D36300', '1'), ('D36000', '1')], drilldown)
 
         # ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         # drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -141,7 +141,7 @@ class SruSlaveTest(IntegrationTestCase):
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="genre"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
-        self.assertEqual([('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('dataset', '1'), ('report', '1')], drilldown)
+        self.assertEqual([('dataset', '3'), ('article', '2'), ('book', '1'), ('doctoralthesis', '1'), ('report', '1')], drilldown)
 
         ddItems = xpath(response, '//drilldown:term-drilldown/drilldown:navigator[@name="dd_abrcmplx"]/drilldown:item')
         drilldown = [(i.text, i.attrib['count']) for i in ddItems]
@@ -161,7 +161,7 @@ class SruSlaveTest(IntegrationTestCase):
         header, body = getRequest(self.sruslavePort, '/rss', dict(query="*", querylabel='MyWorkerLabel', sortKeys='untokenized.dateissued,,1'))
         # print "RSS body:", etree.tostring(body)
         items = xpath(body, "/rss/channel/item")
-        self.assertEquals(13, len(items))
+        self.assertEquals(14, len(items))
         self.assertTrue(xpathFirst(body, '//item/link/text()').endswith('Language/nl'))
         self.assertEqual(['1993-01-01', '2004-06-30', '2009-11-24', '2013', '2014', '2016', '2016-01-31', '2016-05-05', '2019-11-06'], xpath(body, "//item/pubDate/text()"))
         self.assertEqual('MyWorkerLabel', xpathFirst(body, '//channel/title/text()'))
