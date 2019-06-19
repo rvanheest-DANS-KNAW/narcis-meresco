@@ -186,8 +186,7 @@ class NormdocToFieldsList(Observable):
         self._nids_aut_enriched = set()
         self._record_pids = set()
 
-    def add(self, lxmlNode, **kwargs):
-        print "IN ADD. Clearing wrappers..."
+    def add(self, lxmlNode, **kwargs):        
 
         self._fieldslist = [] # reset the fieldslist
         self._nids_aut_enriched.clear() # Empty the set.
@@ -233,7 +232,6 @@ class NormdocToFieldsList(Observable):
                         self._nids_aut_enriched.add(nameId.get_idx_id())
 
             for nid in self._nids_aut_enriched:
-                print "ADDING NID to LUCENE:", nid
                 self._fieldslist.append(('nids_aut_enriched', nid))
 
         # Ready filling fieldslist, now call add method:
@@ -242,7 +240,7 @@ class NormdocToFieldsList(Observable):
 
     def _fillFieldslist(self, aNode, parentName): # NOD-nodes and Long nodes will pass here...
         if type(aNode) != _Element:
-            print "type(aNode) != _Element"
+            # print "type(aNode) != _Element"
             return
         if parentName:
             parentName += '.'
@@ -579,7 +577,7 @@ class NormdocToFieldsList(Observable):
                             self._fieldslist.append(( 'nids', nameId.get_idx_id() ))
 
                             if nidFieldname == 'nids_aut': # Add author nids to the author nids_aut_enriched set, so we can add them later on together with the exterally found (enriched) nids:
-                                print "NID FROM METADATA:", nameId.get_idx_id()
+                                # print "NID FROM METADATA:", nameId.get_idx_id()
                                 self._nids_aut_enriched.add(nameId.get_idx_id())
                                 # self._fieldslist.append(( 'nids_aut_enriched', nameId.get_id() ))
                                 # self._fieldslist.append(( 'nids_aut_enriched', nameId.get_idx_id() ))
