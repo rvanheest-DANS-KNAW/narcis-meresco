@@ -13,7 +13,7 @@ class RecordPidToAuthNid(Observable):
 		config.read(join(dirname(abspath(__file__)), '..', 'conf', 'application.ini'))
 		self._pidgraph_api = config.get('IndexServer', 'pidGraphUrl')
 		self._pidgraph_enabled = config.getboolean('IndexServer', 'pidGraphIsEnabled')
-		print "PidGraph API:", self._pidgraph_api,"isEnabled:", self._pidgraph_enabled
+		print "PidGraph API:", self._pidgraph_api,". IsEnabled:", self._pidgraph_enabled
 
 	def lookupNameIds(self, pidlist):
 		if len(pidlist) > 0 and self._pidgraph_enabled:
