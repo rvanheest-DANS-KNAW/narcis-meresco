@@ -230,9 +230,11 @@ class NormdocToFieldsList(Observable):
                     nameId = NameIdentifierFactory.factory(splitted[0], splitted[1])
                     if nameId.is_valid():
                         self._nids_aut_enriched.add(nameId.get_idx_id())
+                        self._nids_aut_enriched.add(nameId.get_id())
 
             for nid in self._nids_aut_enriched:
                 self._fieldslist.append(('nids_aut_enriched', nid))
+                if self._verbose: print 'addField:', 'nids_aut_enriched'.upper(), "-->", nid
 
         # Ready filling fieldslist, now call add method:
         yield self.all.add(fieldslist=self._fieldslist, **kwargs)
@@ -579,8 +581,7 @@ class NormdocToFieldsList(Observable):
                             if nidFieldname == 'nids_aut': # Add author nids to the author nids_aut_enriched set, so we can add them later on together with the exterally found (enriched) nids:
                                 # print "NID FROM METADATA:", nameId.get_idx_id()
                                 self._nids_aut_enriched.add(nameId.get_idx_id())
-                                # self._fieldslist.append(( 'nids_aut_enriched', nameId.get_id() ))
-                                # self._fieldslist.append(( 'nids_aut_enriched', nameId.get_idx_id() ))
+                                self._nids_aut_enriched.add(nameId.get_id())
 
                             if self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id(), nameId.get_idx_id()
                             if self._verbose: print 'addField: NIDS', "-->", nameId.get_id(), nameId.get_idx_id()
