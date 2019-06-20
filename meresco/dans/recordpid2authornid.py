@@ -9,14 +9,14 @@ class RecordPidToAuthNid(Observable):
 
 	def __init__(self):
 		Observable.__init__(self)
-		config = ConfigParser.RawConfigParser()
-		config.read(join(dirname(abspath(__file__)), '..', 'conf', 'app_config.cfg'))
-		pidgraph_api = config.get('PidGraph API', 'url')
-		self._pidgraph_api = pidgraph_api
-		print "PidGraph API:", pidgraph_api
+		config = ConfigParser.ConfigParser()
+		config.read(join(dirname(abspath(__file__)), '..', 'conf', 'application.ini'))
+		self._pidgraph_api = config.get('IndexServer', 'pidGraphUrl')
+		self._pidgraph_enabled = config.getboolean('IndexServer', 'pidGraphIsEnabled')
+		print "PidGraph API:", self._pidgraph_api,"isEnabled:", self._pidgraph_enabled
 
 	def lookupNameIds(self, pidlist):
-		if len(pidlist) > 0:
+		if len(pidlist) > 0 and self._pidgraph_enabled:
 			req = Request(self._pidgraph_api + '?' + "&".join(list(map(lambda x: 'pid='+x, pidlist))), headers={'User-Agent': "Meresco Index Server"})
 			try:
 				data = json.load(urlopen(req))
