@@ -6,7 +6,7 @@
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xsi:schemaLocation="http://www.knaw.nl/narcis/1.0/long/ ../xsd/knaw_long-1-1.xsd
                                     https://www.openaire.eu/cerif-profile/1.1/ https://www.openaire.eu/schema/cris/1.1/openaire-cerif-profile.xsd"
-                version="1.0" >
+                version="1.0">
 
     <!-- =================================================================================== -->
     <xsl:output encoding="UTF-8" indent="yes" method="xml" omit-xml-declaration="yes"/>
@@ -39,14 +39,14 @@
         <xsl:apply-templates select="input:language"/>
         <xsl:apply-templates select="input:titleInfo[not(@*)]/input:title"/>
         <xsl:apply-templates select="input:titleInfo[not(@*)]/input:subtitle"/>
-        
+
         <xsl:apply-templates select="input:relatedItem[@type='host']/input:titleInfo[not(@*)]/input:title"/>
         <xsl:apply-templates select="input:dateIssued/input:parsed"/>
         <xsl:apply-templates select="input:relatedItem[@type='host']/input:part/input:volume"/>
         <xsl:apply-templates select="input:relatedItem[@type='host']/input:part/input:issue"/>
         <xsl:apply-templates select="input:relatedItem[@type='host']/input:part/input:start_page"/>
         <xsl:apply-templates select="input:relatedItem[@type='host']/input:part/input:end_page"/>
-        
+
         <xsl:apply-templates select="input:publication_identifier[@type='doi']"/>
         <xsl:apply-templates select="input:publication_identifier[@type='handle']"/>
         <xsl:apply-templates select="input:publication_identifier[@type='pmid']"/>
@@ -54,7 +54,7 @@
         <xsl:apply-templates select="input:publication_identifier[@type='scopus']"/>
         <xsl:apply-templates select="input:relatedItem/input:publication_identifier[@type='issn']"/>
         <xsl:apply-templates select="input:publication_identifier[@type='isbn']"/>
-        
+
         <xsl:apply-templates select="input:location_url"/>
 
         <xsl:if test="input:name[input:mcRoleTerm='aut']">
@@ -65,16 +65,16 @@
 
         <xsl:apply-templates select="input:subject/input:topic/input:topicValue"/>
         <xsl:apply-templates select="input:abstract"/>
-        
+
         <!-- TODO continue here with more metadata elements -->
     </xsl:template>
-    
+
     <xsl:template name="publication-type">
         <Type>
             <xsl:choose>
                 <xsl:when test="input:genre='annotation'">
-                <xsl:value-of select="'http://purl.org/coar/resource_type/c_1162'"/>
-                <xsl:comment xml:space="preserve"> annotation </xsl:comment>
+                    <xsl:value-of select="'http://purl.org/coar/resource_type/c_1162'"/>
+                    <xsl:comment xml:space="preserve"> annotation </xsl:comment>
                 </xsl:when>
                 <xsl:when test="input:genre='article'">
                     <xsl:value-of select="'http://purl.org/coar/resource_type/c_6501'"/>
@@ -170,7 +170,7 @@
                 </xsl:when>
                 <xsl:when test="input:genre='review'">
                     <xsl:value-of select="'http://purl.org/coar/resource_type/c_efa0'"/>
-                    <xsl:comment xml:space="preserve"> review </xsl:comment> 
+                    <xsl:comment xml:space="preserve"> review </xsl:comment>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="'http://purl.org/coar/resource_type/c_18cf'"/>
@@ -187,7 +187,7 @@
             </Language>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:titleInfo[not(@*)]/input:title">
         <xsl:if test=".">
             <Title xml:lang="en">
@@ -195,7 +195,7 @@
             </Title>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:titleInfo[not(@*)]/input:subtitle">
         <xsl:if test=".">
             <Subtitle xml:lang="en">
@@ -203,7 +203,7 @@
             </Subtitle>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:relatedItem[@type='host']/input:titleInfo[not(@*)]/input:title" priority="5">
         <xsl:if test=".">
             <PublishedIn>
@@ -211,7 +211,7 @@
             </PublishedIn>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:dateIssued/input:parsed">
         <xsl:if test=".">
             <PublicationDate>
@@ -307,7 +307,7 @@
             </ISBN>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:location_url">
         <xsl:if test=".">
             <URL>
@@ -379,7 +379,7 @@
             </OrgUnit>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:subject/input:topic/input:topicValue">
         <xsl:if test=".">
             <Keyword>
@@ -395,7 +395,7 @@
             </Abstract>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:persistentIdentifier">
         <xsl:if test=".">
             <URN>
@@ -403,7 +403,7 @@
             </URN>
         </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="input:accessRights">
         <Access xmlns="http://purl.org/coar/access_right">
             <xsl:choose>
