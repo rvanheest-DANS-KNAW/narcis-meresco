@@ -326,9 +326,6 @@
         <xsl:element name="{$elementName}">
             <xsl:call-template name="displayName"/>
             <xsl:call-template name="person"/>
-            <xsl:if test="input:mcRoleTerm='pth'"> <!-- only a patentholder may have an OrgUnit element -->
-                <xsl:call-template name="organisation"/>
-            </xsl:if>
         </xsl:element>
     </xsl:template>
 
@@ -362,21 +359,6 @@
                     </PersonName>
                 </xsl:if>
             </Person>
-        </xsl:if>
-    </xsl:template>
-
-    <xsl:template name="organisation">
-        <xsl:if test="input:type='corporate'">
-            <OrgUnit>
-                <xsl:if test="input:nameIdentifier[@type='nod-org']">
-                    <xsl:attribute name="id">
-                        <xsl:value-of select="input:nameIdentifier[@type='nod-org']"/>
-                    </xsl:attribute>
-                    <Name xml:lang="en">
-                        <xsl:value-of select="input:unstructured"/>
-                    </Name>
-                </xsl:if>
-            </OrgUnit>
         </xsl:if>
     </xsl:template>
 

@@ -364,7 +364,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/")
 
     oai_oa_cerifJazz = OaiJazz(join(statePath, 'oai_cerif'))
-    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, "https://github.com/openaire/guidelines-cris-managers/raw/v1.1/schemas/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
+    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, "https://www.openaire.eu/schema/cris/", "https://www.openaire.eu/cerif-profile/1.1/")
     # All of the following OAI-PMH sets shall be recognized by the CRIS, even if not all of them are populated.
     oai_oa_cerifJazz.updateSet("openaire_cris_projects", "OpenAIRE_CRIS_projects")
     oai_oa_cerifJazz.updateSet("openaire_cris_orgunits", "OpenAIRE_CRIS_orgunits")
