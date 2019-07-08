@@ -190,7 +190,7 @@ class ApiTest(IntegrationTestCase):
         header, body = getRequest(self.apiPort, '/cerif', dict(verb="ListRecords", metadataPrefix="oai_cerif_openaire"))
         # print "OAI body:", etree.tostring(body) #
         records = xpath(body, '//oai:record/oai:metadata')
-        self.assertEqual(8, len(records))
+        self.assertEqual(13, len(records))
         # self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
     # def testOaiPovenance(self):

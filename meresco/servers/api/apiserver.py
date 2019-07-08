@@ -174,10 +174,18 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                                     )
                                                 )
                                             )
-                                        )
+                                        ),
+                                        (FilterKnawLongGenre(disallowed=['patent']), # START Publication CONVERSION
+                                            (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-publication.xsl')], fromKwarg="lxmlNode"),
+                                                (RewritePartname(OPENAIRE_PARTNAME),
+                                                    (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                        (storageComponent,)
+                                                    )
+                                                )
+                                            )
+                                        )                                        
                                     )
                                 ),
-
                                 (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                     (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
@@ -244,6 +252,11 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                             (oai_oa_cerifJazz,),
                                         )
                                     ),
+                                    (XmlXPath(["//long:knaw_long/long:metadata[long:genre !='patent']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_publications"]),
+                                            (oai_oa_cerifJazz,),
+                                        )
+                                    ),                                    
                                 ),
                                 (FilterWcpCollection(allowed=['dataset']),
                                     (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset']),
@@ -371,12 +384,11 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     oai_oa_cerifJazz.updateSet("openaire_cris_persons", "OpenAIRE_CRIS_persons")
     oai_oa_cerifJazz.updateSet("openaire_cris_patents", "OpenAIRE_CRIS_patents")
     oai_oa_cerifJazz.updateSet("openaire_cris_products", "OpenAIRE_CRIS_products")
-
     oai_oa_cerifJazz.updateSet("openaire_cris_publications", "OpenAIRE_CRIS_publications")
+
     oai_oa_cerifJazz.updateSet("openaire_cris_funding", "OpenAIRE_CRIS_funding")
     oai_oa_cerifJazz.updateSet("openaire_cris_events", "OpenAIRE_CRIS_events")
     oai_oa_cerifJazz.updateSet("openaire_cris_equipments", "OpenAIRE_CRIS_equipments")
- 
 
 
     cqlClauseConverters = [
