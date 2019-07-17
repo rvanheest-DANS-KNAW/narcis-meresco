@@ -34,7 +34,7 @@ from socket import gethostname
 
 HOSTNAME = gethostname()
 
-CERIF_MAPPING = {'person:':'Persons/', 'research:':'Projects/', 'organisation:':'OrgUnits/'}
+CERIF_MAPPING = {'person:':'Persons/', 'research:':'Projects/', 'organisation:':'OrgUnits/', 'dataset:':'Products/', 'publication:':'Publication/'}
 
 class OaiRepository(object):
     def __init__(self, identifier=None, name=None, adminEmail=None, externalUrl=None):
