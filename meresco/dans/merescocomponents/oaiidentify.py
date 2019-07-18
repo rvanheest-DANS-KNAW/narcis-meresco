@@ -116,7 +116,7 @@ hardcoded_values = {
     'protocolVersion': '2.0',
     'earliestDatestamp': '1970-01-01T00:00:00Z',
     'granularity': 'YYYY-MM-DDThh:mm:ssZ',
-    'baseURL': 'http://oai.narcis.nl/oai'
+    'baseURL': 'http://services.nod.dans.knaw.nl/oa-cerif'
 }
 
 
