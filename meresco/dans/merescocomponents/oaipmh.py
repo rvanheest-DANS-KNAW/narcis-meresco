@@ -34,6 +34,15 @@
 #
 ## end license ##
 
+#######################
+# wilkos-dans, 20190718
+# Changed #prefixIdentifier() and  #unprefixIdentifier() methods to accomodate the requiement by OpenAIRE Advance to put the CERIF type in the identifier (=added semantics, IMHO=Bad)
+# Files affected:
+# - oaipmh.py
+# - oairecord.py
+# - oairepository.py
+#######################
+
 from urlparse import parse_qs
 import re
 
@@ -48,9 +57,10 @@ from meresco.oai.oaigetrecord import OaiGetRecord
 from meresco.oai.oailistmetadataformats import OaiListMetadataFormats
 from meresco.oai.oailistsets import OaiListSets
 from meresco.oai.oaierror import OaiError
-from meresco.oai.oairecord import OaiRecord
+##
+from oairecord import OaiRecord
 from oairepository import OaiRepository
-
+##
 
 class OaiPmh(object):
     def __init__(self, repositoryName, adminEmail, repositoryIdentifier=None, batchSize=DEFAULT_BATCH_SIZE, supportXWait=False, externalUrl=None, preciseDatestamp=False):

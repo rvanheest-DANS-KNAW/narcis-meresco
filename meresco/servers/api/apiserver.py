@@ -377,7 +377,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
     oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/")
 
     oai_oa_cerifJazz = OaiJazz(join(statePath, 'oai_cerif'))
-    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, "https://www.openaire.eu/schema/cris/", "https://www.openaire.eu/cerif-profile/1.1/")
+    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, "https://www.openaire.eu/schema/cris/current/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
     # All of the following OAI-PMH sets shall be recognized by the CRIS, even if not all of them are populated.
     oai_oa_cerifJazz.updateSet("openaire_cris_projects", "OpenAIRE_CRIS_projects")
     oai_oa_cerifJazz.updateSet("openaire_cris_orgunits", "OpenAIRE_CRIS_orgunits")
@@ -466,14 +466,14 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                         ),
                         (OaiOpenAIREDescription(
                             serviceid='',
-                            acronym='OpenAIRE',
-                            name='',
-                            description='Beschrijving...',
-                            website='',
-                            baseurl='',
+                            acronym='narcis.nl',
+                            name='NARCIS',
+                            description='Compliant with the OpenAIRE Guidelines for CRIS Managers v.1.1.',
+                            website='https://www.narcis.nl',
+                            baseurl='http://services.nod.dans.knaw.nl/oa-cerif',
                             subjectheading='',
-                            orgunitid='',
-                            owneracronym='NARCIS'),
+                            orgunitid='ORG1242054',
+                            owneracronym='DANS'),
                         ),
                         # (OaiBranding(
                         #     url="http://www.narcis.nl/images/logos/logo-knaw-house.gif",
