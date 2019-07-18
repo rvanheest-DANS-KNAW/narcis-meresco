@@ -53,7 +53,7 @@ class OaiRepository(object):
         self._unPrefixRegEx=r"^"+self._identifierPrefix+".*?s/" # The 's/' is the end of plurals: OrgUnit + s/ = OrgUnits/
 
     def prefixIdentifier(self, identifier, cerif_type=''):
-        ######     
+        ######
         return self._identifierPrefix + cerif_type + identifier
         ######
 

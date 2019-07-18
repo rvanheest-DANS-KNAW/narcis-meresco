@@ -459,7 +459,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                     )
                 ),
                 (PathFilter(["/cerif"]),
-                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="narcis.nl", externalUrl="http://oai.narcis.nl"),
+                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="narcis.nl", externalUrl="http://services.nod.dans.knaw.nl"), #TODO: pathFilter should resemble proxy path
                         (oai_oa_cerifJazz,),
                         (StorageAdapter(),
                             (storage,)

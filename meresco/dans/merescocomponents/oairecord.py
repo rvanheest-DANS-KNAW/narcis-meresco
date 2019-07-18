@@ -63,12 +63,15 @@ class OaiRecord(Transparent):
 
 #########
         str_genre = '' # Get 'genre' from normalized short format: We cannot tell from the identifier.
-        data = yield self.any.retrieveData(identifier=record.identifier, name="knaw_short")
-        genre = findall("<genre>(.+?)</genre>", data)
-        if len(genre) >= 1: str_genre = genre[0]
-        if not str_genre in CERIF_GENRE_MAPPING.keys(): str_genre = "publication"
+        try:
+            data = yield self.any.retrieveData(identifier=record.identifier, name="knaw_short")
+            genre = findall("<genre>(.+?)</genre>", data)
+            if len(genre) >= 1: str_genre = genre[0]
+            if not str_genre in CERIF_GENRE_MAPPING.keys(): str_genre = "publication"
+        except IOError:
+            pass
         if self._repository:
-            identifier = self._repository.prefixIdentifier(identifier, CERIF_GENRE_MAPPING.get(str_genre))
+            identifier = self._repository.prefixIdentifier(identifier, CERIF_GENRE_MAPPING.get(str_genre, ''))
 ########            
         yield '<header%s>' % isDeletedStr
         yield '<identifier>%s</identifier>' % xmlEscape(identifier)
@@ -88,14 +91,18 @@ class OaiRecord(Transparent):
                 except KeyError:
                     pass
             else:
-                data = yield self.any.retrieveData(identifier=record.identifier, name=metadataPrefix)
-                yield data
+                try:
+                    data = yield self.any.retrieveData(identifier=record.identifier, name=metadataPrefix)
+                    yield data
+                except IOError:
+                    pass
             yield '</metadata>'
-
-            provenance = compose(self.all.provenance(record.identifier))
-            for line in decorate('<about>', provenance, '</about>'):
-                yield line
-
+            try:
+                provenance = compose(self.all.provenance(record.identifier))
+                for line in decorate('<about>', provenance, '</about>'):
+                    yield line
+            except KeyError:
+                pass
         yield '</record>'
 
     def _getSetSpecs(self, record):
