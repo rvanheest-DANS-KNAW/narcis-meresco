@@ -193,11 +193,6 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(13, len(records))
         # self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
 
-    # def testOaiPovenance(self):
-    #     header, body = getRequest(self.apiPort, '/oai', dict(verb="ListRecords", metadataPrefix="oai_dc"))
-    #     # print "OAI body:", etree.tostring(body)
-    #     self.assertEqual('http://www.openarchives.org/OAI/2.0/oai_dc/', xpathFirst(body, '//oaiprov:provenance/oaiprov:originDescription/oaiprov:metadataNamespace/text()'))
-
     def testOaiIdentify(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="Identify"))
         # print "OAI Identify:", etree.tostring(body)
@@ -219,9 +214,9 @@ class ApiTest(IntegrationTestCase):
 
 
     def testOaiCerifGetRecord(self):
-        header, body = getRequest(self.apiPort, '/cerif', dict(verb="GetRecord", metadataPrefix="oai_cerif_openaire", identifier="oai:narcis.nl:OrgUnits/ORG1236141"))
+        header, body = getRequest(self.apiPort, '/cerif', dict(verb="GetRecord", metadataPrefix="oai_cerif_openaire", identifier="oai:narcis.nl:OrgUnits/organisation:ORG1236141"))
         # print "GetRecord", etree.tostring(body)
-        self.assertEqual('oai:narcis.nl:OrgUnits/ORG1236141', xpathFirst(body, '//oai:header/oai:identifier/text()'))
+        self.assertEqual('oai:narcis.nl:OrgUnits/organisation:ORG1236141', xpathFirst(body, '//oai:header/oai:identifier/text()'))
 
     def testOaiListSets(self):
         header, body = getRequest(self.apiPort, '/oai', dict(verb="ListSets"))

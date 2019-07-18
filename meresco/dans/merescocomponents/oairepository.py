@@ -26,15 +26,21 @@
 #
 ## end license ##
 
+#######################
+# wilkos-dans, 20190718
+# Changed #prefixIdentifier() and  #unprefixIdentifier() methods to accomodate the requiement by OpenAIRE Advance to put the CERIF type in the identifier (=added semantics, IMHO=Bad)
+# Files affected:
+# - oaipmh.py
+# - oairecord.py
+# - oairepository.py
+#######################
+
 import re
 
-# from oaiutils import OaiException
 from meresco.oai.oaiutils import OaiException
 from socket import gethostname
 
 HOSTNAME = gethostname()
-
-CERIF_MAPPING = {'person:':'Persons/', 'research:':'Projects/', 'organisation:':'OrgUnits/', 'dataset:':'Products/', 'publication:':'Publication/'}
 
 class OaiRepository(object):
     def __init__(self, identifier=None, name=None, adminEmail=None, externalUrl=None):
@@ -44,13 +50,12 @@ class OaiRepository(object):
         self.adminEmail = adminEmail or ''
         self._identifierPrefix = '' if identifier is None else 'oai:{0}:'.format(identifier)
         self._externalUrl = externalUrl
+        self._unPrefixRegEx=r"^"+self._identifierPrefix+".*?s/" # The 's/' is the end of plurals: OrgUnit + s/ = OrgUnits/
 
-    def prefixIdentifier(self, identifier):
+    def prefixIdentifier(self, identifier, cerif_type=''):
+        ######     
+        return self._identifierPrefix + cerif_type + identifier
         ######
-        for k,v in CERIF_MAPPING.iteritems():
-            if identifier.startswith(k): identifier = identifier.replace(k,v,1)
-        ######
-        return self._identifierPrefix + identifier
 
     def unprefixIdentifier(self, identifier):
         if not self._identifierPrefix:
@@ -58,12 +63,9 @@ class OaiRepository(object):
         if not identifier.startswith(self._identifierPrefix):
             raise OaiException('idDoesNotExist')
         #####
-        unprefixedId = identifier[len(self._identifierPrefix):]
-        for k,v in CERIF_MAPPING.iteritems():
-            if unprefixedId.startswith(v): unprefixedId = unprefixedId.replace(v,k,1)
+        unprefixedId = re.sub(self._unPrefixRegEx, '', identifier)
         return unprefixedId
         #####
-        # return identifier[len(self._identifierPrefix):]
 
     def requestUrl(self, Headers, path, port, **kwargs):
         if self._externalUrl:
