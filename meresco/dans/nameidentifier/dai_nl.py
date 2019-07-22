@@ -12,7 +12,7 @@ class Dai(NameIdentifier):
     ID_PATTERN = compile(r'^(info:eu-repo/dai/nl/)?(\d{6,9}[0-9X])$', IGNORECASE)
 
     def __init__(self, baseDigits):
-        NameIdentifier.__init__(self, "dai-nl", baseDigits, ['info:eu-repo/dai/nl/'])
+        NameIdentifier.__init__(self, "dai-nl", baseDigits, ['info:eu-repo/dai/nl/'], "DAI")
 
     def validate_and_initialize(self):
 

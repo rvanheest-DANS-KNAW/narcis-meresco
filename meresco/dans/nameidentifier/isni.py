@@ -33,5 +33,8 @@ class Isni(NameIdentifier):
                 for suffix in self.formatted:
                     self.typedVariants.add(prefix + suffix)
 
+    def get_vsoi_format(self):
+        return '%s%s[ -]?%s[ -]?%s[ -]?%s' % (self.vsoiprefix, self.get_basedigits()[:4], self.get_basedigits()[4:8], self.get_basedigits()[8:12], self.get_basedigits()[12:]) if self.valid else None
+
     def __str__(self):
         return self.get_init_value()
