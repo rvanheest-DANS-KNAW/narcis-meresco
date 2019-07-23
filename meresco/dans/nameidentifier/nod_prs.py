@@ -10,7 +10,7 @@ class NodPrs(NameIdentifier):
     ID_PATTERN = compile(r'^(PRS)([0-9]{7})$', IGNORECASE)
 
     def __init__(self, baseDigits):
-        NameIdentifier.__init__(self, "nod-prs", baseDigits)
+        NameIdentifier.__init__(self, "nod-prs", baseDigits, vsoiprefix="NOD")
 
     def validate_and_initialize(self):
 

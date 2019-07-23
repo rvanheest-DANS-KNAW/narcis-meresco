@@ -10,7 +10,7 @@ class NodOrg(NameIdentifier):
     ID_PATTERN = compile(r'^(ORG)([0-9]{7})$', IGNORECASE)
 
     def __init__(self, baseDigits):
-        NameIdentifier.__init__(self, "nod-org", baseDigits)
+        NameIdentifier.__init__(self, "nod-org", baseDigits, vsoiprefix="NOD")
 
     def validate_and_initialize(self):
 
