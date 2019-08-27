@@ -28,22 +28,22 @@
             <xsl:apply-templates select="input:initials"/>
         </PersonName>
 
-        <xsl:call-template name="nameIdentifier">
-            <xsl:with-param name="type">orcid</xsl:with-param>
-            <xsl:with-param name="label">ORCID</xsl:with-param>
-        </xsl:call-template>
-        <xsl:call-template name="nameIdentifier">
-            <xsl:with-param name="type">rid</xsl:with-param>
-            <xsl:with-param name="label">RID</xsl:with-param>
-        </xsl:call-template>
-        <xsl:call-template name="nameIdentifier">
-            <xsl:with-param name="type">said</xsl:with-param>
-            <xsl:with-param name="label">SAID</xsl:with-param>
-        </xsl:call-template>
-        <xsl:call-template name="nameIdentifier">
-            <xsl:with-param name="type">isni</xsl:with-param>
-            <xsl:with-param name="label">ISNI</xsl:with-param>
-        </xsl:call-template>
+<!--        <xsl:call-template name="nameIdentifier">-->
+<!--            <xsl:with-param name="type">orcid</xsl:with-param>-->
+<!--            <xsl:with-param name="label">ORCID</xsl:with-param>-->
+<!--        </xsl:call-template>-->
+<!--        <xsl:call-template name="nameIdentifier">-->
+<!--            <xsl:with-param name="type">rid</xsl:with-param>-->
+<!--            <xsl:with-param name="label">RID</xsl:with-param>-->
+<!--        </xsl:call-template>-->
+<!--        <xsl:call-template name="nameIdentifier">-->
+<!--            <xsl:with-param name="type">said</xsl:with-param>-->
+<!--            <xsl:with-param name="label">SAID</xsl:with-param>-->
+<!--        </xsl:call-template>-->
+<!--        <xsl:call-template name="nameIdentifier">-->
+<!--            <xsl:with-param name="type">isni</xsl:with-param>-->
+<!--            <xsl:with-param name="label">ISNI</xsl:with-param>-->
+<!--        </xsl:call-template>-->
         <xsl:call-template name="nameIdentifier">
             <xsl:with-param name="type">dai-nl</xsl:with-param>
             <xsl:with-param name="label">DAI</xsl:with-param>

@@ -29,11 +29,11 @@
 
         <xsl:apply-templates select="input:naam_en"/>
 
-        <xsl:apply-templates select="input:org_telefoon"/>
+<!--        <xsl:apply-templates select="input:org_telefoon"/>-->
 
-        <xsl:apply-templates select="input:org_fax"/>
+<!--        <xsl:apply-templates select="input:org_fax"/>-->
 
-        <xsl:apply-templates select="input:org_email"/>
+<!--        <xsl:apply-templates select="input:org_email"/>-->
 
         <xsl:apply-templates select="input:org_url"/>
 
