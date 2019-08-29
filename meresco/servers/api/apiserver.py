@@ -459,20 +459,20 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                     )
                 ),
                 (PathFilter(["/cerif"]),
-                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="narcis.nl", externalUrl="http://services.nod.dans.knaw.nl"), #TODO: pathFilter should resemble proxy path
+                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="services.nod.dans.knaw.nl", externalUrl="http://services.nod.dans.knaw.nl"), #TODO: pathFilter should resemble proxy path
                         (oai_oa_cerifJazz,),
                         (StorageAdapter(),
                             (storage,)
                         ),
                         (OaiOpenAIREDescription(
-                            serviceid='',
+                            serviceid='organisation:ORG1242054',
                             acronym='narcis.nl',
                             name='NARCIS',
                             description='Compliant with the OpenAIRE Guidelines for CRIS Managers v.1.1.',
                             website='https://www.narcis.nl',
                             baseurl='http://services.nod.dans.knaw.nl/oa-cerif',
                             subjectheading='',
-                            orgunitid='ORG1242054',
+                            orgunitid='organisation:ORG1242054',
                             owneracronym='DANS'),
                         ),
                         # (OaiBranding(
