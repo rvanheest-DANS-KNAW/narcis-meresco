@@ -137,7 +137,7 @@
             <Person>
                 <xsl:if test="input:nameIdentifier[@type='nod-prs']">
                     <xsl:attribute name="id">
-                        <xsl:value-of select="input:nameIdentifier[@type='nod-prs']"/>
+                        <xsl:value-of select="concat('person:', input:nameIdentifier[@type='nod-prs'])"/>
                     </xsl:attribute>
                     <PersonName>
                         <FamilyNames>
@@ -157,7 +157,7 @@
             <OrgUnit>
                 <xsl:if test="input:nameIdentifier[@type='nod-org']">
                     <xsl:attribute name="id">
-                        <xsl:value-of select="input:nameIdentifier[@type='nod-org']"/>
+                        <xsl:value-of select="concat('organisation:', input:nameIdentifier[@type='nod-org'])"/>
                     </xsl:attribute>
                     <Name xml:lang="en">
                         <xsl:value-of select="input:unstructured"/>

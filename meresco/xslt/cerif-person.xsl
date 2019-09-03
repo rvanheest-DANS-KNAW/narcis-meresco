@@ -56,7 +56,7 @@
 
     <xsl:template match="input:identifier">
         <xsl:attribute name="id">
-            <xsl:value-of select="."/>
+            <xsl:value-of select="concat('person:', .)"/>
         </xsl:attribute>
     </xsl:template>
 
@@ -196,7 +196,7 @@
         <Affiliation>
             <OrgUnit>
                 <xsl:attribute name="id">
-                    <xsl:value-of select="@id"/>
+                    <xsl:value-of select="concat('organisation:', @id)"/>
                 </xsl:attribute>
             </OrgUnit>
         </Affiliation>

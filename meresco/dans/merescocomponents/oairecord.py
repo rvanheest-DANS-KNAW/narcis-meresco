@@ -48,7 +48,7 @@ from meresco.core.generatorutils import decorate
 from re import findall
 #########
 
-CERIF_GENRE_MAPPING = {'person':'Persons/', 'research':'Projects/', 'organisation':'OrgUnits/', 'dataset':'Products/', 'software':'Products/', 'publication':'Publications/', 'patent':'Patents/'}
+CERIF_GENRE_MAPPING = {'person':'Persons/', 'research':'Projects/', 'organisation':'OrgUnits/', 'dataset':'Products/', 'software':'Products/', 'publication':'Publications/', 'patent':'Patents/', 'funding':'Fundings/'}
 
 class OaiRecord(Transparent):
     def __init__(self, repository=None, preciseDatestamp=False, **kwargs):
@@ -68,6 +68,9 @@ class OaiRecord(Transparent):
             genre = findall("<genre>(.+?)</genre>", data)
             if len(genre) >= 1: str_genre = genre[0]
             if not str_genre in CERIF_GENRE_MAPPING.keys(): str_genre = "publication"
+            # if str_genre == 'research': # Might be a Funding... <type_nl>Financieringsprogramma</type_nl>
+            #     metadata = yield self.any.retrieveData(identifier=record.identifier, name="metadata")
+            #     if len(findall("<type_nl>Financieringsprogramma</type_nl>", metadata)) >= 1: str_genre = "funding"
         except IOError:
             pass
         if self._repository:
