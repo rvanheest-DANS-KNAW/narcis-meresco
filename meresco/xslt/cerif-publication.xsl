@@ -347,7 +347,7 @@
             <Person>
                 <xsl:if test="input:nameIdentifier[@type='nod-prs']">
                     <xsl:attribute name="id">
-                        <xsl:value-of select="input:nameIdentifier[@type='nod-prs']"/>
+                        <xsl:value-of select="concat('person:', input:nameIdentifier[@type='nod-prs'])"/>
                     </xsl:attribute>
                     <PersonName>
                         <FamilyNames>
