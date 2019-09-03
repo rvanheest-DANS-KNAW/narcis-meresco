@@ -63,7 +63,7 @@
 
     <xsl:template match="input:identifier">
         <xsl:attribute name="id">
-            <xsl:value-of select="."/>
+            <xsl:value-of select="concat('research:', .)"/>
         </xsl:attribute>
     </xsl:template>
 
@@ -140,7 +140,7 @@
             <Coordinator>
                 <OrgUnit>
                     <xsl:attribute name="id">
-                        <xsl:value-of select="@code"/>
+                        <xsl:value-of select="concat('organisation:', @code)"/>
                     </xsl:attribute>
                 </OrgUnit>
             </Coordinator>
@@ -152,7 +152,7 @@
             <Partner>
                 <OrgUnit>
                     <xsl:attribute name="id">
-                        <xsl:value-of select="@code"/>
+                        <xsl:value-of select="concat('organisation:', @code)"/>
                     </xsl:attribute>
                 </OrgUnit>
             </Partner>
@@ -164,7 +164,7 @@
             <Member>
                 <OrgUnit>
                     <xsl:attribute name="id">
-                        <xsl:value-of select="@code"/>
+                        <xsl:value-of select="concat('organisation:', @code)"/>
                     </xsl:attribute>
                 </OrgUnit>
             </Member>
@@ -177,7 +177,7 @@
                 <By>
                     <OrgUnit>
                         <xsl:attribute name="id">
-                            <xsl:value-of select="@code"/>
+                            <xsl:value-of select="concat('organisation:', @code)"/>
                         </xsl:attribute>
                     </OrgUnit>
                 </By>
@@ -189,7 +189,7 @@
         <Member>
             <Person>
                 <xsl:attribute name="id">
-                    <xsl:value-of select="input:nameIdentifier[@type='nod-prs']"/>
+                    <xsl:value-of select="concat('person:', input:nameIdentifier[@type='nod-prs'])"/>
                 </xsl:attribute>
             </Person>
             <xsl:apply-templates select="input:werkzaamheid"/>
@@ -200,7 +200,7 @@
         <Affiliation>
             <OrgUnit>
                 <xsl:attribute name="id">
-                    <xsl:value-of select="."/>
+                    <xsl:value-of select="concat('organisation:', .)"/>
                 </xsl:attribute>
             </OrgUnit>
         </Affiliation>
