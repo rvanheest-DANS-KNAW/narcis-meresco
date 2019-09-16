@@ -70,7 +70,7 @@
     </xsl:template>
 
     <xsl:template name="publication-type">
-        <Type>
+        <Type xmlns="https://www.openaire.eu/cerif-profile/vocab/COAR_Publication_Types">
             <xsl:choose>
                 <xsl:when test="input:genre='annotation'">
                     <xsl:value-of select="'http://purl.org/coar/resource_type/c_1162'"/>
@@ -373,6 +373,9 @@
     <xsl:template match="input:abstract">
         <xsl:if test=".">
             <Abstract>
+                <xsl:attribute name="xml:lang">
+                    <xsl:value-of select="'en'"/>
+                </xsl:attribute>
                 <xsl:value-of select="."/>
             </Abstract>
         </xsl:if>
