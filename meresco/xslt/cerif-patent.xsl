@@ -157,6 +157,9 @@
     <xsl:template match="input:abstract[not(@*)]">
         <xsl:if test=".">
             <Abstract>
+                <xsl:attribute name="xml:lang">
+                    <xsl:value-of select="'en'"/>
+                </xsl:attribute>
                 <xsl:value-of select="."/>
             </Abstract>
         </xsl:if>
