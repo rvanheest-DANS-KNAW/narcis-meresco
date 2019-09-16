@@ -57,7 +57,7 @@
     </xsl:template>
 
     <xsl:template name="product-type">
-        <Type>
+        <Type xmlns="https://www.openaire.eu/cerif-profile/vocab/COAR_Product_Types">
             <xsl:choose>
                 <xsl:when test="input:genre='software'">
                     <xsl:value-of select="'http://purl.org/coar/resource_type/c_5ce6'"/>
@@ -178,6 +178,9 @@
     <xsl:template match="input:abstract[not(@*)]">
         <xsl:if test=".">
             <Abstract>
+                <xsl:attribute name="xml:lang">
+                    <xsl:value-of select="'en'"/>
+                </xsl:attribute>
                 <xsl:value-of select="."/>
             </Abstract>
         </xsl:if>
