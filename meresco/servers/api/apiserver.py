@@ -466,7 +466,7 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                         ),
                         (OaiOpenAIREDescription(
                             serviceid='organisation:ORG1242054',
-                            acronym='narcis.nl',
+                            acronym='services.nod.dans.knaw.nl',
                             name='NARCIS',
                             description='Compliant with the OpenAIRE Guidelines for CRIS Managers v.1.1.',
                             website='https://www.narcis.nl',
