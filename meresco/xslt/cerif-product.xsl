@@ -81,9 +81,9 @@
 
     <xsl:template match="input:titleInfo[not(@*)]">
         <xsl:if test="input:title">
-            <Title xml:lang="en">
+            <Name xml:lang="en">
                 <xsl:value-of select="input:title"/>
-            </Title>
+            </Name>
         </xsl:if>
     </xsl:template>
 
