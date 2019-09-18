@@ -23,7 +23,6 @@
     <xsl:template match="input:knaw_long">
         <xsl:apply-templates select="input:uploadid"/>
         <xsl:apply-templates select="input:metadata"/>
-        <xsl:apply-templates select="input:persistentIdentifier"/>
         <xsl:apply-templates select="input:accessRights"/>
     </xsl:template>
 
@@ -56,6 +55,7 @@
         <xsl:apply-templates select="input:publication_identifier[@type='isbn']"/>
 
         <xsl:apply-templates select="input:location_url"/>
+        <xsl:apply-templates select="../input:persistentIdentifier"/>
 
         <xsl:if test="input:name[input:mcRoleTerm='aut']">
             <Authors>
