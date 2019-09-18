@@ -185,7 +185,7 @@
 
     <xsl:template match="input:subject/input:topic/input:topicValue">
         <xsl:if test=".">
-            <Keyword>
+            <Keyword xml:lang="en">
                 <xsl:value-of select="."/>
             </Keyword>
         </xsl:if>
