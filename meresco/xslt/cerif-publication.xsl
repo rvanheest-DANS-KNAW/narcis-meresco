@@ -65,8 +65,6 @@
 
         <xsl:apply-templates select="input:subject/input:topic/input:topicValue"/>
         <xsl:apply-templates select="input:abstract"/>
-
-        <!-- TODO continue here with more metadata elements -->
     </xsl:template>
 
     <xsl:template name="publication-type">
