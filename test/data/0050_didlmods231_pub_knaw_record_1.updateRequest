@@ -122,6 +122,8 @@
                                 &lt;/mods:extension&gt;
                                 &lt;mods:typeOfResource&gt;text&lt;/mods:typeOfResource&gt;
                                 &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00282162&lt;/mods:identifier&gt;
+                                &lt;mods:identifier type=&quot;doi&quot;&gt;doi:10.1002/lno.10611&lt;/mods:identifier&gt;
+                                &lt;mods:identifier type=&quot;wos&quot;&gt;wos:000423029300003&lt;/mods:identifier&gt;
                                 &lt;mods:relatedItem type=&quot;host&quot;&gt;
                                     &lt;mods:titleInfo&gt;
                                         &lt;mods:title&gt;Spektator&lt;/mods:title&gt;
