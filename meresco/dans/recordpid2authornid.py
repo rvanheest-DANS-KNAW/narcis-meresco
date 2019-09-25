@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import simplejson as json
 from urllib2 import Request, urlopen, URLError
 from urllib import quote
@@ -18,7 +21,7 @@ class RecordPidToAuthNid(Observable):
 
 	def lookupNameIds(self, pidlist):
 		if len(pidlist) > 0 and self._pidgraph_enabled:
-			req = Request(self._pidgraph_api + '?' + "&".join(list(map(lambda x: 'pid='+quote(x), pidlist))), headers={'User-Agent': "Meresco Index Server"})
+			req = Request(self._pidgraph_api + '?' + "&".join(list(map(lambda x: 'pid='+quote(x.encode("utf-8")), pidlist))), headers={'User-Agent': "Meresco Index Server"})
 			try:
 				data = json.load(urlopen(req))
 				for nid in data:
