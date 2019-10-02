@@ -39,7 +39,7 @@
         <xsl:apply-templates select="input:titleInfo[not(@*)]/input:title"/>
         <xsl:apply-templates select="input:titleInfo[not(@*)]/input:subtitle"/>
 
-        <xsl:apply-templates select="input:relatedItem[@type='host']/input:titleInfo[not(@*)]/input:title"/>
+        <xsl:call-template name="publishedIn"/>
         <xsl:apply-templates select="input:dateIssued/input:parsed"/>
         <xsl:apply-templates select="input:relatedItem[@type='host']/input:part/input:volume"/>
         <xsl:apply-templates select="input:relatedItem[@type='host']/input:part/input:issue"/>
@@ -202,10 +202,63 @@
         </xsl:if>
     </xsl:template>
 
-    <xsl:template match="input:relatedItem[@type='host']/input:titleInfo[not(@*)]/input:title" priority="5">
-        <xsl:if test=".">
+    <xsl:template name="publishedIn">
+        <xsl:if test="input:relatedItem[@type='host']/input:titleInfo[not(@*)]/input:title">
             <PublishedIn>
-                <xsl:value-of select="."/>
+                <Publication>
+                    <Type xmlns="https://www.openaire.eu/cerif-profile/vocab/COAR_Publication_Types">
+                        <xsl:choose>
+                            <xsl:when test="input:genre='annotation'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_0640'"/>
+                                <xsl:comment xml:space="preserve"> journal </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='article'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_0640'"/>
+                                <xsl:comment xml:space="preserve"> journal </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='bookpart'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_2f33'"/>
+                                <xsl:comment xml:space="preserve"> book </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='bookreview'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_0640'"/>
+                                <xsl:comment xml:space="preserve"> journal </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='conferencepaper'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_f744'"/>
+                                <xsl:comment xml:space="preserve"> conference proceedings </xsl:comment>
+                            </xsl:when>
+
+                            <xsl:when test="input:genre='contributiontoperiodical'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_0640'"/>
+                                <xsl:comment xml:space="preserve"> journal </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='preprint'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_0640'"/>
+                                <xsl:comment xml:space="preserve"> journal </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='workingpaper'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_0640'"/>
+                                <xsl:comment xml:space="preserve"> journal </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='reportpart'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_93fc'"/>
+                                <xsl:comment xml:space="preserve"> report </xsl:comment>
+                            </xsl:when>
+                            <xsl:when test="input:genre='review'">
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_0640'"/>
+                                <xsl:comment xml:space="preserve"> journal </xsl:comment>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="'http://purl.org/coar/resource_type/c_18cf'"/>
+                                <xsl:comment xml:space="preserve"> text </xsl:comment>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </Type>
+                    <Title xml:lang="en">
+                        <xsl:value-of select="input:relatedItem[@type='host']/input:titleInfo[not(@*)]/input:title"/>
+                    </Title>
+                </Publication>
             </PublishedIn>
         </xsl:if>
     </xsl:template>
