@@ -65,6 +65,8 @@
 
         <xsl:apply-templates select="input:subject/input:topic/input:topicValue"/>
         <xsl:apply-templates select="input:abstract"/>
+        
+<!--     TODO for wilkosdans <Status></Status>-->
     </xsl:template>
 
     <xsl:template name="publication-type">
