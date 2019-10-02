@@ -81,9 +81,9 @@
 
     <xsl:template match="input:titleInfo[not(@*)]">
         <xsl:if test="input:title">
-            <Title xml:lang="en">
+            <Name xml:lang="en">
                 <xsl:value-of select="input:title"/>
-            </Title>
+            </Name>
         </xsl:if>
     </xsl:template>
 
@@ -177,18 +177,15 @@
 
     <xsl:template match="input:abstract[not(@*)]">
         <xsl:if test=".">
-            <Abstract>
-                <xsl:attribute name="xml:lang">
-                    <xsl:value-of select="'en'"/>
-                </xsl:attribute>
+            <Description xml:lang="en">
                 <xsl:value-of select="."/>
-            </Abstract>
+            </Description>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:subject/input:topic/input:topicValue">
         <xsl:if test=".">
-            <Keyword>
+            <Keyword xml:lang="en">
                 <xsl:value-of select="."/>
             </Keyword>
         </xsl:if>
