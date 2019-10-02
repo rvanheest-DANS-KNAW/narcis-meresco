@@ -65,8 +65,7 @@
 
         <xsl:apply-templates select="input:subject/input:topic/input:topicValue"/>
         <xsl:apply-templates select="input:abstract"/>
-        
-        <Status scheme="http://vocabularies.coar-repositories.org/documentation/version_types/">http://purl.org/coar/version/c_be7fb7dd8ff6fe43<!-- Not Applicable (or Unknown) --></Status>
+                
     </xsl:template>
 
     <xsl:template name="publication-type">
