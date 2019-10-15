@@ -43,7 +43,7 @@ class OaiOpenAIREDescription(object):
 
     def description(self):
         yield """<description xmlns="http://www.openarchives.org/OAI/2.0/">"""
-        yield """<Service xmlns="https://www.openaire.eu/cerif-profile/1.1/" id="%s">""" % escapeXml(self._serviceid)
+        yield """<Service xmlns="https://www.openaire.eu/cerif-profile/1.1/">"""
         yield """<Compatibility xmlns="https://www.openaire.eu/cerif-profile/vocab/OpenAIRE_Service_Compatibility">https://www.openaire.eu/cerif-profile/vocab/OpenAIRE_Service_Compatibility#1.1</Compatibility>"""
         yield "<Acronym>%s</Acronym>" % escapeXml(self._acronym)
         yield """<Name xml:lang="en">%s</Name>"""% escapeXml(self._name)
