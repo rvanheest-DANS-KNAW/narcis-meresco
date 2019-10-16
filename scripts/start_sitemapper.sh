@@ -31,7 +31,7 @@ if [[ "$HOSTNAME" == ${STARTMAPPER} ]]
     then
         sleep 20
         cd /home/meresco/meresco/narcisindex/util
-        nohup sh -c "exec /usr/bin/python ./sitemapper.py 1>> ${LOG} 2>&1" >/dev/null &
+        nohup sh -c "exec ionice -c3 /usr/bin/python ./sitemapper.py 1>> ${LOG} 2>&1" >/dev/null &
         PID=$!
                 echo $PID > $PIDFILE
                 echo "STARTED ${NAME} sitemapper, pid=$PID, `date`"
