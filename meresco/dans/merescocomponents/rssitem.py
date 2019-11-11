@@ -65,7 +65,7 @@ class RssItem(XmlCompose):
 
     def createRecord(self, dataDictionary):
         try:
-            link = self._linkTemplate % dict(((k, urlQuote(v)) for k,v in dataDictionary.items()))
+            link = self._linkTemplate % dict(((k, urlQuote(v, safe='')) for k,v in dataDictionary.items()))
         except KeyError:
             link = ''
         rssData = {

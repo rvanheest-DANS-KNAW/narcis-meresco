@@ -1,14 +1,14 @@
 <ucp:updateRequest xmlns:srw="http://www.loc.gov/zing/srw/" xmlns:ucp="info:lc/xmlns/update-v1">
     <srw:version>1.0</srw:version>
     <ucp:action>info:srw/action/1/replace</ucp:action>
-    <ucp:recordIdentifier>easy:oai:easy.dans.knaw.nl:easy-dataset:44292</ucp:recordIdentifier>
+    <ucp:recordIdentifier>easy:oai:easy.dans.knaw.nl:easy-dataset/44292</ucp:recordIdentifier>
     <srw:record xmlns:srw="http://www.loc.gov/zing/srw/">
         <srw:recordPacking>xml</srw:recordPacking>
         <srw:recordSchema>metadata</srw:recordSchema>
         <srw:recordData><document xmlns="http://meresco.org/namespace/harvester/document"><part name="record">&lt;record xmlns=&quot;http://www.openarchives.org/OAI/2.0/&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;
     &lt;header xmlns=&quot;http://www.openarchives.org/OAI/2.0/&quot;&gt;
-        &lt;identifier&gt;oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/identifier&gt;
+        &lt;identifier&gt;oai:easy.dans.knaw.nl:easy-dataset/44292&lt;/identifier&gt;
         &lt;datestamp&gt;2016-12-06T20:30:09Z&lt;/datestamp&gt;
         &lt;setSpec&gt;D30000:D37000&lt;/setSpec&gt;
         &lt;setSpec&gt;driver&lt;/setSpec&gt;
@@ -128,15 +128,15 @@
 		            &lt;/geoLocationBox&gt;
 		        &lt;/geoLocation&gt;
 		    &lt;/geoLocations&gt;
-		&lt;/resource&gt;        
+		&lt;/resource&gt;
     &lt;/metadata&gt;
 &lt;/record&gt;</part>
             <part name="meta">&lt;meta xmlns=&quot;http://meresco.org/namespace/harvester/meta&quot;&gt;
     &lt;upload&gt;
-        &lt;id&gt;easy:oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
+        &lt;id&gt;easy:oai:easy.dans.knaw.nl:easy-dataset/44292&lt;/id&gt;
     &lt;/upload&gt;
     &lt;record&gt;
-        &lt;id&gt;oai:easy.dans.knaw.nl:easy-dataset:44292&lt;/id&gt;
+        &lt;id&gt;oai:easy.dans.knaw.nl:easy-dataset/44292&lt;/id&gt;
         &lt;harvestdate&gt;2016-12-21T13:46:09Z&lt;/harvestdate&gt;
         &lt;metadataNamespace&gt;http://datacite.org/schema/kernel-4&lt;/metadataNamespace&gt;
     &lt;/record&gt;
