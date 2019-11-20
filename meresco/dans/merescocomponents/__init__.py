@@ -27,6 +27,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 # 
 ## end license ##
-__all__ = ['rss', 'rssitem']
+__all__ = ['rss', 'rssitem', 'oaipmh', 'oaiidentify', 'oaiopenairedesc']
 from rss import Rss
 from rssitem import RssItem
+from oaipmh import OaiPmh
+from oaiidentify import OaiIdentify
+from oaiopenairedesc import OaiOpenAIREDescription

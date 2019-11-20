@@ -3,7 +3,10 @@ from dai_nl import Dai
 from grid import Grid
 from isni import Isni
 from nameidentifierfactory import NameIdentifierFactory
+from nod_org import NodOrg
 from nod_prs import NodPrs
 from orcid import Orcid
 from rid import Rid
+from ror import Ror
+from viaf import Viaf
 from unknown import Unknown

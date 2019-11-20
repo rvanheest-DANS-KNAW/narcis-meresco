@@ -4,7 +4,8 @@
                 xmlns="https://www.openaire.eu/cerif-profile/1.1/"
                 exclude-result-prefixes="input xsi"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/act ../xsd/nod-research-1-1.xsd"
+                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/act ../xsd/nod-research-1-1.xsd
+                                    https://www.openaire.eu/cerif-profile/1.1/ https://www.openaire.eu/schema/cris/1.1/openaire-cerif-profile.xsd"
                 version="1.0">
 
     <!-- =================================================================================== -->
@@ -34,17 +35,21 @@
         <xsl:apply-templates select="input:startdate"/>
         <xsl:apply-templates select="input:enddate"/>
 
-        <Consortium>
-            <xsl:apply-templates select="input:penvoerder"/>
+        <xsl:if test="input:penvoerder or input:samenwerking or input:opdrachtgever">
+            <Consortium>
+                <xsl:apply-templates select="input:penvoerder"/>
 
-            <xsl:apply-templates select="input:samenwerking"/>
+                <xsl:apply-templates select="input:samenwerking"/>
 
-            <xsl:apply-templates select="input:opdrachtgever"/>
-        </Consortium>
+                <xsl:apply-templates select="input:opdrachtgever"/>
+            </Consortium>
+        </xsl:if>
 
-        <Team>
-            <xsl:apply-templates select="input:person"/>
-        </Team>
+        <xsl:if test="input:person">
+            <Team>
+                <xsl:apply-templates select="input:person"/>
+            </Team>
+        </xsl:if>
 
         <xsl:apply-templates select="input:financier"/>
 
@@ -58,7 +63,7 @@
 
     <xsl:template match="input:identifier">
         <xsl:attribute name="id">
-            <xsl:value-of select="."/>
+            <xsl:value-of select="concat('research:', .)"/>
         </xsl:attribute>
     </xsl:template>
 
@@ -132,31 +137,37 @@
 
     <xsl:template match="input:penvoerder">
         <xsl:if test=".">
-            <OrgUnit>
-                <xsl:attribute name="id">
-                    <xsl:value-of select="@code"/>
-                </xsl:attribute>
-            </OrgUnit>
+            <Coordinator>
+                <OrgUnit>
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="concat('organisation:', @code)"/>
+                    </xsl:attribute>
+                </OrgUnit>
+            </Coordinator>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:samenwerking">
         <xsl:if test=".">
-            <OrgUnit>
-                <xsl:attribute name="id">
-                    <xsl:value-of select="@code"/>
-                </xsl:attribute>
-            </OrgUnit>
+            <Partner>
+                <OrgUnit>
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="concat('organisation:', @code)"/>
+                    </xsl:attribute>
+                </OrgUnit>
+            </Partner>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:opdrachtgever">
         <xsl:if test=".">
-            <OrgUnit>
-                <xsl:attribute name="id">
-                    <xsl:value-of select="@code"/>
-                </xsl:attribute>
-            </OrgUnit>
+            <Member>
+                <OrgUnit>
+                    <xsl:attribute name="id">
+                        <xsl:value-of select="concat('organisation:', @code)"/>
+                    </xsl:attribute>
+                </OrgUnit>
+            </Member>
         </xsl:if>
     </xsl:template>
 
@@ -166,7 +177,7 @@
                 <By>
                     <OrgUnit>
                         <xsl:attribute name="id">
-                            <xsl:value-of select="@code"/>
+                            <xsl:value-of select="concat('organisation:', @code)"/>
                         </xsl:attribute>
                     </OrgUnit>
                 </By>
@@ -178,17 +189,21 @@
         <Member>
             <Person>
                 <xsl:attribute name="id">
-                    <xsl:value-of select="input:nameIdentifier[@type='nod-prs']"/>
+                    <xsl:value-of select="concat('person:', input:nameIdentifier[@type='nod-prs'])"/>
                 </xsl:attribute>
             </Person>
-            <Affiliation>
-                <OrgUnit>
-                    <xsl:attribute name="id">
-                        <xsl:value-of select="input:werkzaamheid"/>
-                    </xsl:attribute>
-                </OrgUnit>
-            </Affiliation>
+            <xsl:apply-templates select="input:werkzaamheid"/>
         </Member>
+    </xsl:template>
+
+    <xsl:template match="input:person/input:werkzaamheid">
+        <Affiliation>
+            <OrgUnit>
+                <xsl:attribute name="id">
+                    <xsl:value-of select="concat('organisation:', .)"/>
+                </xsl:attribute>
+            </OrgUnit>
+        </Affiliation>
     </xsl:template>
 
     <xsl:template match="input:categories/input:category">

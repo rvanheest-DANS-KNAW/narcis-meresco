@@ -39,7 +39,8 @@ from meresco.components.http import ObservableHttpServer, BasicHttpHandler, Path
 from meresco.components.log import LogCollector, ApacheLogWriter, HandleRequestLog, LogCollectorScope, QueryLogWriter, DirectoryLog, LogFileServer, LogComponent
 from meresco.components.sru import SruHandler, SruParser, SruLimitStartRecord
 
-from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiPmh, OaiAddDeleteRecordWithPrefixesAndSetSpecs, OaiBranding, OaiProvenance
+from meresco.oai import OaiPmh, OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor, OaiJazz, OaiBranding, OaiProvenance, OaiAddDeleteRecordWithPrefixesAndSetSpecs
+# from meresco.dans.merescocomponents import OaiAddDeleteRecordWithPrefixesAndSetSpecs
 
 from meresco.lucene import SORTED_PREFIX, UNTOKENIZED_PREFIX
 from meresco.lucene.remote import LuceneRemote
@@ -58,12 +59,16 @@ from seecr.utils import DebugPrompt
 from meresco.components.drilldownqueries import DrilldownQueries
 from storage import StorageComponent
 
-from meresco.dans.merescocomponents import Rss, RssItem
+from meresco.dans.merescocomponents import Rss, RssItem, OaiOpenAIREDescription
 from meresco.dans.storagesplit import Md5HashDistributeStrategy
 from meresco.dans.writedeleted import ResurrectTombstone, WriteTombstone
 from meresco.dans.shortconverter import ShortConverter
 from meresco.dans.oai_dcconverter import DcConverter
 from meresco.dans.filterwcpcollection import FilterWcpCollection
+from meresco.dans.filterknawlonggenre import FilterKnawLongGenre
+
+from meresco.dans.merescocomponents import OaiPmh as OaiPmhDans
+
 
 from meresco.xml import namespaces
 
@@ -79,6 +84,7 @@ META_PARTNAME = 'meta'
 METADATA_PARTNAME = 'metadata'
 LONG_PARTNAME = 'knaw_long'
 SHORT_PARTNAME = 'knaw_short'
+OPENAIRE_PARTNAME = 'oai_cerif_openaire'
 
 NAMESPACEMAP = namespaces.copyUpdate({
     'prs'   : 'http://www.onderzoekinformatie.nl/nod/prs',
@@ -93,7 +99,7 @@ NAMESPACEMAP = namespaces.copyUpdate({
 
 
 
-def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz):
+def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent, oaiJazz, oai_oa_cerifJazz):
     return \
     (periodicDownload, # Scheduled connection to a remote (response / request)...
         (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode", parseOptions=dict(huge_tree=True, remove_blank_text=True)), # Convert from plain text to lxml-object.
@@ -103,15 +109,83 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                         # (LogComponent("Delete Update"),),
                         (storageComponent,), # Delete from storage
                         (oaiJazz,), # Delete from OAI-pmh repo
+                        (oai_oa_cerifJazz,),
                         # Write a 'deleted' part to the storage, that holds the (Record)uploadId.
                         (WriteTombstone(),
                             (storageComponent,),
                         )
                     ),
                     (FilterMessages(allowed=['add']),
-                        # TODO: onderstaande toKwarg='data' kan eruit. Dan de volgende regel ook:-)
                         (XmlXPath(['/oai:record/oai:metadata/document:document/document:part[@name="record"]/text()'], fromKwarg='lxmlNode', toKwarg='data', namespaces=NAMESPACEMAP),
                             (XmlParseLxml(fromKwarg='data', toKwarg='lxmlNode'),
+
+                                (FilterWcpCollection(allowed=['research']),
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-project.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+
+                                (FilterWcpCollection(allowed=['person']),
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-person.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['organisation']),
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-orgunit.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['dataset']), # START CERIF CONVERSION FOR DATASET COLLECTION: cerif-dataset / cerif-software.
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
+                                        (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-product.xsl')], fromKwarg="lxmlNode"),
+                                            (RewritePartname(OPENAIRE_PARTNAME),
+                                                (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                    (storageComponent,)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['publication']), # START CERIF CONVERSION FOR PUBLICATIONS COLLECTION
+                                    (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
+                                        (FilterKnawLongGenre(allowed=['patent']), # START PATENTS CONVERSION
+                                            (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-patent.xsl')], fromKwarg="lxmlNode"),
+                                                (RewritePartname(OPENAIRE_PARTNAME),
+                                                    (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                        (storageComponent,)
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        (FilterKnawLongGenre(disallowed=['patent']), # START Publication CONVERSION
+                                            (XsltCrosswalk([join(dirname(abspath(__file__)), '..', '..', 'xslt', 'cerif-publication.xsl')], fromKwarg="lxmlNode"),
+                                                (RewritePartname(OPENAIRE_PARTNAME),
+                                                    (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
+                                                        (storageComponent,)
+                                                    )
+                                                )
+                                            )
+                                        )                                        
+                                    )
+                                ),
                                 (XmlXPath(['/oai:record/oai:metadata/norm:md_original/child::*'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Origineel 'metadata' formaat
                                     (RewritePartname("metadata"), # Hernoemt partname van 'record' naar "metadata".
                                         (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=False),
@@ -121,7 +195,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 ),
                                 (XmlXPath(['/oai:record/oai:metadata/norm:normalized/long:knaw_long'], fromKwarg='lxmlNode', namespaces=NAMESPACEMAP), # Genormaliseerd 'long' formaat.
                                     (RewritePartname("knaw_long"), # Hernoemt partname van 'record' naar "knaw_long".
-                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
+                                        (FilterWcpCollection(disallowed=['person', 'research', 'organisation']),
                                             (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
                                                 (storageComponent,), # Schrijft 'long' (=norm:normdoc) naar storage.
                                             )
@@ -133,7 +207,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                                 )
                                             )
                                         ),
-                                        (FilterWcpCollection(disallowed=['person', 'research', "organisation"]),
+                                        (FilterWcpCollection(disallowed=['person', 'research', 'organisation']),
                                             (DcConverter(fromKwarg='lxmlNode'), # Hernoem partname van 'record' naar "oai_dc".
                                                 (RewritePartname("oai_dc"),
                                                     (XmlPrintLxml(fromKwarg="lxmlNode", toKwarg="data", pretty_print=True),
@@ -155,30 +229,57 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                                 ),
                                 (FilterWcpCollection(allowed=['publication']),
                                     # (LogComponent("PUBLICATION"),),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publication'], name='NARCISPORTAL'), #TODO: Skip name='NARCISPORTAL'
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['publication']),
                                         (oaiJazz,),
                                     ),
                                     (XmlXPath(["//long:knaw_long[long:accessRights ='openAccess']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        # (LogComponent("OPENACCESS"),),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire'], name='NARCISPORTAL'),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['oa_publication', 'openaire']),
                                             (oaiJazz,),
                                         )
                                     ),
                                     (XmlXPath(["//long:knaw_long/long:metadata[long:genre ='doctoralthesis']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['thesis'], name='NARCISPORTAL'),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['thesis']),
                                             (oaiJazz,),
                                         )
                                     ),
                                     (XmlXPath(['//long:knaw_long/long:metadata/long:grantAgreements/long:grantAgreement[long:code[contains(.,"greement/EC/") or contains(.,"greement/ec/")]][1]'], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
-                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire'], name='NARCISPORTAL'),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['ec_fundedresources', 'openaire']),
                                             (oaiJazz,),
                                         )
-                                    )
+                                    ),
+                                    (XmlXPath(["//long:knaw_long/long:metadata[long:genre ='patent']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_patents"]),
+                                            (oai_oa_cerifJazz,),
+                                        )
+                                    ),
+                                    (XmlXPath(["//long:knaw_long/long:metadata[long:genre !='patent']"], fromKwarg='lxmlNode', namespaceMap=NAMESPACEMAP),
+                                        (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_publications"]),
+                                            (oai_oa_cerifJazz,),
+                                        )
+                                    ),                                    
                                 ),
                                 (FilterWcpCollection(allowed=['dataset']),
-                                    # (LogComponent("DATASET"),),
-                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset'], name='NARCISPORTAL'),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=["oai_dc"], setSpecs=['dataset']),
                                         (oaiJazz,),
+                                    ),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_products"]),
+                                        (oai_oa_cerifJazz,),
+                                    )                                    
+                                ),
+                                # Add NOD OpenAIRE Cerif to OpenAIRE-PMH repo.
+                                (FilterWcpCollection(allowed=['research']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=["openaire_cris_projects"]),
+                                        (oai_oa_cerifJazz,),
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['person']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_persons']),
+                                        (oai_oa_cerifJazz,),
+                                    )
+                                ),
+                                (FilterWcpCollection(allowed=['organisation']),
+                                    (OaiAddDeleteRecordWithPrefixesAndSetSpecs(metadataPrefixes=[OPENAIRE_PARTNAME], setSpecs=['openaire_cris_orgunits']),
+                                        (oai_oa_cerifJazz,),
                                     )
                                 )
                             )
@@ -189,7 +290,7 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
                             )
                         )
                     ),
-                    (FilterMessages(allowed=['add']), # TODO: Remove this line.
+                    (FilterMessages(allowed=['add']),
                         # (LogComponent("UnDelete"),),
                         (ResurrectTombstone(),
                             (storageComponent,),
@@ -199,7 +300,6 @@ def createDownloadHelix(reactor, periodicDownload, oaiDownload, storageComponent
             )
         )
     )
-
 
 ######## START Lucene Integration ###############################################################
 
@@ -218,24 +318,22 @@ def luceneAndReaderConfig(defaultLuceneSettings, httpRequestAdapter, lucenePort)
 ######## END Lucene Integration ###############################################################
 
 
-
 def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, **ignored):
-
 
 ######## START Lucene Integration ###############################################################
     defaultLuceneSettings = LuceneSettings(
         commitTimeout=30,
         readonly=True,)
-    
-    
+
+
     http11Request = be(
         (HttpRequest1_1(),
             (SocketPool(reactor=reactor, unusedTimeout=5, limits=dict(totalSize=100, destinationSize=10)),),
         )
     )
-    
+
     luceneIndex = luceneAndReaderConfig(defaultLuceneSettings.clone(readonly=True), http11Request, lucenePort)
-    
+
     luceneRoHelix = be(
         (AdapterToLuceneQuery(
                 defaultCore=DEFAULT_CORE,
@@ -273,13 +371,26 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
 
 
     strategie = Md5HashDistributeStrategy()
-    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME])
+    storage = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[HEADER_PARTNAME, META_PARTNAME, METADATA_PARTNAME, OAI_DC_PARTNAME, LONG_PARTNAME, SHORT_PARTNAME, OPENAIRE_PARTNAME])
 
     oaiJazz = OaiJazz(join(statePath, 'oai'))
-    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/") # def updateMetadataFormat(self, prefix, schema, namespace):
-    # oaiJazz.updateMetadataFormat("knaw_long", "http://www.narcis.nl/scheme/knaw_long.xsd", "http://www.knaw.nl/narcis/1.0/long/")
+    oaiJazz.updateMetadataFormat(OAI_DC_PARTNAME, "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "http://purl.org/dc/elements/1.1/")
 
-    # Wat doet dit?
+    oai_oa_cerifJazz = OaiJazz(join(statePath, 'oai_cerif'))
+    oai_oa_cerifJazz.updateMetadataFormat(OPENAIRE_PARTNAME, "https://www.openaire.eu/schema/cris/current/openaire-cerif-profile.xsd", "https://www.openaire.eu/cerif-profile/1.1/")
+    # All of the following OAI-PMH sets shall be recognized by the CRIS, even if not all of them are populated.
+    oai_oa_cerifJazz.updateSet("openaire_cris_projects", "OpenAIRE_CRIS_projects")
+    oai_oa_cerifJazz.updateSet("openaire_cris_orgunits", "OpenAIRE_CRIS_orgunits")
+    oai_oa_cerifJazz.updateSet("openaire_cris_persons", "OpenAIRE_CRIS_persons")
+    oai_oa_cerifJazz.updateSet("openaire_cris_patents", "OpenAIRE_CRIS_patents")
+    oai_oa_cerifJazz.updateSet("openaire_cris_products", "OpenAIRE_CRIS_products")
+    oai_oa_cerifJazz.updateSet("openaire_cris_publications", "OpenAIRE_CRIS_publications")
+
+    oai_oa_cerifJazz.updateSet("openaire_cris_funding", "OpenAIRE_CRIS_funding")
+    oai_oa_cerifJazz.updateSet("openaire_cris_events", "OpenAIRE_CRIS_events")
+    oai_oa_cerifJazz.updateSet("openaire_cris_equipments", "OpenAIRE_CRIS_equipments")
+
+
     cqlClauseConverters = [
         RenameFieldForExact(
             untokenizedFields=untokenizedFieldnames,
@@ -321,23 +432,57 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
 
     return \
     (Observable(),
-        createDownloadHelix(reactor, periodicGateWayDownload, oaiDownload, storage, oaiJazz),
+        createDownloadHelix(reactor, periodicGateWayDownload, oaiDownload, storage, oaiJazz, oai_oa_cerifJazz),
         (ObservableHttpServer(reactor, port, compressResponse=True),
             (BasicHttpHandler(),
                 (PathFilter(["/oai"]),
-                    (OaiPmh(repositoryName="NARCIS OAI-pmh", adminEmail="narcis@dans.knaw.nl"),
+                    (OaiPmh(repositoryName="NARCIS OAI-pmh", adminEmail="narcis@dans.knaw.nl", externalUrl="http://oai.narcis.nl"),
                         (oaiJazz,),
                         (StorageAdapter(),
                             (storage,)
                         ),
                         (OaiBranding(
-                            url="http://www.narcis.nl/images/logos/logo-knaw-house.gif", 
-                            link="http://oai.narcis.nl", 
+                            url="http://www.narcis.nl/images/logos/logo-knaw-house.gif",
+                            link="http://oai.narcis.nl",
                             title="Narcis - The gateway to scholarly information in The Netherlands"),
                         ),
                         (OaiProvenance(
                             nsMap=NAMESPACEMAP,
-                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'), 
+                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'),
+                            harvestDate=('meta', '//meta:record/meta:harvestdate/text()'),
+                            metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
+                            identifier=('header','//oai:identifier/text()'),
+                            datestamp=('header', '//oai:datestamp/text()')
+                            ),
+                            (storage,)
+                        )
+                    )
+                ),
+                (PathFilter(["/cerif"]),
+                    (OaiPmhDans(repositoryName="OpenAIRE CERIF", adminEmail="narcis@dans.knaw.nl", repositoryIdentifier="services.nod.dans.knaw.nl", externalUrl="http://services.nod.dans.knaw.nl"), #TODO: pathFilter should resemble proxy path
+                        (oai_oa_cerifJazz,),
+                        (StorageAdapter(),
+                            (storage,)
+                        ),
+                        (OaiOpenAIREDescription(
+                            serviceid='organisation:ORG1242054',
+                            acronym='services.nod.dans.knaw.nl',
+                            name='NARCIS',
+                            description='Compliant with the OpenAIRE Guidelines for CRIS Managers v.1.1.',
+                            website='https://www.narcis.nl',
+                            baseurl='http://services.nod.dans.knaw.nl/oa-cerif',
+                            subjectheading='',
+                            orgunitid='organisation:ORG1242054',
+                            owneracronym='DANS'),
+                        ),
+                        # (OaiBranding(
+                        #     url="http://www.narcis.nl/images/logos/logo-knaw-house.gif",
+                        #     link="http://oai.narcis.nl",
+                        #     title="Narcis - The gateway to scholarly information in The Netherlands"),
+                        # ),
+                        (OaiProvenance(
+                            nsMap=NAMESPACEMAP,
+                            baseURL=('meta', '//meta:repository/meta:baseurl/text()'),
                             harvestDate=('meta', '//meta:record/meta:harvestdate/text()'),
                             metadataNamespace=('meta', '//meta:record/meta:metadataNamespace/text()'),
                             identifier=('header','//oai:identifier/text()'),
@@ -375,11 +520,11 @@ def main(reactor, port, statePath, lucenePort, gatewayPort, quickCommit=False, *
                             maximumRecords = 20),
                         executeQueryHelix,
                         (RssItem(
-                                nsMap=NAMESPACEMAP,                                            
+                                nsMap=NAMESPACEMAP,
                                 title = ('knaw_short', {'nl':'//short:metadata/short:titleInfo[not (@xml:lang)]/short:title/text()', 'en':'//short:metadata/short:titleInfo[@xml:lang="en"]/short:title/text()'}),
                                 description = ('knaw_short', {'nl':'//short:abstract[not (@xml:lang)]/text()', 'en':'//short:abstract[@xml:lang="en"]/text()'}),
                                 pubdate = ('knaw_short', '//short:dateIssued/short:parsed/text()'),
-                                linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',                                
+                                linkTemplate = 'http://www.narcis.nl/%(wcpcollection)s/RecordID/%(oai_identifier)s/Language/%(language)s',
                                 wcpcollection = ('meta', '//*[local-name() = "collection"]/text()'),
                                 oai_identifier = ('meta', '//meta:record/meta:id/text()'),
                                 language = ('Dummy: Language is auto provided by the calling RSS component, but needs to be present to serve the linkTemplate.')

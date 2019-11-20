@@ -4,7 +4,8 @@
                 xmlns="https://www.openaire.eu/cerif-profile/1.1/"
                 exclude-result-prefixes="input xsi"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/org ../xsd/nod-organisation-1-1.xsd"
+                xsi:schemaLocation="http://www.onderzoekinformatie.nl/nod/org ../xsd/nod-organisation-1-1.xsd
+                                    https://www.openaire.eu/cerif-profile/1.1/ https://www.openaire.eu/schema/cris/1.1/openaire-cerif-profile.xsd"
                 version="1.0">
 
     <!-- =================================================================================== -->
@@ -28,11 +29,11 @@
 
         <xsl:apply-templates select="input:naam_en"/>
 
-        <xsl:apply-templates select="input:org_telefoon"/>
+<!--        <xsl:apply-templates select="input:org_telefoon"/>-->
 
-        <xsl:apply-templates select="input:org_fax"/>
+<!--        <xsl:apply-templates select="input:org_fax"/>-->
 
-        <xsl:apply-templates select="input:org_email"/>
+<!--        <xsl:apply-templates select="input:org_email"/>-->
 
         <xsl:apply-templates select="input:org_url"/>
 
@@ -41,7 +42,7 @@
 
     <xsl:template match="input:identifier">
         <xsl:attribute name="id">
-            <xsl:value-of select="."/>
+            <xsl:value-of select="concat('organisation:', .)"/>
         </xsl:attribute>
     </xsl:template>
 
@@ -55,17 +56,17 @@
 
     <xsl:template match="input:naam_nl">
         <xsl:if test=".">
-            <Naam xml:lang="nl">
+            <Name xml:lang="nl">
                 <xsl:value-of select="."/>
-            </Naam>
+            </Name>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="input:naam_en">
         <xsl:if test=".">
-            <Naam xml:lang="en">
+            <Name xml:lang="en">
                 <xsl:value-of select="."/>
-            </Naam>
+            </Name>
         </xsl:if>
     </xsl:template>
 
@@ -106,7 +107,7 @@
             <PartOf>
                 <OrgUnit>
                     <xsl:attribute name="id">
-                        <xsl:value-of select="."/>
+                        <xsl:value-of select="concat('organisation:', .)"/>
                     </xsl:attribute>
                 </OrgUnit>
             </PartOf>

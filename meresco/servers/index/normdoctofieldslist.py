@@ -77,7 +77,7 @@ abrRegex = compile(r'^.*\(([a-zA-Z.]+)\)$')
 marcrelatorAuthorRoles = ['aut','dis','pta','rev','ctb','cre','prg','edt']
 
 # Known (NOD person) nameIdentifiers to look for:
-personNameIdentifiers = ['dai-nl', 'orcid', 'isni', 'nod-prs']
+personNameIdentifiers = ['dai-nl', 'orcid', 'isni', 'nod-prs', 'ror']
 
 
 def enum(**enums):
@@ -115,6 +115,7 @@ fieldnamesMapping = {
     'knaw_long.metadata.geoLocations.geoLocation.geoLocationPlace'      : UNQUALIFIED_TERMS,
     'knaw_long.metadata.typeOfResource'                                 : UNQUALIFIED_TERMS,
     'knaw_long.metadata.rightsDescription'                              : UNQUALIFIED_TERMS,
+    'knaw_long.metadata.patent_number'                                  : UNQUALIFIED_TERMS,
     'knaw_long.accessRights'                                            : 'access',
     'knaw_long.persistentIdentifier'                                    : 'persistentid',
     'knaw_long.humanStartPage'                                          : 'humanstartpage',
@@ -131,7 +132,7 @@ fieldnamesMapping = {
     'persoon.categories.category.term'                                  : 'category_term',
     }
 
-MetaFieldNamesToXpath = {
+metaFieldNamesToXpath = {
     'oai_id'                : '/meta:meta/meta:record/meta:id/text()',
     'dare_id'               : '/meta:meta/meta:record/meta:id/text()',
     'meta_repositoryid'     : '/meta:meta/meta:repository/meta:id/text()',
@@ -183,12 +184,16 @@ class NormdocToFieldsList(Observable):
         self._truncate_chars = truncate_chars
         self._fieldslist = []
         self._wcp_collection = None
+        self._nids_aut_enriched = set()
+        self._record_pids = set()
 
-    def add(self, lxmlNode, **kwargs):
-        
-        self._fieldslist = [] # reset list
+    def add(self, lxmlNode, **kwargs):        
+
+        self._fieldslist = [] # reset the fieldslist
+        self._nids_aut_enriched.clear() # Empty the set.
+        self._record_pids.clear()
         # hier komt een compleet meresco:document binnen als LXMLnode:
-        # uploadid = kwargs['identifier']
+        # self.uploadid = kwargs['identifier']
 
         # Get meta, header and metadata part(='long') from the normdoc:
         e_metapart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="meta"]/text()', namespaces=namespacesmap)[0])
@@ -200,7 +205,7 @@ class NormdocToFieldsList(Observable):
         e_recordpart = etree.fromstring(lxmlNode.xpath('/document:document/document:part[@name="record"]/text()', namespaces=namespacesmap)[0])
 
         # Add known metapart fields for all records: 
-        for field, xpad in MetaFieldNamesToXpath.iteritems():
+        for field, xpad in metaFieldNamesToXpath.iteritems():
             self._fieldslist.append((field, e_metapart.xpath(xpad, namespaces=namespacesmap)[0]))
             if self._verbose: print 'addField:', field.upper(), "-->", e_metapart.xpath(xpad, namespaces=namespacesmap)[0]
 
@@ -216,13 +221,29 @@ class NormdocToFieldsList(Observable):
         for field, xpad in fieldNamesXpathMap.iteritems(): # Add fields by xPath
             self._findAndAddToFieldslist(record[0], field, xpad)
 
+        if self._wcp_collection in WCPEDUCOLLECTION:
+
+            nidlist = self.all.lookupNameIds(pidlist=self._record_pids)
+
+            for generator in nidlist:
+                for nid in generator:
+                    splitted = nid.split(":", 2)
+                    nameId = NameIdentifierFactory.factory(splitted[0], splitted[1])
+                    if nameId.is_valid():
+                        self._nids_aut_enriched.add(nameId.get_idx_id())
+                        self._nids_aut_enriched.add(nameId.get_id())
+
+            for nid in self._nids_aut_enriched:
+                self._fieldslist.append(('nids_aut_enriched', nid))
+                if self._verbose: print 'addField:', 'nids_aut_enriched'.upper(), "-->", nid
+
         # Ready filling fieldslist, now call add method:
         yield self.all.add(fieldslist=self._fieldslist, **kwargs)
 
 
     def _fillFieldslist(self, aNode, parentName): # NOD-nodes and Long nodes will pass here...
-        if type(aNode) != _Element:
-            print "type(aNode) != _Element"
+        if type(aNode) != _Element: # Also: <type 'lxml.etree._Comment'>: Do not proccess them
+            # print "type(aNode):", type(aNode)
             return
         if parentName:
             parentName += '.'
@@ -379,7 +400,8 @@ class NormdocToFieldsList(Observable):
                     for variant in fundId.getTypedVariants():
                         self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
                         if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
-        elif fieldName in ('relatedid', 'pubid'):
+
+        elif fieldName == 'relatedid':
             for idee in results:
                 if 'idx' in idee.keys(): #Check for mandatory index-value type.
                     if self._verbose: print 'addField:', fieldName.upper(), "-->", idee.attrib['idx']
@@ -391,6 +413,25 @@ class NormdocToFieldsList(Observable):
                         for variant in relId.get_typedvariants():
                             self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
                             if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+
+        elif fieldName == 'pubid':
+            for idee in results:
+                if 'idx' in idee.keys(): #Check for mandatory index-value type.
+                    if self._verbose: print 'addField:', fieldName.upper(), "-->", idee.attrib['idx']
+                    self._fieldslist.append((fieldName, idee.attrib['idx']))
+                    # Add PID to recordpids list to search for related nameid's in the pidgraph:
+                    self._record_pids.add(idee.attrib['idx'])
+
+                if 'type' in idee.keys(): #Check for mandatory identifier type.
+                    relId = PidFactory.factory(idee.attrib['type'], idee.text)
+                    if relId.is_valid():
+                        # Add PID to recordpids list to search for related nameid's in the pidgraph:
+                        self._record_pids.add(relId.get_idx_id())
+                        #  Add all PID formats to general field:
+                        for variant in relId.get_typedvariants():
+                            self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
+                            if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
+
         elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
@@ -537,6 +578,12 @@ class NormdocToFieldsList(Observable):
                             self._fieldslist.append(( nidFieldname, nameId.get_idx_id() ))
                             self._fieldslist.append(( 'nids', nameId.get_id() ))
                             self._fieldslist.append(( 'nids', nameId.get_idx_id() ))
+
+                            if nidFieldname == 'nids_aut': # Add author nids to the author nids_aut_enriched set, so we can add them later on together with the exterally found (enriched) nids:
+                                # print "NID FROM METADATA:", nameId.get_idx_id()
+                                self._nids_aut_enriched.add(nameId.get_idx_id())
+                                self._nids_aut_enriched.add(nameId.get_id())
+
                             if self._verbose: print 'addField:', nidFieldname.upper(), "-->", nameId.get_id(), nameId.get_idx_id()
                             if self._verbose: print 'addField: NIDS', "-->", nameId.get_id(), nameId.get_idx_id()
                             #  Add all ID formats to general field:

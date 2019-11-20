@@ -54,6 +54,7 @@
                                     &lt;mods:languageTerm type=&quot;code&quot; authority=&quot;rfc3066&quot;&gt;NL-01234&lt;/mods:languageTerm&gt;
                                 &lt;/mods:language&gt;
                                 &lt;mods:identifier type=&quot;local&quot;&gt;info:doi/10.00282162&lt;/mods:identifier&gt;
+                                &lt;mods:identifier type=&quot;patent_number&quot;&gt;US7941156&lt;/mods:identifier&gt;
                                 &lt;mods:titleInfo&gt;
                                     &lt;mods:title&gt;Appositie en de interne struktuur van de NP&lt;/mods:title&gt;
                                 &lt;/mods:titleInfo&gt;
@@ -121,6 +122,8 @@
                                 &lt;/mods:extension&gt;
                                 &lt;mods:typeOfResource&gt;text&lt;/mods:typeOfResource&gt;
                                 &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00282162&lt;/mods:identifier&gt;
+                                &lt;mods:identifier type=&quot;doi&quot;&gt;doi:10.1245/s10434-011-2114-4Online First™Open Access&lt;/mods:identifier&gt;
+                                &lt;mods:identifier type=&quot;wos&quot;&gt;wos:000423029300003&lt;/mods:identifier&gt;
                                 &lt;mods:relatedItem type=&quot;host&quot;&gt;
                                     &lt;mods:titleInfo&gt;
                                         &lt;mods:title&gt;Spektator&lt;/mods:title&gt;

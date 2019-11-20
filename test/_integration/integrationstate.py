@@ -66,7 +66,7 @@ class ExampleIntegrationState(IntegrationState):
         self.startSruSlaveServer()
         self.waitForServicesStarted()
         self._createDatabase()
-        sleep(0.2)
+        sleep(0.3)
 
     def startGatewayServer(self):
         executable = self.binPath('start-gateway')

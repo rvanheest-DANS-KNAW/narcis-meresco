@@ -20,6 +20,10 @@ from re import compile
 from dateutil.parser import parse as parseDate
 from datetime import *
 
+import MySQLdb
+import ConfigParser
+from os.path import abspath, dirname, join
+
 namespacesmap = namespaces.copyUpdate({ #  See: https://github.com/seecr/meresco-xml/blob/master/meresco/xml/namespaces.py
     
     'dip'     : 'urn:mpeg:mpeg21:2005:01-DIP-NS',
@@ -108,6 +112,20 @@ class NormaliseOaiRecord(UiaConverter):
         self._wcpcollection = None
         self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[0] # AccesRights defaults to 'openAcces'
         self._languagePattern = compile('^([A-Za-z]{2,3})(-[a-zA-Z0-9]{1,8})?$') # Captures first 2 or 3 language chars if nothing else OR followed by '-' and 1 to 8 alfanum chars. See also: ftp://ftp.rfc-editor.org/in-notes/rfc3066.txt 
+        
+        self._initDbProperties()        
+
+
+    def _initDbProperties(self):
+        config = ConfigParser.ConfigParser()
+        config.read(join(dirname(abspath(__file__)), '..', 'conf', 'application.ini'))
+        # http://mysql-python.sourceforge.net/MySQLdb.html
+        self._dbIsEnabled = config.getboolean('GatewayServer', 'dbIsEnabled')
+        self._dbHost = config.get('GatewayServer', 'dbHost')
+        self._dbUser = config.get('GatewayServer', 'dbUser')
+        self._dbPwd = config.get('GatewayServer', 'dbPwd')
+        self._dbSchema = config.get('GatewayServer', 'dbSchema')
+        print "VSOI-enabled:", self._dbIsEnabled
 
     def _convert(self, lxmlNode):
         self._accesRights = NormaliseOaiRecord.ACCESS_LEVELS[0] # Reset AccesRights to openAcces
@@ -172,6 +190,8 @@ class NormaliseOaiRecord(UiaConverter):
             e_longroot.set("version", LONG_VERSION)
             # Add WCP Collection to long format:
             etree.SubElement(e_longroot, "wcpcollection").text = self._wcpcollection
+            # Add Meresco uploadid long format:
+            etree.SubElement(e_longroot, "uploadid").text = self._uploadid
 
             e_longmetadata = etree.Element("metadata")
 
@@ -698,13 +718,14 @@ class NormaliseOaiRecord(UiaConverter):
         if self._metadataformat.isMods():
             nameTypes = ['personal','corporate','conference','NOTYPE'] # NOTYPE used to catch names without a type attribute! We will tread them as type 'personal'.
             namepartTypes=['family','given','termsOfAddress'] # 'unstructured' is special :(
-            for nameType in nameTypes: #alle personal namen, alle corporate namen etc.
+            for nameType in nameTypes: #alle personal namen, alle corporate namen etc.                
                 if nameType == nameTypes[3]: # Change xpath, to get all names without @type
                     names = lxmlNode.xpath(root+'mods:name[not(@type)]', namespaces=namespacesmap)
                     nameType = nameTypes[0] # Assign "personal" type to them.... quick & dirty, maar we moeten wat, anders geen datasets van DANS...
                 else:
                     names = lxmlNode.xpath(root+'mods:name[@type="'+nameType+'"]', namespaces=namespacesmap)
                 for name in names: #voor iedere personal naam, voor iedere corrporate naam, etc.
+                    nidSet = set() # temp NID-container to store all nids for this current name.
                     namepartDict = dict.fromkeys(namepartTypes) # reset dict elements
                     unstructured = None
                     for namepartType in namepartTypes:
@@ -743,13 +764,14 @@ class NormaliseOaiRecord(UiaConverter):
                         if nid_type in supportedNids:
                             nameId = NameIdentifierFactory.factory(nid_type, nid.text)
                             if nameId.is_valid():
-                                if nameId.get_name() == supportedNids[0]:
+                                if nameId.get_name() == supportedNids[0]: # Add valid DAI Identifiers to a temp-dai-container.
                                     daiset.add(nameId.get_id()) # Add valid dai to dai-container.
                                 else: # Add valid non-dai nameIdentifiers directly 
                                     e_nid = etree.SubElement(e_name_type, "nameIdentifier")
                                     e_nid.attrib['type'] = nameId.get_name()
                                     e_nid.text = nameId.get_id()
-                                
+                                    nidSet.add(nameId) # Add found nid to the NID-set.
+
                     # Transfer valid DAI's from old style daiList-mods-extension: 
                     extensionid = name.xpath('self::mods:name/@ID', namespaces=namespacesmap)
                     if extensionid:
@@ -766,6 +788,9 @@ class NormaliseOaiRecord(UiaConverter):
                         e_nid = etree.SubElement(e_name_type, "nameIdentifier")
                         e_nid.attrib['type'] = supportedNids[0]
                         e_nid.text = dai
+                        nidSet.add(NameIdentifierFactory.factory(supportedNids[0], dai)) # Add found DAI to the NID-set.
+                    # Ready processing this name. Try to find out if this name is known in sysvsoi, if so, ADD nod-prs to the identifiers list of this name.
+                    self._addLocalIdToName(nidSet, e_name_type)
 
         # Get creators and contributors from DC if NO FULLMODS available, or if MMODS did not yield any authors:
         elif self._metadataformat.isDC():
@@ -799,7 +824,7 @@ class NormaliseOaiRecord(UiaConverter):
                 nameIdentifierType = creator.xpath('self::datacite:creator/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
                 affiliation = creator.xpath('self::datacite:creator/datacite:affiliation/text()', namespaces=namespacesmap)
                 self._nameParts(e_longmetadata, creatorName, givenName, familyName, ['Creator'], nameIdentifier, nameIdentifierType, affiliation, nametype)
-                
+
             contributors = lxmlNode.xpath('//datacite:resource/datacite:contributors/datacite:contributor', namespaces=namespacesmap)
             for contributor in contributors:
                 creatorName = contributor.xpath('self::datacite:contributor/datacite:contributorName/text()', namespaces=namespacesmap)
@@ -811,11 +836,12 @@ class NormaliseOaiRecord(UiaConverter):
                 nameIdentifierType = contributor.xpath('self::datacite:contributor/datacite:nameIdentifier/@nameIdentifierScheme', namespaces=namespacesmap)
                 affiliation = contributor.xpath('self::datacite:contributor/datacite:affiliation/text()', namespaces=namespacesmap)
                 self._nameParts(e_longmetadata, creatorName, givenName, familyName, contributorType, nameIdentifier, nameIdentifierType, affiliation, nametype)
-                
+
 
     def _nameParts(self, e_longmetadata, name="", givenName="", familyName="", contributorType="", nameIdentifier="", nameIdentifierType="", affiliation="", nametype=None):
         # Do not create an name element if no name is available:
         if len(name) > 0 or len(familyName) > 0 or len(givenName) > 0:
+            nidSet = set()
             e_name_type = etree.SubElement(e_longmetadata, 'name')
             if len(nametype) > 0 and nametype[0].strip().lower() in (
                 "organisational", "corporate", "organizational", "organisation"):
@@ -843,9 +869,27 @@ class NormaliseOaiRecord(UiaConverter):
                         nameId = NameIdentifierFactory.factory(nameIdType, nameIdentifier[idx])
                         if nameId.is_valid():
                             etree.SubElement(e_name_type, "nameIdentifier", type=nameId.get_name()).text = nameId.get_id()
-    
+                            nidSet.add(nameId) # Add found DAI to the NID-set.
+            # Ready processing this name. Try to find out if this name is known in sysvsoi, if so, ADD nod-prs to the identifiers list of this name.
+            self._addLocalIdToName(nidSet, e_name_type)
+
             if len(affiliation) > 0:
                 etree.SubElement(e_name_type, 'affiliation').text = affiliation[0]
+
+
+    def _addLocalIdToName(self, nidSet, e_name_type):
+        if len(nidSet) == 0 or not self._dbIsEnabled: #TODO: Check if 'nod-prs' type is already supplied from metadata. Probably never: NOD-Internal identifier...
+            return
+        sysvsoi = MySQLdb.connect(host=self._dbHost, user=self._dbUser, passwd=self._dbPwd, db=self._dbSchema)
+        dbcur = sysvsoi.cursor()
+        query = "SELECT DISTINCT pers_id FROM sysvsoi.persoon_externid WHERE "
+        wherelist = ['extern_id REGEXP "%s"' % nid.get_vsoi_format() for nid in nidSet]
+        dbcur.execute(query + " OR ".join(wherelist))
+        if dbcur.rowcount == 1: # More than one PRS should not be possible... Skip this name.
+            prs = dbcur.fetchone()[0]
+            print "Found VSOI Person:", prs
+            etree.SubElement(e_name_type, "nameIdentifier", type="nod-prs").text = prs
+        sysvsoi.close()
 
 
     def _getRightsDescription(self, lxmlNode, e_longmetadata):

@@ -72,22 +72,6 @@ def main(reactor, port, statePath, **ignored):
 
     storeComponent = StorageComponent(join(statePath, 'store'), strategy=strategie, partsRemovedOnDelete=[NORMALISED_DOC_NAME])
 
-    # scheduledCommitPeriodicCall = be(
-    #     (PeriodicCall(reactor, message='commit', name='Scheduled commit', schedule=Schedule(period=1)),
-    #         (AllToDo(), # Converts all_unknown to: self.do.unknown messages.
-    #             (LogComponent("PeriodicCall"),), # [PeriodicCall] commit(*(), **{}) # This logs the commit message
-    #             (storeComponent,), # Has no method named 'commit'?
-    #             (oaiJazz,) # commit saves data to a json file:
-    #          =>def commit(self):
-    #          =>self._save()
-    #          =>self._writer.commit()
-    #         )
-    #     )
-    # )
-    # processingStates = [
-    #     scheduledCommitPeriodicCall.getState(),
-    # ]
-
     return \
     (Observable(),
         # (scheduledCommitPeriodicCall,),

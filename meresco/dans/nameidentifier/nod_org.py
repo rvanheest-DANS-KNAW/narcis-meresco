@@ -4,13 +4,13 @@ from nameidentifier import NameIdentifier
 
 
 # from __init__ import pattern_dai
-# The PRS NOD idenitfier format: PRS1234567
+# The ORG NOD idenitfier format: ORG1234567
 
-class NodPrs(NameIdentifier):
-    ID_PATTERN = compile(r'^(PRS)([0-9]{7})$', IGNORECASE)
+class NodOrg(NameIdentifier):
+    ID_PATTERN = compile(r'^(ORG)([0-9]{7})$', IGNORECASE)
 
     def __init__(self, baseDigits):
-        NameIdentifier.__init__(self, "nod-prs", baseDigits, vsoiprefix="NOD")
+        NameIdentifier.__init__(self, "nod-org", baseDigits, vsoiprefix="NOD")
 
     def validate_and_initialize(self):
 
@@ -22,7 +22,7 @@ class NodPrs(NameIdentifier):
 
             str_id = None
             if len(self.formatted) > 0:
-                str_id = '%s' % (self.formatted[0])  # PRS1234567
+                str_id = '%s' % (self.formatted[0])  # ORG1234567
                 self.valid = True
             self.id = str_id
 
