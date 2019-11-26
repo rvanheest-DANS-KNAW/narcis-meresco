@@ -237,10 +237,15 @@ class NormaliseOaiRecord(UiaConverter):
                 e_longroot.append(e_longmetadata)
 
                 try:
-                    hostCitation = self._getHostCitation(parse(StringIO(tostring(e_longroot))))
+                    hostCitation = self._getCitation(parse(StringIO(tostring(e_longroot))), 'host')
                     if hostCitation:
                         # Add hostcitation string from '/long/metadata' to 'knaw_long' node.
                         etree.SubElement(e_longmetadata, namespacesmap.curieToTag('long:hostCitation')).text = hostCitation
+
+                    seriesCitation = self._getCitation(parse(StringIO(tostring(e_longroot))), 'series')
+                    if seriesCitation:
+                        # Add seriesCitation string from '/long/metadata' to 'knaw_long' node.
+                        etree.SubElement(e_longmetadata, namespacesmap.curieToTag('long:seriesCitation')).text = seriesCitation
                 except:
                     print 'Error while parsing', tostring(e_longroot)
                     raise
@@ -1194,7 +1199,11 @@ class NormaliseOaiRecord(UiaConverter):
             for relateditemtype in relateditemtypes:
                 relatedItems = lxmlNode.xpath('//mods:mods/mods:relatedItem[@type="'+relateditemtype+'"]', namespaces=namespacesmap)
                 for relatedItem in relatedItems: # voor iedere relatedItem per host, series, etc.
-                    e_relateditem = etree.SubElement(e_longmetadata, "relatedItem", type=relateditemtype)
+                    xlinkRole = relatedItem.xpath('self::mods:relatedItem/@xlink:role', namespaces=namespacesmap)
+                    if len(xlinkRole) > 0:
+                        e_relateditem = etree.SubElement(e_longmetadata, "relatedItem", type=relateditemtype, xlinkrole=xlinkRole[0])
+                    else:
+                        e_relateditem = etree.SubElement(e_longmetadata, "relatedItem", type=relateditemtype)
                     # Get host or series info from related item:
                     self._addRelatedItemPart(relatedItem, relateditemtype, e_relateditem)
                     methodNames = [ self._getTitleInfo, self._getAllRecordIdentifiers, self._getNames, self._getDates, self._getPlaceterm, self._getPublisher, self._getGenre ]
@@ -1351,58 +1360,68 @@ class NormaliseOaiRecord(UiaConverter):
 
 ################### Helper methods #########################
 
-    def _getHostCitation(self, lxmlNode):
-        relatedItems = lxmlNode.xpath("//long:knaw_long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
+    def _getCitation(self, lxmlNode, attribute):
+        if attribute == 'host':
+            relatedItems = lxmlNode.xpath("//long:knaw_long/long:metadata/long:relatedItem[@type='host']", namespaces=namespacesmap)
+        elif attribute == 'series':
+            relatedItems = lxmlNode.xpath("//long:knaw_long/long:metadata/long:relatedItem[@type='series']", namespaces=namespacesmap)
         if len(relatedItems) > 0:
-            title, page, volume, published, issn = '', '', '', '', ''
-            relatedItem = relatedItems[0]
-            titles = relatedItem.xpath('self::long:relatedItem/long:titleInfo/long:title/text()', namespaces=namespacesmap)
-            subtitles = relatedItem.xpath('self::long:relatedItem/long:titleInfo/long:subtitle/text()',
-                                          namespaces=namespacesmap)
-            if titles and titles[0] != 'None':
-                title = titles[0]
-                if subtitles:
-                    title = '%s: %s' % (title, subtitles[0])
-            volumes = relatedItem.xpath('self::long:relatedItem/long:part/long:volume/text()', namespaces=namespacesmap)
-            if volumes and volumes[0] != 'None':
-                volume = '<i>, %s</i>' % (volumes[0])
-                issue = relatedItem.xpath('self::long:relatedItem/long:part/long:issue/text()', namespaces=namespacesmap)
-                if issue:
-                    volume = '%s(%s)' % (volume, issue[0])
-            start_page = relatedItem.xpath('self::long:relatedItem/long:part/long:start_page/text()',
-                                           namespaces=namespacesmap)
-            end_page = relatedItem.xpath('self::long:relatedItem/long:part/long:end_page/text()', namespaces=namespacesmap)
-            if start_page and start_page != 'None':
-                page = ', %s' % (start_page[0])
-                if end_page:
-                    page = '%s - %s' % (page, end_page[0])
-            else:
-                list = relatedItem.xpath('self::long:relatedItem/long:part/long:list/text()', namespaces=namespacesmap)
-                if list:
-                    page = ', %s' % (list[0])
-                else:
+            relatedItem = None
+            for r in relatedItems:
+                xlinkRole = r.xpath('self::long:relatedItem/@xlinkrole', namespaces=namespacesmap)
+                if len(xlinkRole) == 0 or str(xlinkRole[0]).strip() == '':
+                    relatedItem = r
+                    break
+
+            if (relatedItem):
+                title, page, volume, published, issn = '', '', '', '', ''
+                titles = relatedItem.xpath('self::long:relatedItem/long:titleInfo/long:title/text()', namespaces=namespacesmap)
+                subtitles = relatedItem.xpath('self::long:relatedItem/long:titleInfo/long:subtitle/text()',
+                                              namespaces=namespacesmap)
+                if titles and titles[0] != 'None':
+                    title = titles[0]
+                    if subtitles:
+                        title = '%s: %s' % (title, subtitles[0])
+                volumes = relatedItem.xpath('self::long:relatedItem/long:part/long:volume/text()', namespaces=namespacesmap)
+                if volumes and volumes[0] != 'None':
+                    volume = '<i>, %s</i>' % (volumes[0])
+                    issue = relatedItem.xpath('self::long:relatedItem/long:part/long:issue/text()', namespaces=namespacesmap)
+                    if issue:
+                        volume = '%s(%s)' % (volume, issue[0])
+                start_page = relatedItem.xpath('self::long:relatedItem/long:part/long:start_page/text()',
+                                               namespaces=namespacesmap)
+                end_page = relatedItem.xpath('self::long:relatedItem/long:part/long:end_page/text()', namespaces=namespacesmap)
+                if start_page and start_page != 'None':
+                    page = ', %s' % (start_page[0])
                     if end_page:
-                        page = ', %s' % (end_page[0])
-            place = relatedItem.xpath('self::long:relatedItem/long:placeTerm/text()', namespaces=namespacesmap)
-            publisher = relatedItem.xpath('self::long:relatedItem/long:publisher/text()', namespaces=namespacesmap)
-            if place:
-                published = '. %s' % (place[0])
-                if publisher:
-                    published = '%s: %s' % (published, publisher[0])
-            else:
-                if publisher:
-                    published = '. %s' % (publisher[0])
-    
-            issnen = relatedItem.xpath(
-                '//long:metadata/long:relatedItem[@type="host"]/long:publication_identifier[@type="issn"]/text()',
-                namespaces=namespacesmap)
-            if issnen:
-                issn = '. ISSN %s.' % (issnen[0])
-    
-            if title:
-                return '<i>%s</i>%s%s%s%s' % (title, volume, page, published, issn)
-            else:
-                return ""
+                        page = '%s - %s' % (page, end_page[0])
+                else:
+                    list = relatedItem.xpath('self::long:relatedItem/long:part/long:list/text()', namespaces=namespacesmap)
+                    if list:
+                        page = ', %s' % (list[0])
+                    else:
+                        if end_page:
+                            page = ', %s' % (end_page[0])
+                place = relatedItem.xpath('self::long:relatedItem/long:placeTerm/text()', namespaces=namespacesmap)
+                publisher = relatedItem.xpath('self::long:relatedItem/long:publisher/text()', namespaces=namespacesmap)
+                if place:
+                    published = '. %s' % (place[0])
+                    if publisher:
+                        published = '%s: %s' % (published, publisher[0])
+                else:
+                    if publisher:
+                        published = '. %s' % (publisher[0])
+
+                issnen = relatedItem.xpath(
+                    '//long:metadata/long:relatedItem[@type="host"]/long:publication_identifier[@type="issn"]/text()',
+                    namespaces=namespacesmap)
+                if issnen:
+                    issn = '. ISSN %s.' % (issnen[0])
+
+                if title:
+                    return '<i>%s</i>%s%s%s%s' % (title, volume, page, published, issn)
+                else:
+                    return ""
 
 
     def _addRelatedItemPart(self, lxmlNode, relatedItemType, relatedItemElement):        
