@@ -1200,7 +1200,7 @@ class NormaliseOaiRecord(UiaConverter):
                 relatedItems = lxmlNode.xpath('//mods:mods/mods:relatedItem[@type="'+relateditemtype+'"]', namespaces=namespacesmap)
                 for relatedItem in relatedItems: # voor iedere relatedItem per host, series, etc.
                     xlinkRole = relatedItem.xpath('self::mods:relatedItem/@xlink:role', namespaces=namespacesmap)
-                    if len(xlinkRole) > 0:
+                    if len(xlinkRole) > 0 and str(xlinkRole[0]).strip() != '':
                         e_relateditem = etree.SubElement(e_longmetadata, "relatedItem", type=relateditemtype, xlinkrole=xlinkRole[0])
                     else:
                         e_relateditem = etree.SubElement(e_longmetadata, "relatedItem", type=relateditemtype)
@@ -1369,7 +1369,7 @@ class NormaliseOaiRecord(UiaConverter):
             relatedItem = None
             for r in relatedItems:
                 xlinkRole = r.xpath('self::long:relatedItem/@xlinkrole', namespaces=namespacesmap)
-                if len(xlinkRole) == 0 or str(xlinkRole[0]).strip() == '':
+                if len(xlinkRole) == 0:
                     relatedItem = r
                     break
 
