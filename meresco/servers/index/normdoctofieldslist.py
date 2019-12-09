@@ -152,7 +152,6 @@ fieldNamesXpathMap = {
     'dd_year'           : "//long:metadata/long:dateIssued/long:parsed/text()", # Parsed (normalized) datefield from KNAWLONG.
     'coverage'          : "//long:metadata/long:coverage/text()", # 'coverage' field from KNAWLONG.
     'format'            : "//long:metadata/long:format/text()", # 'format' field from KNAWLONG.
-    'fundingid'         : "//long:metadata/long:grantAgreements/long:grantAgreement/long:code/text()", # 'fundingid' field from KNAWLONG.
     'dd_prices'         : "//prs:persoon/prs:prices/prs:price/text()",
     'dd_werkzaamheid'   : "//prs:persoon/prs:jobs/prs:job",
     'titulatuur'        : "//prs:persoon/prs:titulatuur/text()",
@@ -433,7 +432,7 @@ class NormdocToFieldsList(Observable):
                             self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
                             if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
 
-        elif fieldName in ('coverage', 'format', 'fundingid', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject'):
+        elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
                 self._fieldslist.append((fieldName, result))

@@ -1261,12 +1261,7 @@ class NormaliseOaiRecord(UiaConverter):
                     
                     fname = ga.xpath('self::datacite:fundingReference/datacite:funderName/text()', namespaces=namespacesmap)
                     if len(fname) > 0: etree.SubElement(e_ga, "funder").text = fname[0]
-                    
-                    anumber = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/text()', namespaces=namespacesmap)
-                    if len(anumber) > 0: etree.SubElement(e_ga, "description").text = anumber[0]                    
-                    auri = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/@awardURI', namespaces=namespacesmap)
-                    if len(auri) > 0: etree.SubElement(e_ga, "code").text = auri[0]
-                    
+
                     fidtxt = ga.xpath('self::datacite:fundingReference/datacite:funderIdentifier/text()', namespaces=namespacesmap)
                     if len(fidtxt) > 0:
                         fidtype = ga.xpath('self::datacite:fundingReference/datacite:funderIdentifier/@funderIdentifierType', namespaces=namespacesmap)
@@ -1275,8 +1270,15 @@ class NormaliseOaiRecord(UiaConverter):
                             if funderId.is_valid():
                                 etree.SubElement(e_ga, "funderIdentifier", type=funderId.get_name()).text = funderId.get_id()
                         else:
-                            e_fid = etree.SubElement(e_ga, "funderIdentifier").text=fidtxt[0]
-                                        
+                            etree.SubElement(e_ga, "funderIdentifier").text=fidtxt[0]
+
+                    anumber = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/text()', namespaces=namespacesmap)
+                    if len(anumber) > 0:
+                        if (anumber[0].startswith("info:eu-repo/grantAgreement")):
+                            etree.SubElement(e_ga, "code").text = anumber[0]
+                        elif(len(fidtxt) > 0 and fidtxt[0].startswith("info:eu-repo/grantAgreement")):
+                            etree.SubElement(e_ga, "code").text = join(fidtxt[0], anumber[0])
+
                     
         elif self._metadataformat.isMods():
             e_gas = None
