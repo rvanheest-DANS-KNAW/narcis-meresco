@@ -169,6 +169,7 @@ fieldNamesXpathMap = {
     'nids_funder'       : "//long:metadata/long:grantAgreements/long:grantAgreement/long:funderIdentifier", #knaw_long.metadata.grantAgreements.grantAgreement.funderIdentifier
     'relatedid'         : "//long:metadata/long:related_identifier",
     'pubid'             : "//long:metadata/long:publication_identifier",
+    'fundingid'         : "//prj:grantAgreement/@code",
     # 'dd_format'         : "//long:metadata/long:format/text()",
     # 'dd_typeofresource' : "//long:metadata/long:typeOfResource/text()",
     # 'dd_subject'        : "//long:metadata/long:subject/long:topic[not (long:subjectScheme/text())]/long:topicValue/text()",
@@ -432,7 +433,7 @@ class NormdocToFieldsList(Observable):
                             self._fieldslist.append(( UNQUALIFIED_TERMS, variant ))
                             if self._verbose: print 'addField:', UNQUALIFIED_TERMS, "-->", variant
 
-        elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject'):
+        elif fieldName in ('coverage', 'format', 'publicationid', 'dd_format', 'dd_typeofresource', 'dd_subject', 'fundingid'):
             for result in results:
                 if self._verbose: print 'addField:', fieldName.upper(), "-->", result
                 self._fieldslist.append((fieldName, result))

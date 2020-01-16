@@ -99,6 +99,10 @@ class ApiTest(IntegrationTestCase):
         self.assertSruQuery(1, '"Veenendaal"')
         self.assertSruQuery(1, '"Groningen Institute of Archaeology, University of Groningen"')
         self.assertSruQuery(1, 'untokenized.nids exact "ror:008pnp284"')
+        self.assertSruQuery(2, '"info:eu-repo/grantAgreement/EC/FP7/34567"')
+        self.assertSruQuery(2, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/EC/FP7/34567"')
+        self.assertSruQuery(1, '"info:eu-repo/grantAgreement/NWO/programma/12345"')
+        self.assertSruQuery(1, 'untokenized.fundingid exact "info:eu-repo/grantAgreement/NWO/programma/12345"')
 
 
     def testPublIdentifier(self):
