@@ -43,7 +43,7 @@
                     &lt;/didl:Descriptor&gt;
                     &lt;didl:Component&gt;
                         &lt;didl:Resource mimeType=&quot;application/xml&quot;&gt;
-                            &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; version=&quot;3.6&quot; xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-6.xsd&quot;&gt;
+                            &lt;mods:mods xmlns:mods=&quot;http://www.loc.gov/mods/v3&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; version=&quot;3.6&quot; xsi:schemaLocation=&quot;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-6.xsd&quot;&gt;
                                 &lt;mods:originInfo&gt;
                                     &lt;mods:dateIssued encoding=&quot;iso8601&quot;&gt;opgraafdatum 3000 jaar voor christus&lt;/mods:dateIssued&gt;
                                     &lt;mods:place&gt;
@@ -90,7 +90,7 @@
                                     &lt;mods:role&gt;
                                         &lt;mods:roleTerm type=&quot;code&quot; authority=&quot;marcrelator&quot;&gt;dgg&lt;/mods:roleTerm&gt;
                                     &lt;/mods:role&gt;
-                                &lt;/mods:name&gt;    
+                                &lt;/mods:name&gt;
                                 &lt;mods:extension&gt;
                                     &lt;dai:daiList xmlns:dai=&quot;info:eu-repo/dai&quot; xsi:schemaLocation=&quot;info:eu-repo/dai https://www.surfgroepen.nl/sites/oai/metadata/Shared%20Documents/dai-extension.xsd&quot;&gt;
                                         &lt;dai:identifier IDref=&quot;n565-aut0&quot; authority=&quot;info:eu-repo/dai/nl&quot;&gt;071792279&lt;/dai:identifier&gt;
@@ -124,7 +124,7 @@
                                 &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00282162&lt;/mods:identifier&gt;
                                 &lt;mods:identifier type=&quot;doi&quot;&gt;doi:10.1245/s10434-011-2114-4Online First™Open Access&lt;/mods:identifier&gt;
                                 &lt;mods:identifier type=&quot;wos&quot;&gt;wos:000423029300003&lt;/mods:identifier&gt;
-                                &lt;mods:relatedItem type=&quot;host&quot;&gt;
+                                &lt;mods:relatedItem type=&quot;host&quot; xlink:role=&quot;&quot;&gt;
                                     &lt;mods:titleInfo&gt;
                                         &lt;mods:title&gt;Spektator&lt;/mods:title&gt;
                                     &lt;/mods:titleInfo&gt;
@@ -148,6 +148,19 @@
                                         &lt;/mods:place&gt;
                                     &lt;/mods:originInfo&gt;
                                     &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:00286666&lt;/mods:identifier&gt;
+                                &lt;/mods:relatedItem&gt;
+                                &lt;mods:relatedItem type=&quot;series&quot;&gt;
+                                    &lt;mods:titleInfo&gt;
+                                        &lt;mods:title&gt;Lecture Notes in Computer Science&lt;/mods:title&gt;
+                                    &lt;/mods:titleInfo&gt;
+                                    &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:0302-9743&lt;/mods:identifier&gt;
+                                    &lt;mods:identifier type=&quot;uri&quot;&gt;urn:issn:1611-3349&lt;/mods:identifier&gt;
+                                    &lt;mods:part&gt;
+                                        &lt;mods:detail type=&quot;volume&quot;&gt;
+                                            &lt;mods:number&gt;6738&lt;/mods:number&gt;
+                                            &lt;mods:caption&gt;vol.&lt;/mods:caption&gt;
+                                        &lt;/mods:detail&gt;
+                                    &lt;/mods:part&gt;
                                 &lt;/mods:relatedItem&gt;
                                 &lt;mods:genre&gt;info:eu-repo/semantics/article&lt;/mods:genre&gt;
                                 &lt;mods:location&gt;
