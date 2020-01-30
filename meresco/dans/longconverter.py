@@ -1373,7 +1373,7 @@ class NormaliseOaiRecord(UiaConverter):
                     relatedItem = r
                     break
 
-            if (relatedItem):
+            if relatedItem is not None:
                 title, page, volume, published, issn = '', '', '', '', ''
                 titles = relatedItem.xpath('self::long:relatedItem/long:titleInfo/long:title/text()', namespaces=namespacesmap)
                 subtitles = relatedItem.xpath('self::long:relatedItem/long:titleInfo/long:subtitle/text()',
