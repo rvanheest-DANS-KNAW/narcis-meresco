@@ -78,6 +78,16 @@
 		            &lt;funderIdentifier funderIdentifierType=&quot;Other&quot;&gt;info:eu-repo/grantAgreement/EC/H2020&lt;/funderIdentifier&gt;
 		            &lt;awardNumber&gt;735008&lt;/awardNumber&gt;
 		        &lt;/fundingReference&gt;
+		        &lt;fundingReference&gt;
+		            &lt;funderName&gt;European Commission&lt;/funderName&gt;
+		            &lt;funderIdentifier funderIdentifierType=&quot;Crossref Funder ID&quot;&gt;http://doi.org/10.13039/501100000780&lt;/funderIdentifier&gt;
+		            &lt;awardNumber&gt;info:eu-repo/grantAgreement/EC&lt;/awardNumber&gt;
+		        &lt;/fundingReference&gt;
+		        &lt;fundingReference&gt;
+		            &lt;funderName&gt;European Commission&lt;/funderName&gt;
+		            &lt;funderIdentifier funderIdentifierType=&quot;Crossref Funder ID&quot;&gt;http://doi.org/10.13039/501100000780&lt;/funderIdentifier&gt;
+		            &lt;awardNumber&gt;info:eu-repo/grantAgreement/EC/FP7/&lt;/awardNumber&gt;
+		        &lt;/fundingReference&gt;
 		    &lt;/fundingReferences&gt;
 		    &lt;dates&gt;
 		        &lt;date dateType=&quot;Submitted&quot;&gt;2009-9-4&lt;/date&gt;

@@ -415,6 +415,8 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual(None, testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements/long:grantAgreement[2]/long:code/text()'))
         self.assertEqual('EU', testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements//long:grantAgreement[3]/long:funder/text()'))
         self.assertEqual('info:eu-repo/grantAgreement/EC/H2020/735008', testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements/long:grantAgreement[3]/long:code/text()'))
+        self.assertEqual(None, testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements/long:grantAgreement[4]/long:code/text()'))
+        self.assertEqual(None, testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements/long:grantAgreement[5]/long:code/text()'))
         self.assertEqual('nl', testNamespaces.xpathFirst(response, '//long:metadata/long:language/text()'))
         self.assertEqual('19 p.', testNamespaces.xpathFirst(response, '//long:metadata/long:format/text()'))
         self.assertEqual('Matthijs Tinxgracht 16', testNamespaces.xpathFirst(response, '//long:metadata/long:geoLocations/long:geoLocation[3]/long:geoLocationPlace/text()'))
