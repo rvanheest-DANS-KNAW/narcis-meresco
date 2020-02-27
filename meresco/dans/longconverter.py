@@ -1275,15 +1275,20 @@ class NormaliseOaiRecord(UiaConverter):
                         else:
                             etree.SubElement(e_ga, "funderIdentifier").text=fidtxt[0]
 
+                    fundingId = ""
                     anumber = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/text()', namespaces=namespacesmap)
                     if len(anumber) > 0:
-                        fundingId = ""
                         if (anumber[0].startswith("info:eu-repo/grantAgreement")):
                             fundingId = anumber[0].strip()
                         elif(len(fidtxt) > 0 and fidtxt[0].startswith("info:eu-repo/grantAgreement")):
-                            fundingId = join(fidtxt[0], anumber[0]).strip()
-                        if fundingIdRegex.match(fundingId):
-                            etree.SubElement(e_ga, "code").text = fundingId
+                            fundingId = (fidtxt[0].rstrip('/') + '/' + anumber[0]).strip()
+                    if(fundingId == ""):
+                        auri = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/@awardURI', namespaces=namespacesmap)
+                        if (len(auri) > 0 and auri[0].startswith("info:eu-repo/grantAgreement")):
+                            fundingId = auri[0].strip()
+
+                    if fundingIdRegex.match(fundingId):
+                        etree.SubElement(e_ga, "code").text = fundingId
 
 
 
