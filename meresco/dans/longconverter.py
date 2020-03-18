@@ -102,6 +102,9 @@ datacite_datasetGenres = ['Dataset','Software']
 # ORDER does matter!
 supportedNids = ['dai-nl', 'orcid', 'isni', 'nod-prs']
 
+# RegEx to check correctness of funding id:
+fundingIdRegex = compile('^info:eu-repo/grantAgreement/.+/.*/.+$')
+
 class NormaliseOaiRecord(UiaConverter):
 
     ACCESS_LEVELS = ['openAccess', 'restrictedAccess', 'closedAccess', 'embargoedAccess']
@@ -1270,12 +1273,7 @@ class NormaliseOaiRecord(UiaConverter):
                     
                     fname = ga.xpath('self::datacite:fundingReference/datacite:funderName/text()', namespaces=namespacesmap)
                     if len(fname) > 0: etree.SubElement(e_ga, "funder").text = fname[0]
-                    
-                    anumber = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/text()', namespaces=namespacesmap)
-                    if len(anumber) > 0: etree.SubElement(e_ga, "description").text = anumber[0]                    
-                    auri = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/@awardURI', namespaces=namespacesmap)
-                    if len(auri) > 0: etree.SubElement(e_ga, "code").text = auri[0]
-                    
+
                     fidtxt = ga.xpath('self::datacite:fundingReference/datacite:funderIdentifier/text()', namespaces=namespacesmap)
                     if len(fidtxt) > 0:
                         fidtype = ga.xpath('self::datacite:fundingReference/datacite:funderIdentifier/@funderIdentifierType', namespaces=namespacesmap)
@@ -1284,9 +1282,25 @@ class NormaliseOaiRecord(UiaConverter):
                             if funderId.is_valid():
                                 etree.SubElement(e_ga, "funderIdentifier", type=funderId.get_name()).text = funderId.get_id()
                         else:
-                            e_fid = etree.SubElement(e_ga, "funderIdentifier").text=fidtxt[0]
-                                        
-                    
+                            etree.SubElement(e_ga, "funderIdentifier").text=fidtxt[0]
+
+                    fundingId = ""
+                    anumber = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/text()', namespaces=namespacesmap)
+                    if len(anumber) > 0:
+                        if (anumber[0].startswith("info:eu-repo/grantAgreement")):
+                            fundingId = anumber[0].strip()
+                        elif(len(fidtxt) > 0 and fidtxt[0].startswith("info:eu-repo/grantAgreement")):
+                            fundingId = (fidtxt[0].rstrip('/') + '/' + anumber[0]).strip()
+                    if(fundingId == ""):
+                        auri = ga.xpath('self::datacite:fundingReference/datacite:awardNumber/@awardURI', namespaces=namespacesmap)
+                        if (len(auri) > 0 and auri[0].startswith("info:eu-repo/grantAgreement")):
+                            fundingId = auri[0].strip()
+
+                    if fundingIdRegex.match(fundingId):
+                        etree.SubElement(e_ga, "code").text = fundingId
+
+
+
         elif self._metadataformat.isMods():
             e_gas = None
             #Look for grantAgreements with mandatory Project Reference (@code)
