@@ -74,6 +74,7 @@
 
                                             &lt;mods:name ID=&quot;FND_1&quot; type=&quot;corporate&quot;&gt;
                                                 &lt;mods:namePart&gt;European Commission CORDIS&lt;/mods:namePart&gt;
+                                                &lt;mods:nameIdentifier type=&quot;ror&quot; &gt;00k4n6c32&lt;/mods:nameIdentifier&gt;
                                                 &lt;mods:role&gt;
                                                     &lt;mods:roleTerm authority=&quot;marcrelator&quot; type=&quot;code&quot;&gt;fnd&lt;/mods:roleTerm&gt;
                                                 &lt;/mods:role&gt;

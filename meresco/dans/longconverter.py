@@ -1325,7 +1325,18 @@ class NormaliseOaiRecord(UiaConverter):
                     etree.SubElement(e_ga, "description").text = GaDescription[0]                   
                 GaFunderId = ga.xpath('self::gal:grantAgreement/gal:funder/@IDref', namespaces=namespacesmap)
                 if GaFunderId:
-                    #found Funder: Get its (plain) name TODO: Check for nameIdentifier and add it to 
+                    # found Funder: Get its nameidentifier
+                    fidtxt = lxmlNode.xpath('//mods:mods/mods:name[@ID="' + GaFunderId[0] + '"]/mods:nameIdentifier/text()', namespaces=namespacesmap)
+                    if len(fidtxt) > 0:
+                        fidtype = lxmlNode.xpath('//mods:mods/mods:name[@ID="' + GaFunderId[0] + '"]/mods:nameIdentifier/@type', namespaces=namespacesmap)
+                        if len(fidtype) > 0:
+                            funderId = NameIdentifierFactory.factory(fidtype[0], fidtxt[0])
+                            if funderId.is_valid():
+                                etree.SubElement(e_ga, "funderIdentifier", type=funderId.get_name()).text = funderId.get_id()
+                        else:
+                            etree.SubElement(e_ga, "funderIdentifier").text = fidtxt[0]
+
+                    #found Funder: Get its (plain) name
                     funder = lxmlNode.xpath('//mods:mods/mods:name[@ID="'+GaFunderId[0]+'"]/mods:displayForm/text()', namespaces=namespacesmap)
                     if not funder:
                         funder = lxmlNode.xpath('//mods:mods/mods:name[@ID="'+GaFunderId[0]+'"]/mods:namePart/text()', namespaces=namespacesmap)
