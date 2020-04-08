@@ -1413,6 +1413,9 @@ class NormaliseOaiRecord(UiaConverter):
                     issue = relatedItem.xpath('self::long:relatedItem/long:part/long:issue/text()', namespaces=namespacesmap)
                     if issue:
                         volume = '%s(%s)' % (volume, issue[0])
+                    articleNumber = relatedItem.xpath('self::long:relatedItem/long:part/long:articleNumber/text()', namespaces=namespacesmap)
+                    if articleNumber:
+                        volume = '%s:%s' % (volume, articleNumber[0])
                 start_page = relatedItem.xpath('self::long:relatedItem/long:part/long:start_page/text()',
                                                namespaces=namespacesmap)
                 end_page = relatedItem.xpath('self::long:relatedItem/long:part/long:end_page/text()', namespaces=namespacesmap)
@@ -1458,7 +1461,7 @@ class NormaliseOaiRecord(UiaConverter):
             #create part element:
             e_part = etree.Element("part")
             #detail section:
-            detail_types = ['part', 'volume', 'issue', 'chapter', 'section']
+            detail_types = ['part', 'volume', 'issue', 'chapter', 'section', 'articleNumber']
             for detail_type in detail_types: #Haal alle numbers op: (Er kan er maar 1 per type zijn)
                 numbers = lxmlNode.xpath('self::mods:relatedItem/mods:part/mods:detail[@type="'+detail_type+'"]/mods:number[1]/text()', namespaces=namespacesmap)
                 if numbers:
