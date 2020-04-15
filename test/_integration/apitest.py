@@ -269,6 +269,7 @@ class ApiTest(IntegrationTestCase):
         self.assertEqual('10.1002/lno.10611', testNamespaces.xpathFirst(response, '//long:metadata/long:publication_identifier/text()'))
         self.assertEqual(2, len(testNamespaces.xpath(response, '//long:metadata/long:related_identifier')))
         self.assertEqual('10.1234.567/abc', testNamespaces.xpathFirst(response, '//long:metadata/long:related_identifier/text()'))
+        self.assertEqual('info:eu-repo/grantAgreement/NWO/Gravitation/024.001.006', testNamespaces.xpathFirst(response, '//long:metadata/long:grantAgreements/long:grantAgreement/long:code/text()'))
 
     def testDidlDcToLong(self):
         response = self.doSruQuery(**{'query': '2016-01-31', 'recordSchema':'knaw_long'})
