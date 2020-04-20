@@ -1299,8 +1299,6 @@ class NormaliseOaiRecord(UiaConverter):
                     if fundingIdRegex.match(fundingId):
                         etree.SubElement(e_ga, "code").text = fundingId
 
-
-
         elif self._metadataformat.isMods():
             e_gas = None
             #Look for grantAgreements with mandatory Project Reference (@code)
@@ -1345,6 +1343,16 @@ class NormaliseOaiRecord(UiaConverter):
             if e_gas is not None:
                 e_longmetadata.append(e_gas)
 
+        elif self._metadataformat.isDC():
+            relations = lxmlNode.xpath("//dc:relation/text()", namespaces=namespacesmap)
+            if "info:eu-repo/grantAgreement" in str(relations):
+                e_gas = etree.SubElement(e_longmetadata, "grantAgreements")
+                for relation in relations:
+                    if relation.startswith("info:eu-repo/grantAgreement"):
+                        fundingId = relation
+                        if fundingIdRegex.match(fundingId):
+                            e_ga = etree.SubElement(e_gas, "grantAgreement")
+                            etree.SubElement(e_ga, "code").text = fundingId
 
     def _getGeoLocations(self, lxmlNode, e_longmetadata):
         if self._metadataformat.isDatacite():
