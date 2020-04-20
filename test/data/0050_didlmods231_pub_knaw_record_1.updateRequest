@@ -135,6 +135,9 @@
                                         &lt;mods:detail type=&quot;issue&quot;&gt;
                                             &lt;mods:number&gt;5&lt;/mods:number&gt;
                                         &lt;/mods:detail&gt;
+                                        &lt;mods:detail type=&quot;articleNumber&quot;&gt;
+                                            &lt;mods:number&gt;e136&lt;/mods:number&gt;
+                                        &lt;/mods:detail&gt;
                                         &lt;mods:extent unit=&quot;page&quot;&gt;
                                             &lt;mods:start&gt;209&lt;/mods:start&gt;
                                             &lt;mods:end&gt;228&lt;/mods:end&gt;
